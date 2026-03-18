@@ -1,3 +1,4 @@
+```powershell
 PS F:\zeroclaw> git remote -v
 origin  https://github.com/zeroclaw-labs/zeroclaw (fetch)
 origin  https://github.com/zeroclaw-labs/zeroclaw (push)
@@ -707,4 +708,5 @@ Total 7 (delta 1), reused 1 (delta 0), pack-reused 0 (from 0)
 remote: Resolving deltas: 100% (1/1), completed with 1 local object.
 To https://github.com/manfromexistence/zeroclaw
    92940a3d..e5a20779  master -> master
-   
+```
+Please make this "https://github.com/manfromexistence/zeroclaw" the remote branch and merge local and remote changes correctly!!!
