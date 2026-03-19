@@ -227,7 +227,7 @@ pub async fn run_models(
                 ok_count += 1;
                 println!("    ✅ model catalog check passed");
                 let models_count =
-                    crate::onboard::wizard::cached_model_catalog_stats(config, provider_name)
+                    crate::onboard::cached_model_catalog_stats(config, provider_name)
                         .await?
                         .map(|(count, _)| count);
                 matrix_rows.push((
