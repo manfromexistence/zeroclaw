@@ -213,6 +213,18 @@ pub mod log {
         Ok(())
     }
 
+    pub fn error(text: impl Display) -> io::Result<()> {
+        let theme = THEME.read().unwrap();
+        let symbols = &*SYMBOLS;
+        eprintln!(
+            "{} {}",
+            theme.error.apply_to(symbols.step_error.as_str()).bold(),
+            text
+        );
+        eprintln!("{}", theme.dim.apply_to(symbols.bar.as_str()));
+        Ok(())
+    }
+
     pub fn step(text: impl Display) -> io::Result<()> {
         let theme = THEME.read().unwrap();
         let symbols = &*SYMBOLS;

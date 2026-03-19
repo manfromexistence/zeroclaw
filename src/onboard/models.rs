@@ -4,7 +4,7 @@
 //! from various providers.
 
 use anyhow::{bail, Context, Result};
-use console::style;
+use onboard::prompts;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -96,15 +96,14 @@ pub fn build_model_options(model_ids: Vec<String>, source: &str) -> Vec<(String,
 
 fn print_model_preview(models: &[String]) {
     for model in models.iter().take(MODEL_PREVIEW_LIMIT) {
-        println!("  {} {model}", style("-"));
+        let _ = prompts::log::step(model.as_str());
     }
 
     if models.len() > MODEL_PREVIEW_LIMIT {
-        println!(
-            "  {} ... and {} more",
-            style("-"),
+        let _ = prompts::log::step(format!(
+            "... and {} more",
             models.len() - MODEL_PREVIEW_LIMIT
-        );
+        ));
     }
 }
 
@@ -583,17 +582,16 @@ pub async fn run_models_refresh(
         )
         .await?
         {
-            println!(
+            prompts::log::info(format!(
                 "Using cached model list for '{}' (updated {} ago):",
                 provider_name,
                 humanize_age(cached.age_secs)
-            );
+            ))?;
             print_model_preview(&cached.models);
-            println!();
-            println!(
+            prompts::log::info(format!(
                 "Tip: run `zeroclaw models refresh --force --provider {}` to fetch latest now.",
                 provider_name
-            );
+            ))?;
             return Ok(());
         }
     }
@@ -603,11 +601,11 @@ pub async fn run_models_refresh(
     match fetch_live_models_for_provider(&provider_name, &api_key, config.api_url.as_deref()) {
         Ok(models) if !models.is_empty() => {
             cache_live_models_for_provider(&config.workspace_dir, &provider_name, &models).await?;
-            println!(
+            prompts::log::success(format!(
                 "Refreshed '{}' model cache with {} models.",
                 provider_name,
                 models.len()
-            );
+            ))?;
             print_model_preview(&models);
             Ok(())
         }
@@ -615,10 +613,10 @@ pub async fn run_models_refresh(
             if let Some(stale_cache) =
                 load_any_cached_models_for_provider(&config.workspace_dir, &provider_name).await?
             {
-                println!(
+                prompts::log::warning(format!(
                     "Provider returned no models; using stale cache (updated {} ago):",
                     humanize_age(stale_cache.age_secs)
-                );
+                ))?;
                 print_model_preview(&stale_cache.models);
                 return Ok(());
             }
@@ -629,11 +627,11 @@ pub async fn run_models_refresh(
             if let Some(stale_cache) =
                 load_any_cached_models_for_provider(&config.workspace_dir, &provider_name).await?
             {
-                println!(
+                prompts::log::warning(format!(
                     "Live refresh failed ({}). Falling back to stale cache (updated {} ago):",
                     error,
                     humanize_age(stale_cache.age_secs)
-                );
+                ))?;
                 print_model_preview(&stale_cache.models);
                 return Ok(());
             }
@@ -652,31 +650,27 @@ pub async fn run_models_list(config: &Config, provider_override: Option<&str>) -
     let cached = load_any_cached_models_for_provider(&config.workspace_dir, provider_name).await?;
 
     let Some(cached) = cached else {
-        println!();
-        println!(
-            "  No cached models for '{provider_name}'. Run: zeroclaw models refresh --provider {provider_name}"
-        );
-        println!();
+        prompts::log::warning(format!(
+            "No cached models for '{provider_name}'. Run: zeroclaw models refresh --provider {provider_name}"
+        ))?;
         return Ok(());
     };
 
-    println!();
-    println!(
-        "  {} models for '{}' (cached {} ago):",
+    prompts::log::info(format!(
+        "{} models for '{}' (cached {} ago):",
         cached.models.len(),
         provider_name,
         humanize_age(cached.age_secs)
-    );
-    println!();
+    ))?;
+
     for model in &cached.models {
-        let marker = if config.default_model.as_deref() == Some(model.as_str()) {
-            "* "
+        if config.default_model.as_deref() == Some(model.as_str()) {
+            prompts::log::success(format!("* {model}"))?;
         } else {
-            "  "
-        };
-        println!("  {marker}{model}");
+            prompts::log::step(model.as_str())?;
+        }
     }
-    println!();
+
     Ok(())
 }
 
@@ -690,9 +684,8 @@ pub async fn run_models_set(config: &Config, model: &str) -> Result<()> {
     updated.default_model = Some(model.to_string());
     updated.save().await?;
 
-    println!();
-    println!("  Default model set to '{}'.", style(model).green().bold());
-    println!();
+    prompts::log::success(format!("Default model set to '{model}'."))?;
+
     Ok(())
 }
 
@@ -700,34 +693,29 @@ pub async fn run_models_status(config: &Config) -> Result<()> {
     let provider = config.default_provider.as_deref().unwrap_or("openrouter");
     let model = config.default_model.as_deref().unwrap_or("(not set)");
 
-    println!();
-    println!("  Provider:  {}", style(provider).cyan());
-    println!("  Model:     {}", style(model).cyan());
-    println!(
-        "  Temp:      {}",
-        style(format!("{:.1}", config.default_temperature)).cyan()
-    );
+    prompts::log::info(format!("Provider:  {provider}"))?;
+    prompts::log::info(format!("Model:     {model}"))?;
+    prompts::log::info(format!("Temp:      {:.1}", config.default_temperature))?;
 
     match load_any_cached_models_for_provider(&config.workspace_dir, provider).await? {
         Some(cached) => {
-            println!(
-                "  Cache:     {} models (updated {} ago)",
+            prompts::log::info(format!(
+                "Cache:     {} models (updated {} ago)",
                 cached.models.len(),
                 humanize_age(cached.age_secs)
-            );
+            ))?;
             let fresh = cached.age_secs < MODEL_CACHE_TTL_SECS;
             if fresh {
-                println!("  Freshness: {}", style("fresh").green());
+                prompts::log::success("Freshness: fresh")?;
             } else {
-                println!("  Freshness: {}", style("stale").yellow());
+                prompts::log::warning("Freshness: stale")?;
             }
         }
         None => {
-            println!("  Cache:     {}", style("none").yellow());
+            prompts::log::warning("Cache:     none")?;
         }
     }
 
-    println!();
     Ok(())
 }
 
@@ -757,31 +745,32 @@ pub async fn run_models_refresh_all(config: &Config, force: bool) -> Result<()> 
         anyhow::bail!("No providers support live model discovery");
     }
 
-    println!(
+    prompts::log::info(format!(
         "Refreshing model catalogs for {} providers (force: {})",
         targets.len(),
         if force { "yes" } else { "no" }
-    );
-    println!();
+    ))?;
 
     let mut ok_count = 0usize;
     let mut fail_count = 0usize;
 
     for provider_name in &targets {
-        println!("== {} ==", provider_name);
+        prompts::log::step(format!("== {} ==", provider_name))?;
         match run_models_refresh(config, Some(provider_name), force).await {
             Ok(()) => {
                 ok_count += 1;
             }
             Err(error) => {
                 fail_count += 1;
-                println!("  failed: {error}");
+                prompts::log::error(format!("failed: {error}"))?;
             }
         }
-        println!();
     }
 
-    println!("Summary: {} succeeded, {} failed", ok_count, fail_count);
+    prompts::log::info(format!(
+        "Summary: {} succeeded, {} failed",
+        ok_count, fail_count
+    ))?;
 
     if ok_count == 0 {
         anyhow::bail!("Model refresh failed for all providers")

@@ -9377,6 +9377,7 @@ dependencies = [
  "nanohtml2text",
  "nostr-sdk",
  "nusb",
+ "onboard",
  "opentelemetry",
  "opentelemetry-otlp",
  "opentelemetry_sdk",

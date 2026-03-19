@@ -4,8 +4,8 @@
 //! (Telegram, Discord, Slack, Matrix, etc.)
 
 use anyhow::Result;
-use console::style;
-use dialoguer::{Confirm, Input, Select};
+use onboard::prompts;
+use onboard::prompts::PromptInteraction;
 use serde_json::Value;
 use std::time::Duration;
 
@@ -23,13 +23,12 @@ use crate::config::schema::{
 };
 
 // Import helper functions and types from wizard
-use super::wizard::{print_bullet, ChannelMenuChoice, channel_menu_choices};
+use super::wizard::{ChannelMenuChoice, channel_menu_choices};
 
 #[allow(clippy::too_many_lines)]
 pub fn setup_channels() -> Result<ChannelsConfig> {
-    print_bullet("Channels let you talk to ZeroClaw from anywhere.");
-    print_bullet("CLI is always available. Connect more channels now.");
-    println!();
+    prompts::log::info("Channels let you talk to ZeroClaw from anywhere.")?;
+    prompts::log::info("CLI is always available. Connect more channels now.")?;
 
     let mut config = ChannelsConfig::default();
     let menu_choices = channel_menu_choices();
@@ -173,11 +172,11 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             })
             .collect();
 
-        let selection = Select::new()
-            .with_prompt("  Connect a channel (or Done to continue)")
-            .items(&options)
-            .default(options.len() - 1)
-            .interact()?;
+        let mut select = prompts::select("Connect a channel (or Done to continue)");
+        for (i, option) in options.iter().enumerate() {
+            select = select.item(i, option, "");
+        }
+        let selection: usize = select.interact()?;
 
         let choice = menu_choices
             .get(selection)
@@ -187,29 +186,24 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
         match choice {
             ChannelMenuChoice::Telegram => {
                 // ── Telegram ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Telegram Setup").white().bold(),
-                    style("— talk to ZeroClaw from Telegram").dim()
-                );
-                print_bullet("1. Open Telegram and message @BotFather");
-                print_bullet("2. Send /newbot and follow the prompts");
-                print_bullet("3. Copy the bot token and paste it below");
-                println!();
+                prompts::section_with_width("Telegram Setup — talk to ZeroClaw from Telegram", 70, |lines| {
+                    lines.push("1. Open Telegram and message @BotFather".to_string());
+                    lines.push("2. Send /newbot and follow the prompts".to_string());
+                    lines.push("3. Copy the bot token and paste it below".to_string());
+                })?;
 
-                let token: String = Input::new()
-                    .with_prompt("  Bot token (from @BotFather)")
-                    .interact_text()?;
+                let token = prompts::input::input("Bot token (from @BotFather)")
+                    .placeholder("paste your bot token here")
+                    .interact()?;
 
                 if token.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
                 // Test connection (run entirely in separate thread — reqwest::blocking Response
                 // must be used and dropped there to avoid "Cannot drop a runtime" panic)
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let token_clone = token.clone();
                 let thread_result = std::thread::spawn(move || {
                     let client = reqwest::blocking::Client::new();
@@ -228,34 +222,23 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 .join();
                 match thread_result {
                     Ok(Ok((true, bot_name))) => {
-                        println!(
-                            "\r  {} Connected as @{bot_name}        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success(format!("Connected as @{bot_name}"))?;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check your token and try again",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your token and try again")?;
                         continue;
                     }
                 }
 
-                print_bullet(
-                    "Allowlist your own Telegram identity first (recommended for secure + fast setup).",
-                );
-                print_bullet(
-                    "Use your @username without '@' (example: argenis), or your numeric Telegram user ID.",
-                );
-                print_bullet("Use '*' only for temporary open testing.");
+                prompts::log::info("Allowlist your own Telegram identity first (recommended for secure + fast setup).")?;
+                prompts::log::info("Use your @username without '@' (example: argenis), or your numeric Telegram user ID.")?;
+                prompts::log::info("Use '*' only for temporary open testing.")?;
 
-                let users_str: String = Input::new()
-                    .with_prompt(
-                        "  Allowed Telegram identities (comma-separated: username without '@' and/or numeric user ID, '*' for all)",
-                    )
-                    .allow_empty(true)
-                    .interact_text()?;
+                let users_str = prompts::input::input(
+                    "Allowed Telegram identities (comma-separated: username without '@' and/or numeric user ID, '*' for all)",
+                )
+                .placeholder("username or user ID")
+                .interact()?;
 
                 let allowed_users = if users_str.trim() == "*" {
                     vec!["*".into()]
@@ -268,10 +251,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if allowed_users.is_empty() {
-                    println!(
-                        "  {} No users allowlisted — Telegram inbound messages will be denied until you add your username/user ID or '*'.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("No users allowlisted — Telegram inbound messages will be denied until you add your username/user ID or '*'.")?;
                 }
 
                 config.telegram = Some(TelegramConfig {
@@ -286,27 +266,24 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Discord => {
                 // ── Discord ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Discord Setup").white().bold(),
-                    style("— talk to ZeroClaw from Discord").dim()
-                );
-                print_bullet("1. Go to https://discord.com/developers/applications");
-                print_bullet("2. Create a New Application → Bot → Copy token");
-                print_bullet("3. Enable MESSAGE CONTENT intent under Bot settings");
-                print_bullet("4. Invite bot to your server with messages permission");
-                println!();
+                prompts::section_with_width("Discord Setup — talk to ZeroClaw from Discord", 70, |lines| {
+                    lines.push("1. Go to https://discord.com/developers/applications".to_string());
+                    lines.push("2. Create a New Application → Bot → Copy token".to_string());
+                    lines.push("3. Enable MESSAGE CONTENT intent under Bot settings".to_string());
+                    lines.push("4. Invite bot to your server with messages permission".to_string());
+                })?;
 
-                let token: String = Input::new().with_prompt("  Bot token").interact_text()?;
+                let token = prompts::input::input("Bot token")
+                    .placeholder("paste your bot token here")
+                    .interact()?;
 
                 if token.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
                 // Test connection (run entirely in separate thread — Response must be used/dropped there)
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let token_clone = token.clone();
                 let thread_result = std::thread::spawn(move || {
                     let client = reqwest::blocking::Client::new();
@@ -326,37 +303,27 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 .join();
                 match thread_result {
                     Ok(Ok((true, bot_name))) => {
-                        println!(
-                            "\r  {} Connected as {bot_name}        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success(format!("Connected as {bot_name}"))?;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check your token and try again",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your token and try again")?;
                         continue;
                     }
                 }
 
-                let guild: String = Input::new()
-                    .with_prompt("  Server (guild) ID (optional, Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let guild = prompts::input::input("Server (guild) ID (optional, Enter to skip)")
+                    .placeholder("guild ID")
+                    .interact()?;
 
-                print_bullet("Allowlist your own Discord user ID first (recommended).");
-                print_bullet(
-                    "Get it in Discord: Settings -> Advanced -> Developer Mode (ON), then right-click your profile -> Copy User ID.",
-                );
-                print_bullet("Use '*' only for temporary open testing.");
+                prompts::log::info("Allowlist your own Discord user ID first (recommended).")?;
+                prompts::log::info("Get it in Discord: Settings -> Advanced -> Developer Mode (ON), then right-click your profile -> Copy User ID.")?;
+                prompts::log::info("Use '*' only for temporary open testing.")?;
 
-                let allowed_users_str: String = Input::new()
-                    .with_prompt(
-                        "  Allowed Discord user IDs (comma-separated, recommended: your own ID, '*' for all)",
-                    )
-                    .allow_empty(true)
-                    .interact_text()?;
+                let allowed_users_str = prompts::input::input(
+                    "Allowed Discord user IDs (comma-separated, recommended: your own ID, '*' for all)",
+                )
+                .placeholder("user IDs")
+                .interact()?;
 
                 let allowed_users = if allowed_users_str.trim().is_empty() {
                     vec![]
@@ -369,10 +336,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if allowed_users.is_empty() {
-                    println!(
-                        "  {} No users allowlisted — Discord inbound messages will be denied until you add IDs or '*'.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("No users allowlisted — Discord inbound messages will be denied until you add IDs or '*'.")?;
                 }
 
                 config.discord = Some(DiscordConfig {
@@ -385,28 +349,23 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Slack => {
                 // ── Slack ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Slack Setup").white().bold(),
-                    style("— talk to ZeroClaw from Slack").dim()
-                );
-                print_bullet("1. Go to https://api.slack.com/apps → Create New App");
-                print_bullet("2. Add Bot Token Scopes: chat:write, channels:history");
-                print_bullet("3. Install to workspace and copy the Bot Token");
-                println!();
+                prompts::section_with_width("Slack Setup — talk to ZeroClaw from Slack", 70, |lines| {
+                    lines.push("1. Go to https://api.slack.com/apps → Create New App".to_string());
+                    lines.push("2. Add Bot Token Scopes: chat:write, channels:history".to_string());
+                    lines.push("3. Install to workspace and copy the Bot Token".to_string());
+                })?;
 
-                let token: String = Input::new()
-                    .with_prompt("  Bot token (xoxb-...)")
-                    .interact_text()?;
+                let token = prompts::input::input("Bot token (xoxb-...)")
+                    .placeholder("xoxb-...")
+                    .interact()?;
 
                 if token.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
                 // Test connection (run entirely in separate thread — Response must be used/dropped there)
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let token_clone = token.clone();
                 let thread_result = std::thread::spawn(move || {
                     let client = reqwest::blocking::Client::new();
@@ -435,48 +394,37 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 .join();
                 match thread_result {
                     Ok(Ok((true, true, team, _))) => {
-                        println!(
-                            "\r  {} Connected to workspace: {team}        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success(format!("Connected to workspace: {team}"))?;
                     }
                     Ok(Ok((true, false, _, err))) => {
-                        println!("\r  {} Slack error: {err}", style("❌").red().bold());
+                        prompts::log::error(format!("Slack error: {err}"))?;
                         continue;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check your token",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your token")?;
                         continue;
                     }
                 }
 
-                let app_token: String = Input::new()
-                    .with_prompt("  App token (xapp-..., optional, Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let app_token = prompts::input::input("App token (xapp-..., optional, Enter to skip)")
+                    .placeholder("xapp-...")
+                    .interact()?;
 
-                let channel: String = Input::new()
-                    .with_prompt(
-                        "  Default channel ID (optional, Enter to skip for all accessible channels; '*' also means all)",
-                    )
-                    .allow_empty(true)
-                    .interact_text()?;
+                let channel = prompts::input::input(
+                    "Default channel ID (optional, Enter to skip for all accessible channels; '*' also means all)",
+                )
+                .placeholder("channel ID")
+                .interact()?;
 
-                print_bullet("Allowlist your own Slack member ID first (recommended).");
-                print_bullet(
-                    "Member IDs usually start with 'U' (open your Slack profile -> More -> Copy member ID).",
-                );
-                print_bullet("Use '*' only for temporary open testing.");
+                prompts::log::info("Allowlist your own Slack member ID first (recommended).")?;
+                prompts::log::info("Member IDs usually start with 'U' (open your Slack profile -> More -> Copy member ID).")?;
+                prompts::log::info("Use '*' only for temporary open testing.")?;
 
-                let allowed_users_str: String = Input::new()
-                    .with_prompt(
-                        "  Allowed Slack user IDs (comma-separated, recommended: your own member ID, '*' for all)",
-                    )
-                    .allow_empty(true)
-                    .interact_text()?;
+                let allowed_users_str = prompts::input::input(
+                    "Allowed Slack user IDs (comma-separated, recommended: your own member ID, '*' for all)",
+                )
+                .placeholder("member IDs")
+                .interact()?;
 
                 let allowed_users = if allowed_users_str.trim().is_empty() {
                     vec![]
@@ -489,10 +437,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if allowed_users.is_empty() {
-                    println!(
-                        "  {} No users allowlisted — Slack inbound messages will be denied until you add IDs or '*'.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("No users allowlisted — Slack inbound messages will be denied until you add IDs or '*'.")?;
                 }
 
                 config.slack = Some(SlackConfig {
@@ -514,31 +459,25 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::IMessage => {
                 // ── iMessage ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("iMessage Setup").white().bold(),
-                    style("— macOS only, reads from Messages.app").dim()
-                );
+                prompts::section_with_width("iMessage Setup — macOS only, reads from Messages.app", 70, |lines| {
+                    lines.push("ZeroClaw reads your iMessage database and replies via AppleScript.".to_string());
+                    lines.push("You need to grant Full Disk Access to your terminal in System Settings.".to_string());
+                })?;
 
                 if !cfg!(target_os = "macos") {
-                    println!(
-                        "  {} iMessage is only available on macOS.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("iMessage is only available on macOS.")?;
                     continue;
                 }
 
-                print_bullet("ZeroClaw reads your iMessage database and replies via AppleScript.");
-                print_bullet(
-                    "You need to grant Full Disk Access to your terminal in System Settings.",
-                );
-                println!();
+                let contacts_str = prompts::input::input("Allowed contacts (comma-separated phone/email, or * for all)")
+                    .placeholder("*")
+                    .interact()?;
 
-                let contacts_str: String = Input::new()
-                    .with_prompt("  Allowed contacts (comma-separated phone/email, or * for all)")
-                    .default("*".into())
-                    .interact_text()?;
+                let contacts_str = if contacts_str.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    contacts_str
+                };
 
                 let allowed_contacts = if contacts_str.trim() == "*" {
                     vec!["*".into()]
@@ -550,44 +489,36 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 config.imessage = Some(IMessageConfig { allowed_contacts });
-                println!(
-                    "  {} iMessage configured (contacts: {})",
-                    style("✅").green().bold(),
-                    style(&contacts_str).cyan()
-                );
+                prompts::log::success(format!("iMessage configured (contacts: {contacts_str})"))?;
             }
             ChannelMenuChoice::Matrix => {
                 // ── Matrix ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Matrix Setup").white().bold(),
-                    style("— self-hosted, federated chat").dim()
-                );
-                print_bullet("You need a Matrix account and an access token.");
-                print_bullet("Get a token via Element → Settings → Help & About → Access Token.");
-                println!();
+                prompts::section_with_width("Matrix Setup — self-hosted, federated chat", 70, |lines| {
+                    lines.push("You need a Matrix account and an access token.".to_string());
+                    lines.push("Get a token via Element → Settings → Help & About → Access Token.".to_string());
+                })?;
 
-                let homeserver: String = Input::new()
-                    .with_prompt("  Homeserver URL (e.g. https://matrix.org)")
-                    .interact_text()?;
+                let homeserver = prompts::input::input("Homeserver URL (e.g. https://matrix.org)")
+                    .placeholder("https://matrix.org")
+                    .interact()?;
 
                 if homeserver.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let access_token: String =
-                    Input::new().with_prompt("  Access token").interact_text()?;
+                let access_token = prompts::input::input("Access token")
+                    .placeholder("paste your access token")
+                    .interact()?;
 
                 if access_token.trim().is_empty() {
-                    println!("  {} Skipped — token required", style("→").dim());
+                    prompts::log::info("Skipped — token required")?;
                     continue;
                 }
 
                 // Test connection (run entirely in separate thread — Response must be used/dropped there)
                 let hs = homeserver.trim_end_matches('/');
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let hs_owned = hs.to_string();
                 let access_token_clone = access_token.clone();
                 let thread_result = std::thread::spawn(move || {
@@ -621,37 +552,33 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
 
                 let (detected_user_id, detected_device_id) = match thread_result {
                     Ok(Ok((true, user_id, device_id))) => {
-                        println!(
-                            "\r  {} Connection verified        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success("Connection verified")?;
 
                         if device_id.is_none() {
-                            println!(
-                                "  {} Homeserver did not return device_id from whoami. If E2EE decryption fails, set channels.matrix.device_id manually in config.toml.",
-                                style("⚠️").yellow().bold()
-                            );
+                            prompts::log::warning("Homeserver did not return device_id from whoami. If E2EE decryption fails, set channels.matrix.device_id manually in config.toml.")?;
                         }
 
                         (user_id, device_id)
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check homeserver URL and token",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check homeserver URL and token")?;
                         continue;
                     }
                 };
 
-                let room_id: String = Input::new()
-                    .with_prompt("  Room ID (e.g. !abc123:matrix.org)")
-                    .interact_text()?;
+                let room_id = prompts::input::input("Room ID (e.g. !abc123:matrix.org)")
+                    .placeholder("!abc123:matrix.org")
+                    .interact()?;
 
-                let users_str: String = Input::new()
-                    .with_prompt("  Allowed users (comma-separated @user:server, or * for all)")
-                    .default("*".into())
-                    .interact_text()?;
+                let users_str = prompts::input::input("Allowed users (comma-separated @user:server, or * for all)")
+                    .placeholder("*")
+                    .interact()?;
+
+                let users_str = if users_str.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    users_str
+                };
 
                 let allowed_users = if users_str.trim() == "*" {
                     vec!["*".into()]
@@ -670,55 +597,46 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Signal => {
                 // ── Signal ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Signal Setup").white().bold(),
-                    style("— signal-cli daemon bridge").dim()
-                );
-                print_bullet("1. Run signal-cli daemon with HTTP enabled (default port 8686).");
-                print_bullet("2. Ensure your Signal account is registered in signal-cli.");
-                print_bullet("3. Optionally scope to DMs only or to a specific group.");
-                println!();
+                prompts::section_with_width("Signal Setup — signal-cli daemon bridge", 70, |lines| {
+                    lines.push("1. Run signal-cli daemon with HTTP enabled (default port 8686).".to_string());
+                    lines.push("2. Ensure your Signal account is registered in signal-cli.".to_string());
+                    lines.push("3. Optionally scope to DMs only or to a specific group.".to_string());
+                })?;
 
-                let http_url: String = Input::new()
-                    .with_prompt("  signal-cli HTTP URL")
-                    .default("http://127.0.0.1:8686".into())
-                    .interact_text()?;
+                let http_url = prompts::input::input("signal-cli HTTP URL")
+                    .placeholder("http://127.0.0.1:8686")
+                    .interact()?;
 
-                if http_url.trim().is_empty() {
-                    println!("  {} Skipped — HTTP URL required", style("→").dim());
-                    continue;
-                }
+                let http_url = if http_url.trim().is_empty() {
+                    "http://127.0.0.1:8686".to_string()
+                } else {
+                    http_url
+                };
 
-                let account: String = Input::new()
-                    .with_prompt("  Account number (E.164, e.g. +1234567890)")
-                    .interact_text()?;
+                let account = prompts::input::input("Account number (E.164, e.g. +1234567890)")
+                    .placeholder("+1234567890")
+                    .interact()?;
 
                 if account.trim().is_empty() {
-                    println!("  {} Skipped — account number required", style("→").dim());
+                    prompts::log::info("Skipped — account number required")?;
                     continue;
                 }
 
-                let scope_options = [
-                    "All messages (DMs + groups)",
-                    "DM only",
-                    "Specific group ID",
-                ];
-                let scope_choice = Select::new()
-                    .with_prompt("  Message scope")
-                    .items(scope_options)
-                    .default(0)
+                let scope_choice: usize = prompts::select("Message scope")
+                    .item(0, "All messages (DMs + groups)", "Receive everything")
+                    .item(1, "DM only", "Private messages only")
+                    .item(2, "Specific group ID", "Single group")
                     .interact()?;
 
                 let group_id = match scope_choice {
                     1 => Some("dm".to_string()),
                     2 => {
-                        let group_input: String =
-                            Input::new().with_prompt("  Group ID").interact_text()?;
+                        let group_input = prompts::input::input("Group ID")
+                            .placeholder("group ID")
+                            .interact()?;
                         let group_input = group_input.trim().to_string();
                         if group_input.is_empty() {
-                            println!("  {} Skipped — group ID required", style("→").dim());
+                            prompts::log::info("Skipped — group ID required")?;
                             continue;
                         }
                         Some(group_input)
@@ -726,12 +644,17 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     _ => None,
                 };
 
-                let allowed_from_raw: String = Input::new()
-                    .with_prompt(
-                        "  Allowed sender numbers (comma-separated +1234567890, or * for all)",
-                    )
-                    .default("*".into())
-                    .interact_text()?;
+                let allowed_from_raw = prompts::input::input(
+                    "Allowed sender numbers (comma-separated +1234567890, or * for all)",
+                )
+                .placeholder("*")
+                .interact()?;
+
+                let allowed_from_raw = if allowed_from_raw.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    allowed_from_raw
+                };
 
                 let allowed_from = if allowed_from_raw.trim() == "*" {
                     vec!["*".into()]
@@ -743,14 +666,12 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                         .collect()
                 };
 
-                let ignore_attachments = Confirm::new()
-                    .with_prompt("  Ignore attachment-only messages?")
-                    .default(false)
+                let ignore_attachments = prompts::toggle::toggle("Ignore attachment-only messages?")
+                    .initial_value(false)
                     .interact()?;
 
-                let ignore_stories = Confirm::new()
-                    .with_prompt("  Ignore incoming stories?")
-                    .default(true)
+                let ignore_stories = prompts::toggle::toggle("Ignore incoming stories?")
+                    .initial_value(true)
                     .interact()?;
 
                 config.signal = Some(SignalConfig {
@@ -762,83 +683,67 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     ignore_stories,
                 });
 
-                println!("  {} Signal configured", style("✅").green().bold());
+                prompts::log::success("Signal configured")?;
             }
             ChannelMenuChoice::WhatsApp => {
                 // ── WhatsApp ──
-                println!();
-                println!("  {}", style("WhatsApp Setup").white().bold());
+                prompts::section_with_width("WhatsApp Setup", 70, |_lines| {})?;
 
-                let mode_options = vec![
-                    "WhatsApp Web (QR / pair-code, no Meta Business API)",
-                    "WhatsApp Business Cloud API (webhook)",
-                ];
-                let mode_idx = Select::new()
-                    .with_prompt("  Choose WhatsApp mode")
-                    .items(&mode_options)
-                    .default(0)
+                let mode_idx: usize = prompts::select("Choose WhatsApp mode")
+                    .item(0, "WhatsApp Web", "QR / pair-code, no Meta Business API")
+                    .item(1, "WhatsApp Business Cloud API", "Webhook-based")
                     .interact()?;
 
                 if mode_idx == 0 {
                     // Compile-time check: warn early if the feature is not enabled.
                     #[cfg(not(feature = "whatsapp-web"))]
                     {
-                        println!();
-                        println!(
-                            "  {} {}",
-                            style("⚠").yellow().bold(),
-                            style("The 'whatsapp-web' feature is not compiled in. WhatsApp Web will not work at runtime.").yellow()
-                        );
-                        println!(
-                            "  {} Rebuild with: {}",
-                            style("→").dim(),
-                            style("cargo build --features whatsapp-web").white().bold()
-                        );
-                        println!();
+                        prompts::log::warning("The 'whatsapp-web' feature is not compiled in. WhatsApp Web will not work at runtime.")?;
+                        prompts::log::info("Rebuild with: cargo build --features whatsapp-web")?;
                     }
 
-                    println!("  {}", style("Mode: WhatsApp Web").dim());
-                    print_bullet("1. Build with --features whatsapp-web");
-                    print_bullet(
-                        "2. Start channel/daemon and scan QR in WhatsApp > Linked Devices",
-                    );
-                    print_bullet("3. Keep session_path persistent so relogin is not required");
-                    println!();
+                    prompts::log::info("Mode: WhatsApp Web")?;
+                    prompts::log::step("1. Build with --features whatsapp-web")?;
+                    prompts::log::step("2. Start channel/daemon and scan QR in WhatsApp > Linked Devices")?;
+                    prompts::log::step("3. Keep session_path persistent so relogin is not required")?;
 
-                    let session_path: String = Input::new()
-                        .with_prompt("  Session database path")
-                        .default("~/.zeroclaw/state/whatsapp-web/session.db".into())
-                        .interact_text()?;
+                    let session_path = prompts::input::input("Session database path")
+                        .placeholder("~/.zeroclaw/state/whatsapp-web/session.db")
+                        .interact()?;
 
-                    if session_path.trim().is_empty() {
-                        println!("  {} Skipped — session path required", style("→").dim());
-                        continue;
-                    }
-
-                    let pair_phone: String = Input::new()
-                        .with_prompt(
-                            "  Pair phone (optional, digits only; leave empty to use QR flow)",
-                        )
-                        .allow_empty(true)
-                        .interact_text()?;
-
-                    let pair_code: String = if pair_phone.trim().is_empty() {
-                        String::new()
+                    let session_path = if session_path.trim().is_empty() {
+                        "~/.zeroclaw/state/whatsapp-web/session.db".to_string()
                     } else {
-                        Input::new()
-                            .with_prompt(
-                                "  Custom pair code (optional, leave empty for auto-generated)",
-                            )
-                            .allow_empty(true)
-                            .interact_text()?
+                        session_path
                     };
 
-                    let users_str: String = Input::new()
-                        .with_prompt(
-                            "  Allowed phone numbers (comma-separated +1234567890, or * for all)",
+                    let pair_phone = prompts::input::input(
+                        "Pair phone (optional, digits only; leave empty to use QR flow)",
+                    )
+                    .placeholder("digits only")
+                    .interact()?;
+
+                    let pair_code = if pair_phone.trim().is_empty() {
+                        String::new()
+                    } else {
+                        prompts::input::input(
+                            "Custom pair code (optional, leave empty for auto-generated)",
                         )
-                        .default("*".into())
-                        .interact_text()?;
+                        .placeholder("pair code")
+                        .interact()?
+                    };
+
+                    let users_str = prompts::input::input(
+                        "Allowed phone numbers (comma-separated +1234567890, or * for all)",
+                    )
+                    .placeholder("*")
+                    .interact()?;
+
+                    let users_str = if users_str.trim().is_empty() {
+                        "*".to_string()
+                    } else {
+                        users_str
+                    };
 
                     let allowed_numbers = if users_str.trim() == "*" {
                         vec!["*".into()]
@@ -859,49 +764,46 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                         allowed_numbers,
                     });
 
-                    println!(
-                        "  {} WhatsApp Web configuration saved.",
-                        style("✅").green().bold()
-                    );
+                    prompts::log::success("WhatsApp Web configuration saved.")?;
                     continue;
                 }
 
-                println!(
-                    "  {} {}",
-                    style("Mode:").dim(),
-                    style("Business Cloud API").dim()
-                );
-                print_bullet("1. Go to developers.facebook.com and create a WhatsApp app");
-                print_bullet("2. Add the WhatsApp product and get your phone number ID");
-                print_bullet("3. Generate a temporary access token (System User)");
-                print_bullet("4. Configure webhook URL to: https://your-domain/whatsapp");
-                println!();
+                prompts::log::info("Mode: Business Cloud API")?;
+                prompts::log::step("1. Go to developers.facebook.com and create a WhatsApp app")?;
+                prompts::log::step("2. Add the WhatsApp product and get your phone number ID")?;
+                prompts::log::step("3. Generate a temporary access token (System User)")?;
+                prompts::log::step("4. Configure webhook URL to: https://your-domain/whatsapp")?;
 
-                let access_token: String = Input::new()
-                    .with_prompt("  Access token (from Meta Developers)")
-                    .interact_text()?;
+                let access_token = prompts::input::input("Access token (from Meta Developers)")
+                    .placeholder("paste access token")
+                    .interact()?;
 
                 if access_token.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let phone_number_id: String = Input::new()
-                    .with_prompt("  Phone number ID (from WhatsApp app settings)")
-                    .interact_text()?;
+                let phone_number_id = prompts::input::input("Phone number ID (from WhatsApp app settings)")
+                    .placeholder("phone number ID")
+                    .interact()?;
 
                 if phone_number_id.trim().is_empty() {
-                    println!("  {} Skipped — phone number ID required", style("→").dim());
+                    prompts::log::info("Skipped — phone number ID required")?;
                     continue;
                 }
 
-                let verify_token: String = Input::new()
-                    .with_prompt("  Webhook verify token (create your own)")
-                    .default("zeroclaw-whatsapp-verify".into())
-                    .interact_text()?;
+                let verify_token = prompts::input::input("Webhook verify token (create your own)")
+                    .placeholder("zeroclaw-whatsapp-verify")
+                    .interact()?;
+
+                let verify_token = if verify_token.trim().is_empty() {
+                    "zeroclaw-whatsapp-verify".to_string()
+                } else {
+                    verify_token
+                };
 
                 // Test connection (run entirely in separate thread — Response must be used/dropped there)
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let phone_number_id_clone = phone_number_id.clone();
                 let access_token_clone = access_token.clone();
                 let thread_result = std::thread::spawn(move || {
@@ -922,26 +824,25 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 .join();
                 match thread_result {
                     Ok(Ok(true)) => {
-                        println!(
-                            "\r  {} Connected to WhatsApp API        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success("Connected to WhatsApp API")?;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check access token and phone number ID",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check access token and phone number ID")?;
                         continue;
                     }
                 }
 
-                let users_str: String = Input::new()
-                    .with_prompt(
-                        "  Allowed phone numbers (comma-separated +1234567890, or * for all)",
-                    )
-                    .default("*".into())
-                    .interact_text()?;
+                let users_str = prompts::input::input(
+                    "Allowed phone numbers (comma-separated +1234567890, or * for all)",
+                )
+                .placeholder("*")
+                .interact()?;
+
+                let users_str = if users_str.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    users_str
+                };
 
                 let allowed_numbers = if users_str.trim() == "*" {
                     vec!["*".into()]
@@ -962,37 +863,32 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Linq => {
                 // ── Linq ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Linq Setup").white().bold(),
-                    style("— iMessage/RCS/SMS via Linq API").dim()
-                );
-                print_bullet("1. Sign up at linqapp.com and get your Partner API token");
-                print_bullet("2. Note your Linq phone number (E.164 format)");
-                print_bullet("3. Configure webhook URL to: https://your-domain/linq");
-                println!();
+                prompts::section_with_width("Linq Setup — iMessage/RCS/SMS via Linq API", 70, |lines| {
+                    lines.push("1. Sign up at linqapp.com and get your Partner API token".to_string());
+                    lines.push("2. Note your Linq phone number (E.164 format)".to_string());
+                    lines.push("3. Configure webhook URL to: https://your-domain/linq".to_string());
+                })?;
 
-                let api_token: String = Input::new()
-                    .with_prompt("  API token (Linq Partner API token)")
-                    .interact_text()?;
+                let api_token = prompts::input::input("API token (Linq Partner API token)")
+                    .placeholder("paste API token")
+                    .interact()?;
 
                 if api_token.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let from_phone: String = Input::new()
-                    .with_prompt("  From phone number (E.164 format, e.g. +12223334444)")
-                    .interact_text()?;
+                let from_phone = prompts::input::input("From phone number (E.164 format, e.g. +12223334444)")
+                    .placeholder("+12223334444")
+                    .interact()?;
 
                 if from_phone.trim().is_empty() {
-                    println!("  {} Skipped — phone number required", style("→").dim());
+                    prompts::log::info("Skipped — phone number required")?;
                     continue;
                 }
 
                 // Test connection
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let api_token_clone = api_token.clone();
                 let thread_result = std::thread::spawn(move || {
                     let client = reqwest::blocking::Client::new();
@@ -1009,26 +905,25 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 .join();
                 match thread_result {
                     Ok(Ok(true)) => {
-                        println!(
-                            "\r  {} Connected to Linq API              ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success("Connected to Linq API")?;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check API token",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check API token")?;
                         continue;
                     }
                 }
 
-                let users_str: String = Input::new()
-                    .with_prompt(
-                        "  Allowed sender numbers (comma-separated +1234567890, or * for all)",
-                    )
-                    .default("*".into())
-                    .interact_text()?;
+                let users_str = prompts::input::input(
+                    "Allowed sender numbers (comma-separated +1234567890, or * for all)",
+                )
+                .placeholder("*")
+                .interact()?;
+
+                let users_str = if users_str.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    users_str
+                };
 
                 let allowed_senders = if users_str.trim() == "*" {
                     vec!["*".into()]
@@ -1036,10 +931,9 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     users_str.split(',').map(|s| s.trim().to_string()).collect()
                 };
 
-                let signing_secret: String = Input::new()
-                    .with_prompt("  Webhook signing secret (optional, press Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let signing_secret = prompts::input::input("Webhook signing secret (optional, press Enter to skip)")
+                    .placeholder("signing secret")
+                    .interact()?;
 
                 config.linq = Some(LinqConfig {
                     api_token: api_token.trim().to_string(),
@@ -1054,50 +948,50 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Irc => {
                 // ── IRC ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("IRC Setup").white().bold(),
-                    style("— IRC over TLS").dim()
-                );
-                print_bullet("IRC connects over TLS to any IRC server");
-                print_bullet("Supports SASL PLAIN and NickServ authentication");
-                println!();
+                prompts::section_with_width("IRC Setup — IRC over TLS", 70, |lines| {
+                    lines.push("IRC connects over TLS to any IRC server".to_string());
+                    lines.push("Supports SASL PLAIN and NickServ authentication".to_string());
+                })?;
 
-                let server: String = Input::new()
-                    .with_prompt("  IRC server (hostname)")
-                    .interact_text()?;
+                let server = prompts::input::input("IRC server (hostname)")
+                    .placeholder("irc.libera.chat")
+                    .interact()?;
 
                 if server.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let port_str: String = Input::new()
-                    .with_prompt("  Port")
-                    .default("6697".into())
-                    .interact_text()?;
+                let port_str = prompts::input::input("Port")
+                    .placeholder("6697")
+                    .interact()?;
+
+                let port_str = if port_str.trim().is_empty() {
+                    "6697".to_string()
+                } else {
+                    port_str
+                };
 
                 let port: u16 = match port_str.trim().parse() {
                     Ok(p) => p,
                     Err(_) => {
-                        println!("  {} Invalid port, using 6697", style("→").dim());
+                        prompts::log::info("Invalid port, using 6697")?;
                         6697
                     }
                 };
 
-                let nickname: String =
-                    Input::new().with_prompt("  Bot nickname").interact_text()?;
+                let nickname = prompts::input::input("Bot nickname")
+                    .placeholder("zeroclaw")
+                    .interact()?;
 
                 if nickname.trim().is_empty() {
-                    println!("  {} Skipped — nickname required", style("→").dim());
+                    prompts::log::info("Skipped — nickname required")?;
                     continue;
                 }
 
-                let channels_str: String = Input::new()
-                    .with_prompt("  Channels to join (comma-separated: #channel1,#channel2)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let channels_str = prompts::input::input("Channels to join (comma-separated: #channel1,#channel2)")
+                    .placeholder("#channel1,#channel2")
+                    .interact()?;
 
                 let channels = if channels_str.trim().is_empty() {
                     vec![]
@@ -1109,15 +1003,12 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                         .collect()
                 };
 
-                print_bullet(
-                    "Allowlist nicknames that can interact with the bot (case-insensitive).",
-                );
-                print_bullet("Use '*' to allow anyone (not recommended for production).");
+                prompts::log::info("Allowlist nicknames that can interact with the bot (case-insensitive).")?;
+                prompts::log::info("Use '*' to allow anyone (not recommended for production).")?;
 
-                let users_str: String = Input::new()
-                    .with_prompt("  Allowed nicknames (comma-separated, or * for all)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let users_str = prompts::input::input("Allowed nicknames (comma-separated, or * for all)")
+                    .placeholder("*")
+                    .interact()?;
 
                 let allowed_users = if users_str.trim() == "*" {
                     vec!["*".into()]
@@ -1130,41 +1021,33 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if allowed_users.is_empty() {
-                    print_bullet(
-                        "⚠️  Empty allowlist — only you can interact. Add nicknames above.",
-                    );
+                    prompts::log::warning("Empty allowlist — only you can interact. Add nicknames above.")?;
                 }
 
-                println!();
-                print_bullet("Optional authentication (press Enter to skip each):");
+                prompts::log::info("Optional authentication (leave empty to skip each):")?;
 
-                let server_password: String = Input::new()
-                    .with_prompt("  Server password (for bouncers like ZNC, leave empty if none)")
-                    .allow_empty(true)
-                    .interact_text()?;
-
-                let nickserv_password: String = Input::new()
-                    .with_prompt("  NickServ password (leave empty if none)")
-                    .allow_empty(true)
-                    .interact_text()?;
-
-                let sasl_password: String = Input::new()
-                    .with_prompt("  SASL PLAIN password (leave empty if none)")
-                    .allow_empty(true)
-                    .interact_text()?;
-
-                let verify_tls: bool = Confirm::new()
-                    .with_prompt("  Verify TLS certificate?")
-                    .default(true)
+                let server_password = prompts::input::input("Server password (for bouncers like ZNC, leave empty if none)")
+                    .placeholder("optional")
                     .interact()?;
 
-                println!(
-                    "  {} IRC configured as {}@{}:{}",
-                    style("✅").green().bold(),
-                    style(&nickname).cyan(),
-                    style(&server).cyan(),
-                    style(port).cyan()
-                );
+                let nickserv_password = prompts::input::input("NickServ password (leave empty if none)")
+                    .placeholder("optional")
+                    .interact()?;
+
+                let sasl_password = prompts::input::input("SASL PLAIN password (leave empty if none)")
+                    .placeholder("optional")
+                    .interact()?;
+
+                let verify_tls = prompts::toggle::toggle("Verify TLS certificate?")
+                    .initial_value(true)
+                    .interact()?;
+
+                prompts::log::success(format!(
+                    "IRC configured as {}@{}:{}",
+                    nickname.trim(),
+                    server.trim(),
+                    port
+                ))?;
 
                 config.irc = Some(IrcConfig {
                     server: server.trim().to_string(),
@@ -1193,22 +1076,21 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::Webhook => {
                 // ── Webhook ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Webhook Setup").white().bold(),
-                    style("— HTTP endpoint for custom integrations").dim()
-                );
+                prompts::section_with_width("Webhook Setup — HTTP endpoint for custom integrations", 70, |_lines| {})?;
 
-                let port: String = Input::new()
-                    .with_prompt("  Port")
-                    .default("8080".into())
-                    .interact_text()?;
+                let port = prompts::input::input("Port")
+                    .placeholder("8080")
+                    .interact()?;
 
-                let secret: String = Input::new()
-                    .with_prompt("  Secret (optional, Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let port = if port.trim().is_empty() {
+                    "8080".to_string()
+                } else {
+                    port
+                };
+
+                let secret = prompts::input::input("Secret (optional, Enter to skip)")
+                    .placeholder("optional")
+                    .interact()?;
 
                 config.webhook = Some(WebhookConfig {
                     port: port.parse().unwrap_or(8080),
@@ -1222,55 +1104,48 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                         Some(secret)
                     },
                 });
-                println!(
-                    "  {} Webhook on port {}",
-                    style("✅").green().bold(),
-                    style(&port).cyan()
-                );
+                prompts::log::success(format!("Webhook on port {port}"))?;
             }
             ChannelMenuChoice::NextcloudTalk => {
                 // ── Nextcloud Talk ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Nextcloud Talk Setup").white().bold(),
-                    style("— Talk webhook receive + OCS API send").dim()
-                );
-                print_bullet("1. Configure your Nextcloud Talk bot app and app token.");
-                print_bullet("2. Set webhook URL to: https://<your-public-url>/nextcloud-talk");
-                print_bullet(
-                    "3. Keep webhook_secret aligned with Nextcloud signature headers if enabled.",
-                );
-                println!();
+                prompts::section_with_width("Nextcloud Talk Setup — Talk webhook receive + OCS API send", 70, |lines| {
+                    lines.push("1. Configure your Nextcloud Talk bot app and app token.".to_string());
+                    lines.push("2. Set webhook URL to: https://<your-public-url>/nextcloud-talk".to_string());
+                    lines.push("3. Keep webhook_secret aligned with Nextcloud signature headers if enabled.".to_string());
+                })?;
 
-                let base_url: String = Input::new()
-                    .with_prompt("  Nextcloud base URL (e.g. https://cloud.example.com)")
-                    .interact_text()?;
+                let base_url = prompts::input::input("Nextcloud base URL (e.g. https://cloud.example.com)")
+                    .placeholder("https://cloud.example.com")
+                    .interact()?;
 
                 let base_url = base_url.trim().trim_end_matches('/').to_string();
                 if base_url.is_empty() {
-                    println!("  {} Skipped — base URL required", style("→").dim());
+                    prompts::log::info("Skipped — base URL required")?;
                     continue;
                 }
 
-                let app_token: String = Input::new()
-                    .with_prompt("  App token (Talk bot token)")
-                    .interact_text()?;
+                let app_token = prompts::input::input("App token (Talk bot token)")
+                    .placeholder("paste app token")
+                    .interact()?;
 
                 if app_token.trim().is_empty() {
-                    println!("  {} Skipped — app token required", style("→").dim());
+                    prompts::log::info("Skipped — app token required")?;
                     continue;
                 }
 
-                let webhook_secret: String = Input::new()
-                    .with_prompt("  Webhook secret (optional, Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let webhook_secret = prompts::input::input("Webhook secret (optional, Enter to skip)")
+                    .placeholder("optional")
+                    .interact()?;
 
-                let allowed_users_raw: String = Input::new()
-                    .with_prompt("  Allowed Nextcloud actor IDs (comma-separated, or * for all)")
-                    .default("*".into())
-                    .interact_text()?;
+                let allowed_users_raw = prompts::input::input("Allowed Nextcloud actor IDs (comma-separated, or * for all)")
+                    .placeholder("*")
+                    .interact()?;
+
+                let allowed_users_raw = if allowed_users_raw.trim().is_empty() {
+                    "*".to_string()
+                } else {
+                    allowed_users_raw
+                };
 
                 let allowed_users = if allowed_users_raw.trim() == "*" {
                     vec!["*".into()]
@@ -1293,36 +1168,31 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     allowed_users,
                 });
 
-                println!("  {} Nextcloud Talk configured", style("✅").green().bold());
+                prompts::log::success("Nextcloud Talk configured")?;
             }
             ChannelMenuChoice::DingTalk => {
                 // ── DingTalk ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("DingTalk Setup").white().bold(),
-                    style("— DingTalk Stream Mode").dim()
-                );
-                print_bullet("1. Go to DingTalk developer console (open.dingtalk.com)");
-                print_bullet("2. Create an app and enable the Stream Mode bot");
-                print_bullet("3. Copy the Client ID (AppKey) and Client Secret (AppSecret)");
-                println!();
+                prompts::section_with_width("DingTalk Setup — DingTalk Stream Mode", 70, |lines| {
+                    lines.push("1. Go to DingTalk developer console (open.dingtalk.com)".to_string());
+                    lines.push("2. Create an app and enable the Stream Mode bot".to_string());
+                    lines.push("3. Copy the Client ID (AppKey) and Client Secret (AppSecret)".to_string());
+                })?;
 
-                let client_id: String = Input::new()
-                    .with_prompt("  Client ID (AppKey)")
-                    .interact_text()?;
+                let client_id = prompts::input::input("Client ID (AppKey)")
+                    .placeholder("AppKey")
+                    .interact()?;
 
                 if client_id.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let client_secret: String = Input::new()
-                    .with_prompt("  Client Secret (AppSecret)")
-                    .interact_text()?;
+                let client_secret = prompts::input::input("Client Secret (AppSecret)")
+                    .placeholder("AppSecret")
+                    .interact()?;
 
                 // Test connection
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let client = reqwest::blocking::Client::new();
                 let body = serde_json::json!({
                     "clientId": client_id,
@@ -1334,24 +1204,17 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     .send()
                 {
                     Ok(resp) if resp.status().is_success() => {
-                        println!(
-                            "\r  {} DingTalk credentials verified        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success("DingTalk credentials verified")?;
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check your credentials",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your credentials")?;
                         continue;
                     }
                 }
 
-                let users_str: String = Input::new()
-                    .with_prompt("  Allowed staff IDs (comma-separated, '*' for all)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let users_str = prompts::input::input("Allowed staff IDs (comma-separated, '*' for all)")
+                    .placeholder("*")
+                    .interact()?;
 
                 let allowed_users: Vec<String> = users_str
                     .split(',')
@@ -1367,29 +1230,27 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             }
             ChannelMenuChoice::QqOfficial => {
                 // ── QQ Official ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("QQ Official Setup").white().bold(),
-                    style("— Tencent QQ Bot SDK").dim()
-                );
-                print_bullet("1. Go to QQ Bot developer console (q.qq.com)");
-                print_bullet("2. Create a bot application");
-                print_bullet("3. Copy the App ID and App Secret");
-                println!();
+                prompts::section_with_width("QQ Official Setup — Tencent QQ Bot SDK", 70, |lines| {
+                    lines.push("1. Go to QQ Bot developer console (q.qq.com)".to_string());
+                    lines.push("2. Create a bot application".to_string());
+                    lines.push("3. Copy the App ID and App Secret".to_string());
+                })?;
 
-                let app_id: String = Input::new().with_prompt("  App ID").interact_text()?;
+                let app_id = prompts::input::input("App ID")
+                    .placeholder("App ID")
+                    .interact()?;
 
                 if app_id.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let app_secret: String =
-                    Input::new().with_prompt("  App Secret").interact_text()?;
+                let app_secret = prompts::input::input("App Secret")
+                    .placeholder("App Secret")
+                    .interact()?;
 
                 // Test connection
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let client = reqwest::blocking::Client::new();
                 let body = serde_json::json!({
                     "appId": app_id,
@@ -1403,31 +1264,21 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     Ok(resp) if resp.status().is_success() => {
                         let data: serde_json::Value = resp.json().unwrap_or_default();
                         if data.get("access_token").is_some() {
-                            println!(
-                                "\r  {} QQ Bot credentials verified        ",
-                                style("✅").green().bold()
-                            );
+                            prompts::log::success("QQ Bot credentials verified")?;
                         } else {
-                            println!(
-                                "\r  {} Auth error — check your credentials",
-                                style("❌").red().bold()
-                            );
+                            prompts::log::error("Auth error — check your credentials")?;
                             continue;
                         }
                     }
                     _ => {
-                        println!(
-                            "\r  {} Connection failed — check your credentials",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your credentials")?;
                         continue;
                     }
                 }
 
-                let users_str: String = Input::new()
-                    .with_prompt("  Allowed user IDs (comma-separated, '*' for all)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let users_str = prompts::input::input("Allowed user IDs (comma-separated, '*' for all)")
+                    .placeholder("*")
+                    .interact()?;
 
                 let allowed_users: Vec<String> = users_str
                     .split(',')
@@ -1456,38 +1307,40 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 // ── Lark / Feishu ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style(format!("{provider_label} Setup")).white().bold(),
-                    style(format!("— talk to ZeroClaw from {provider_label}")).dim()
-                );
-                print_bullet(&format!(
-                    "1. Go to {provider_label} Open Platform ({provider_host})"
-                ));
-                print_bullet("2. Create an app and enable 'Bot' capability");
-                print_bullet("3. Copy the App ID and App Secret");
-                println!();
+                prompts::section_with_width(
+                    &format!("{provider_label} Setup — talk to ZeroClaw from {provider_label}"),
+                    70,
+                    |lines| {
+                        lines.push(format!(
+                            "1. Go to {provider_label} Open Platform ({provider_host})"
+                        ));
+                        lines.push("2. Create an app and enable 'Bot' capability".to_string());
+                        lines.push("3. Copy the App ID and App Secret".to_string());
+                    },
+                )?;
 
-                let app_id: String = Input::new().with_prompt("  App ID").interact_text()?;
+                let app_id = prompts::input::input("App ID")
+                    .placeholder("App ID")
+                    .interact()?;
                 let app_id = app_id.trim().to_string();
 
                 if app_id.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
-                let app_secret: String =
-                    Input::new().with_prompt("  App Secret").interact_text()?;
+                let app_secret = prompts::input::input("App Secret")
+                    .placeholder("App Secret")
+                    .interact()?;
                 let app_secret = app_secret.trim().to_string();
 
                 if app_secret.is_empty() {
-                    println!("  {} App Secret is required", style("❌").red().bold());
+                    prompts::log::error("App Secret is required")?;
                     continue;
                 }
 
                 // Test connection (run entirely in separate thread — Response must be used/dropped there)
-                print!("  {} Testing connection... ", style("⏳").dim());
+                prompts::log::step("Testing connection...")?;
                 let app_id_clone = app_id.clone();
                 let app_secret_clone = app_secret.clone();
                 let endpoint = format!("{base_url}/auth/v3/tenant_access_token/internal");
@@ -1532,35 +1385,22 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
 
                 match thread_result {
                     Ok(Ok(())) => {
-                        println!(
-                            "\r  {} {provider_label} credentials verified        ",
-                            style("✅").green().bold()
-                        );
+                        prompts::log::success(format!("{provider_label} credentials verified"))?;
                     }
                     Ok(Err(reason)) => {
-                        println!(
-                            "\r  {} Connection failed — check your credentials",
-                            style("❌").red().bold()
-                        );
-                        println!("    {}", style(reason).dim());
+                        prompts::log::error("Connection failed — check your credentials")?;
+                        prompts::log::info(reason)?;
                         continue;
                     }
                     Err(_) => {
-                        println!(
-                            "\r  {} Connection failed — check your credentials",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Connection failed — check your credentials")?;
                         continue;
                     }
                 }
 
-                let receive_mode_choice = Select::new()
-                    .with_prompt("  Receive Mode")
-                    .items([
-                        "WebSocket (recommended, no public IP needed)",
-                        "Webhook (requires public HTTPS endpoint)",
-                    ])
-                    .default(0)
+                let receive_mode_choice: usize = prompts::select("Receive Mode")
+                    .item(0, "WebSocket", "Recommended, no public IP needed")
+                    .item(1, "Webhook", "Requires public HTTPS endpoint")
                     .interact()?;
 
                 let receive_mode = if receive_mode_choice == 0 {
@@ -1570,10 +1410,9 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 let verification_token = if receive_mode == LarkReceiveMode::Webhook {
-                    let token: String = Input::new()
-                        .with_prompt("  Verification Token (optional, for Webhook mode)")
-                        .allow_empty(true)
-                        .interact_text()?;
+                    let token = prompts::input::input("Verification Token (optional, for Webhook mode)")
+                        .placeholder("optional")
+                        .interact()?;
                     if token.is_empty() {
                         None
                     } else {
@@ -1584,26 +1423,26 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if receive_mode == LarkReceiveMode::Webhook && verification_token.is_none() {
-                    println!(
-                        "  {} Verification Token is empty — webhook authenticity checks are reduced.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("Verification Token is empty — webhook authenticity checks are reduced.")?;
                 }
 
                 let port = if receive_mode == LarkReceiveMode::Webhook {
-                    let p: String = Input::new()
-                        .with_prompt("  Webhook Port")
-                        .default("8080".into())
-                        .interact_text()?;
+                    let p = prompts::input::input("Webhook Port")
+                        .placeholder("8080")
+                        .interact()?;
+                    let p = if p.trim().is_empty() {
+                        "8080".to_string()
+                    } else {
+                        p
+                    };
                     Some(p.parse().unwrap_or(8080))
                 } else {
                     None
                 };
 
-                let users_str: String = Input::new()
-                    .with_prompt("  Allowed user Open IDs (comma-separated, '*' for all)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let users_str = prompts::input::input("Allowed user Open IDs (comma-separated, '*' for all)")
+                    .placeholder("*")
+                    .interact()?;
 
                 let allowed_users: Vec<String> = users_str
                     .split(',')
@@ -1612,10 +1451,9 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     .collect();
 
                 if allowed_users.is_empty() {
-                    println!(
-                        "  {} No users allowlisted — {provider_label} inbound messages will be denied until you add Open IDs or '*'.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning(format!(
+                        "No users allowlisted — {provider_label} inbound messages will be denied until you add Open IDs or '*'."
+                    ))?;
                 }
 
                 config.lark = Some(LarkConfig {
@@ -1633,48 +1471,44 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
             #[cfg(feature = "channel-nostr")]
             ChannelMenuChoice::Nostr => {
                 // ── Nostr ──
-                println!();
-                println!(
-                    "  {} {}",
-                    style("Nostr Setup").white().bold(),
-                    style("— private messages via NIP-04 & NIP-17").dim()
-                );
-                print_bullet("ZeroClaw will listen for encrypted DMs on Nostr relays.");
-                print_bullet("You need a Nostr private key (hex or nsec) and at least one relay.");
-                println!();
+                prompts::section_with_width("Nostr Setup — private messages via NIP-04 & NIP-17", 70, |lines| {
+                    lines.push("ZeroClaw will listen for encrypted DMs on Nostr relays.".to_string());
+                    lines.push("You need a Nostr private key (hex or nsec) and at least one relay.".to_string());
+                })?;
 
-                let private_key: String = Input::new()
-                    .with_prompt("  Private key (hex or nsec1...)")
-                    .interact_text()?;
+                let private_key = prompts::input::input("Private key (hex or nsec1...)")
+                    .placeholder("hex or nsec1...")
+                    .interact()?;
 
                 if private_key.trim().is_empty() {
-                    println!("  {} Skipped", style("→").dim());
+                    prompts::log::info("Skipped")?;
                     continue;
                 }
 
                 // Validate the key immediately
                 match nostr_sdk::Keys::parse(private_key.trim()) {
                     Ok(keys) => {
-                        println!(
-                            "  {} Key valid — public key: {}",
-                            style("✅").green().bold(),
-                            style(keys.public_key().to_hex()).cyan()
-                        );
+                        prompts::log::success(format!(
+                            "Key valid — public key: {}",
+                            keys.public_key().to_hex()
+                        ))?;
                     }
                     Err(_) => {
-                        println!(
-                            "  {} Invalid private key — check format and try again",
-                            style("❌").red().bold()
-                        );
+                        prompts::log::error("Invalid private key — check format and try again")?;
                         continue;
                     }
                 }
 
                 let default_relays = default_nostr_relays().join(",");
-                let relays_str: String = Input::new()
-                    .with_prompt("  Relay URLs (comma-separated, Enter for defaults)")
-                    .default(default_relays)
-                    .interact_text()?;
+                let relays_str = prompts::input::input("Relay URLs (comma-separated, Enter for defaults)")
+                    .placeholder(&default_relays)
+                    .interact()?;
+
+                let relays_str = if relays_str.trim().is_empty() {
+                    default_relays
+                } else {
+                    relays_str
+                };
 
                 let relays: Vec<String> = relays_str
                     .split(',')
@@ -1682,13 +1516,12 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     .filter(|s| !s.is_empty())
                     .collect();
 
-                print_bullet("Allowlist pubkeys that can message the bot (hex or npub).");
-                print_bullet("Use '*' to allow anyone (not recommended for production).");
+                prompts::log::info("Allowlist pubkeys that can message the bot (hex or npub).")?;
+                prompts::log::info("Use '*' to allow anyone (not recommended for production).")?;
 
-                let pubkeys_str: String = Input::new()
-                    .with_prompt("  Allowed pubkeys (comma-separated, or * for all)")
-                    .allow_empty(true)
-                    .interact_text()?;
+                let pubkeys_str = prompts::input::input("Allowed pubkeys (comma-separated, or * for all)")
+                    .placeholder("*")
+                    .interact()?;
 
                 let allowed_pubkeys: Vec<String> = if pubkeys_str.trim() == "*" {
                     vec!["*".into()]
@@ -1701,10 +1534,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                 };
 
                 if allowed_pubkeys.is_empty() {
-                    println!(
-                        "  {} No pubkeys allowlisted — inbound messages will be denied until you add pubkeys or '*'.",
-                        style("⚠").yellow().bold()
-                    );
+                    prompts::log::warning("No pubkeys allowlisted — inbound messages will be denied until you add pubkeys or '*'.")?;
                 }
 
                 config.nostr = Some(NostrConfig {
@@ -1713,15 +1543,13 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     allowed_pubkeys,
                 });
 
-                println!(
-                    "  {} Nostr configured with {} relay(s)",
-                    style("✅").green().bold(),
-                    style(relays.len()).cyan()
-                );
+                prompts::log::success(format!(
+                    "Nostr configured with {} relay(s)",
+                    relays.len()
+                ))?;
             }
             ChannelMenuChoice::Done => break,
         }
-        println!();
     }
 
     // Summary line
@@ -1732,11 +1560,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
     let channels: Vec<_> = std::iter::once("Cli").chain(channels).collect();
     let active = channels.join(", ");
 
-    println!(
-        "  {} Channels: {}",
-        style("✓").green().bold(),
-        style(active).green()
-    );
+    prompts::log::success(format!("Channels: {active}"))?;
 
     Ok(config)
 }

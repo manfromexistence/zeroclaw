@@ -13,10 +13,13 @@ use crate::memory::{
 use crate::providers::{canonical_china_provider_name, is_qwen_oauth_alias};
 use anyhow::{bail, Context, Result};
 use console::style;
-use dialoguer::{Confirm, Input, Select};
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use tokio::fs;
+
+// Import onboard UI framework
+use onboard::{effects::RainbowEffect, prompts, splash};
+use onboard::prompts::PromptInteraction;
 
 // ── Project context collected during wizard ──────────────────────
 
@@ -31,20 +34,7 @@ pub struct ProjectContext {
 
 // ── Banner ───────────────────────────────────────────────────────
 
-const BANNER: &str = r"
-    ⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡
-
-    ███████╗███████╗██████╗  ██████╗  ██████╗██╗      █████╗ ██╗    ██╗
-    ╚══███╔╝██╔════╝██╔══██╗██╔═══██╗██╔════╝██║     ██╔══██╗██║    ██║
-      ███╔╝ █████╗  ██████╔╝██║   ██║██║     ██║     ███████║██║ █╗ ██║
-     ███╔╝  ██╔══╝  ██╔══██╗██║   ██║██║     ██║     ██╔══██║██║███╗██║
-    ███████╗███████╗██║  ██║╚██████╔╝╚██████╗███████╗██║  ██║╚███╔███╔╝
-    ╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝
-
-    Zero overhead. Zero compromise. 100% Rust. 100% Agnostic.
-
-    ⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡
-";
+// Banner is now handled by onboard::splash::render_dx_logo()
 
 pub const LIVE_MODEL_MAX_OPTIONS: usize = 120;
 pub const MODEL_PREVIEW_LIMIT: usize = 20;
@@ -65,21 +55,23 @@ enum InteractiveOnboardingMode {
 }
 
 pub async fn run_wizard(force: bool) -> Result<Config> {
-    println!("{}", style(BANNER).cyan().bold());
-
-    println!(
-        "  {}",
-        style("Welcome to ZeroClaw — the fastest, smallest AI assistant.")
-            .white()
-            .bold()
-    );
-    println!(
-        "  {}",
-        style("This wizard will configure your agent in under 60 seconds.").dim()
-    );
+    // Initialize rainbow effect and show splash screen
+    let rainbow = RainbowEffect::new();
+    print!("\x1B[2J\x1B[H"); // Clear screen
+    splash::render_dx_logo(&rainbow)?;
     println!();
+    std::thread::sleep(std::time::Duration::from_millis(800));
 
-    print_step(1, 9, "Workspace Setup");
+    // Welcome with onboard UI
+    prompts::intro("ZeroClaw Setup Wizard")?;
+    prompts::section_with_width("Welcome to ZeroClaw", 80, |lines| {
+        lines.push("The fastest, smallest AI assistant.".to_string());
+        lines.push("100% Rust. 100% Agnostic. Zero compromise.".to_string());
+        lines.push("".to_string());
+        lines.push("This wizard will configure your agent in under 60 seconds.".to_string());
+    })?;
+
+    print_step(1, 9, "Workspace Setup")?;
     let (workspace_dir, config_path) = setup_workspace().await?;
     match resolve_interactive_onboarding_mode(&config_path, force)? {
         InteractiveOnboardingMode::FullOnboarding => {}
@@ -88,28 +80,28 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         }
     }
 
-    print_step(2, 9, "AI Provider & API Key");
+    print_step(2, 9, "AI Provider & API Key")?;
     let (provider, api_key, model, provider_api_url) = setup_provider(&workspace_dir).await?;
 
-    print_step(3, 9, "Channels (How You Talk to ZeroClaw)");
+    print_step(3, 9, "Channels (How You Talk to ZeroClaw)")?;
     let channels_config = setup_channels()?;
 
-    print_step(4, 9, "Tunnel (Expose to Internet)");
+    print_step(4, 9, "Tunnel (Expose to Internet)")?;
     let tunnel_config = setup_tunnel()?;
 
-    print_step(5, 9, "Tool Mode & Security");
+    print_step(5, 9, "Tool Mode & Security")?;
     let (composio_config, secrets_config) = setup_tool_mode()?;
 
-    print_step(6, 9, "Hardware (Physical World)");
+    print_step(6, 9, "Hardware (Physical World)")?;
     let hardware_config = setup_hardware()?;
 
-    print_step(7, 9, "Memory Configuration");
+    print_step(7, 9, "Memory Configuration")?;
     let memory_config = setup_memory()?;
 
-    print_step(8, 9, "Project Context (Personalize Your Agent)");
+    print_step(8, 9, "Project Context (Personalize Your Agent)")?;
     let project_ctx = setup_project_context()?;
 
-    print_step(9, 9, "Workspace Files");
+    print_step(9, 9, "Workspace Files")?;
     scaffold_workspace(&workspace_dir, &project_ctx).await?;
 
     // ── Build config ──
@@ -185,111 +177,91 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         locale: None,
     };
 
-    println!(
-        "  {} Security: {} | workspace-scoped",
-        style("✓").green().bold(),
-        style("Supervised").green()
-    );
-    println!(
-        "  {} Memory: {} (auto-save: {})",
-        style("✓").green().bold(),
-        style(&config.memory.backend).green(),
+    prompts::log::success(format!(
+        "Security: {} | workspace-scoped",
+        "Supervised"
+    ))?;
+    prompts::log::success(format!(
+        "Memory: {} (auto-save: {})",
+        config.memory.backend,
         if config.memory.auto_save { "on" } else { "off" }
-    );
+    ))?;
 
     config.save().await?;
     persist_workspace_selection(&config.config_path).await?;
 
     // ── Final summary ────────────────────────────────────────────
-    print_summary(&config);
+    print_summary(&config)?;
 
     // ── Offer to launch channels immediately ─────────────────────
     let has_channels = has_launchable_channels(&config.channels_config);
 
     if has_channels && config.api_key.is_some() {
-        let launch: bool = Confirm::new()
-            .with_prompt(format!(
-                "  {} Launch channels now? (connected channels → AI → reply)",
-                style("🚀").cyan()
-            ))
-            .default(true)
+        let launch = prompts::confirm("🚀 Launch channels now? (connected channels → AI → reply)")
+            .initial_value(true)
             .interact()?;
 
         if launch {
-            println!();
-            println!(
-                "  {} {}",
-                style("⚡").cyan(),
-                style("Starting channel server...").white().bold()
-            );
-            println!();
+            prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
             std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
         }
     }
+
+    prompts::outro("🎉 ZeroClaw setup complete!")?;
 
     Ok(config)
 }
 
 /// Interactive repair flow: rerun channel setup only without redoing full onboarding.
 pub async fn run_channels_repair_wizard() -> Result<Config> {
-    println!("{}", style(BANNER).cyan().bold());
-    println!(
-        "  {}",
-        style("Channels Repair — update channel tokens and allowlists only")
-            .white()
-            .bold()
-    );
+    // Initialize rainbow effect and show splash screen
+    let rainbow = RainbowEffect::new();
+    print!("\x1B[2J\x1B[H"); // Clear screen
+    splash::render_dx_logo(&rainbow)?;
     println!();
+    std::thread::sleep(std::time::Duration::from_millis(800));
+
+    prompts::intro("Channels Repair Wizard")?;
+    prompts::section_with_width("Channel Configuration", 80, |lines| {
+        lines.push("Update channel tokens and allowlists only.".to_string());
+        lines.push("Your existing configuration will be preserved.".to_string());
+    })?;
 
     let mut config = Box::pin(Config::load_or_init()).await?;
 
-    print_step(1, 1, "Channels (How You Talk to ZeroClaw)");
+    print_step(1, 1, "Channels (How You Talk to ZeroClaw)")?;
     config.channels_config = setup_channels()?;
     config.save().await?;
     persist_workspace_selection(&config.config_path).await?;
 
-    println!();
-    println!(
-        "  {} Channel config saved: {}",
-        style("✓").green().bold(),
-        style(config.config_path.display()).green()
-    );
+    prompts::log::success(format!(
+        "Channel config saved: {}",
+        config.config_path.display()
+    ))?;
 
     let has_channels = has_launchable_channels(&config.channels_config);
 
     if has_channels && config.api_key.is_some() {
-        let launch: bool = Confirm::new()
-            .with_prompt(format!(
-                "  {} Launch channels now? (connected channels → AI → reply)",
-                style("🚀").cyan()
-            ))
-            .default(true)
+        let launch = prompts::confirm("🚀 Launch channels now? (connected channels → AI → reply)")
+            .initial_value(true)
             .interact()?;
 
         if launch {
-            println!();
-            println!(
-                "  {} {}",
-                style("⚡").cyan(),
-                style("Starting channel server...").white().bold()
-            );
-            println!();
+            prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
             std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
         }
     }
+
+    prompts::outro("🎉 Channel repair complete!")?;
 
     Ok(config)
 }
 
 /// Interactive flow: update only provider/model/api key while preserving existing config.
 async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) -> Result<Config> {
-    println!();
-    println!(
-        "  {} Existing config detected. Running provider-only update mode (preserving channels, memory, tunnel, hooks, and other settings).",
-        style("↻").cyan().bold()
-    );
+    prompts::log::info("Existing config detected. Running provider-only update mode (preserving channels, memory, tunnel, hooks, and other settings).")?;
 
     let raw = fs::read_to_string(config_path).await.with_context(|| {
         format!(
@@ -306,41 +278,32 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
     config.workspace_dir = workspace_dir.to_path_buf();
     config.config_path = config_path.to_path_buf();
 
-    print_step(1, 1, "AI Provider & API Key");
+    print_step(1, 1, "AI Provider & API Key")?;
     let (provider, api_key, model, provider_api_url) = setup_provider(workspace_dir).await?;
     apply_provider_update(&mut config, provider, api_key, model, provider_api_url);
 
     config.save().await?;
     persist_workspace_selection(&config.config_path).await?;
 
-    println!(
-        "  {} Provider settings updated at {}",
-        style("✓").green().bold(),
-        style(config.config_path.display()).green()
-    );
-    print_summary(&config);
+    prompts::log::success(format!(
+        "Provider settings updated at {}",
+        config.config_path.display()
+    ))?;
+    print_summary(&config)?;
 
     let has_channels = has_launchable_channels(&config.channels_config);
     if has_channels && config.api_key.is_some() {
-        let launch: bool = Confirm::new()
-            .with_prompt(format!(
-                "  {} Launch channels now? (connected channels → AI → reply)",
-                style("🚀").cyan()
-            ))
-            .default(true)
+        let launch = prompts::confirm("🚀 Launch channels now? (connected channels → AI → reply)")
+            .initial_value(true)
             .interact()?;
 
         if launch {
-            println!();
-            println!(
-                "  {} {}",
-                style("⚡").cyan(),
-                style("Starting channel server...").white().bold()
-            );
-            println!();
+            prompts::log::info("Starting channel server...")?;
             std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
         }
     }
+
+    prompts::outro("🎉 Provider update complete!")?;
 
     Ok(config)
 }
@@ -461,14 +424,18 @@ async fn run_quick_setup_with_home(
     force: bool,
     home: &Path,
 ) -> Result<Config> {
-    println!("{}", style(BANNER).cyan().bold());
-    println!(
-        "  {}",
-        style("Quick Setup — generating config with sensible defaults...")
-            .white()
-            .bold()
-    );
+    // Initialize rainbow effect and show splash screen
+    let rainbow = RainbowEffect::new();
+    print!("\x1B[2J\x1B[H"); // Clear screen
+    splash::render_dx_logo(&rainbow)?;
     println!();
+    std::thread::sleep(std::time::Duration::from_millis(800));
+
+    prompts::intro("ZeroClaw Quick Setup")?;
+    prompts::section_with_width("Quick Configuration", 80, |lines| {
+        lines.push("Generating config with sensible defaults...".to_string());
+        lines.push("You can customize later with 'zeroclaw onboard'.".to_string());
+    })?;
 
     let (zeroclaw_dir, workspace_dir) = resolve_quick_setup_dirs_with_home(home);
     let config_path = zeroclaw_dir.join("config.toml");
@@ -574,106 +541,67 @@ async fn run_quick_setup_with_home(
     };
     scaffold_workspace(&workspace_dir, &default_ctx).await?;
 
-    println!(
-        "  {} Workspace:  {}",
-        style("✓").green().bold(),
-        style(workspace_dir.display()).green()
-    );
-    println!(
-        "  {} Provider:   {}",
-        style("✓").green().bold(),
-        style(&provider_name).green()
-    );
-    println!(
-        "  {} Model:      {}",
-        style("✓").green().bold(),
-        style(&model).green()
-    );
-    println!(
-        "  {} API Key:    {}",
-        style("✓").green().bold(),
+    prompts::log::success(format!("Workspace: {}", workspace_dir.display()))?;
+    prompts::log::success(format!("Provider: {}", provider_name))?;
+    prompts::log::success(format!("Model: {}", model))?;
+    prompts::log::success(format!(
+        "API Key: {}",
         if credential_override.is_some() {
-            style("set").green()
+            "set"
         } else {
-            style("not set (use --api-key or edit config.toml)").yellow()
+            "not set (use --api-key or edit config.toml)"
         }
-    );
-    println!(
-        "  {} Security:   {}",
-        style("✓").green().bold(),
-        style("Supervised (workspace-scoped)").green()
-    );
-    println!(
-        "  {} Memory:     {} (auto-save: {})",
-        style("✓").green().bold(),
-        style(&memory_backend_name).green(),
+    ))?;
+    prompts::log::success("Security: Supervised (workspace-scoped)")?;
+    prompts::log::success(format!(
+        "Memory: {} (auto-save: {})",
+        memory_backend_name,
         if memory_backend_name == "none" {
             "off"
         } else {
             "on"
         }
-    );
-    println!(
-        "  {} Secrets:    {}",
-        style("✓").green().bold(),
-        style("encrypted").green()
-    );
-    println!(
-        "  {} Gateway:    {}",
-        style("✓").green().bold(),
-        style("pairing required (127.0.0.1:8080)").green()
-    );
-    println!(
-        "  {} Tunnel:     {}",
-        style("✓").green().bold(),
-        style("none (local only)").dim()
-    );
-    println!(
-        "  {} Composio:   {}",
-        style("✓").green().bold(),
-        style("disabled (sovereign mode)").dim()
-    );
-    println!();
-    println!(
-        "  {} {}",
-        style("Config saved:").white().bold(),
-        style(config_path.display()).green()
-    );
-    println!();
-    println!("  {}", style("Next steps:").white().bold());
+    ))?;
+    prompts::log::success("Secrets: encrypted")?;
+    prompts::log::success("Gateway: pairing required (127.0.0.1:8080)")?;
+    prompts::log::info("Tunnel: none (local only)")?;
+    prompts::log::info("Composio: disabled (sovereign mode)")?;
+    
+    prompts::log::success(format!("Config saved: {}", config_path.display()))?;
+    
+    prompts::log::step("Next steps:")?;
     if credential_override.is_none() {
         if provider_supports_keyless_local_usage(&provider_name) {
-            println!("    1. Chat:     zeroclaw agent -m \"Hello!\"");
-            println!("    2. Gateway:  zeroclaw gateway");
-            println!("    3. Status:   zeroclaw status");
+            prompts::log::info("1. Chat:     zeroclaw agent -m \"Hello!\"")?;
+            prompts::log::info("2. Gateway:  zeroclaw gateway")?;
+            prompts::log::info("3. Status:   zeroclaw status")?;
         } else if provider_supports_device_flow(&provider_name) {
             if canonical_provider_name(&provider_name) == "copilot" {
-                println!("    1. Chat:              zeroclaw agent -m \"Hello!\"");
-                println!("       (device / OAuth auth will prompt on first run)");
-                println!("    2. Gateway:           zeroclaw gateway");
-                println!("    3. Status:            zeroclaw status");
+                prompts::log::info("1. Chat:              zeroclaw agent -m \"Hello!\"")?;
+                prompts::log::info("   (device / OAuth auth will prompt on first run)")?;
+                prompts::log::info("2. Gateway:           zeroclaw gateway")?;
+                prompts::log::info("3. Status:            zeroclaw status")?;
             } else {
-                println!(
-                    "    1. Login:             zeroclaw auth login --provider {}",
+                prompts::log::info(format!(
+                    "1. Login:             zeroclaw auth login --provider {}",
                     provider_name
-                );
-                println!("    2. Chat:              zeroclaw agent -m \"Hello!\"");
-                println!("    3. Gateway:           zeroclaw gateway");
-                println!("    4. Status:            zeroclaw status");
+                ))?;
+                prompts::log::info("2. Chat:              zeroclaw agent -m \"Hello!\"")?;
+                prompts::log::info("3. Gateway:           zeroclaw gateway")?;
+                prompts::log::info("4. Status:            zeroclaw status")?;
             }
         } else {
             let env_var = provider_env_var(&provider_name);
-            println!("    1. Set your API key:  export {env_var}=\"sk-...\"");
-            println!("    2. Or edit:           ~/.zeroclaw/config.toml");
-            println!("    3. Chat:              zeroclaw agent -m \"Hello!\"");
-            println!("    4. Gateway:           zeroclaw gateway");
+            prompts::log::info(format!("1. Set your API key:  export {env_var}=\"sk-...\""))?;
+            prompts::log::info("2. Or edit:           ~/.zeroclaw/config.toml")?;
+            prompts::log::info("3. Chat:              zeroclaw agent -m \"Hello!\"")?;
+            prompts::log::info("4. Gateway:           zeroclaw gateway")?;
         }
     } else {
-        println!("    1. Chat:     zeroclaw agent -m \"Hello!\"");
-        println!("    2. Gateway:  zeroclaw gateway");
-        println!("    3. Status:   zeroclaw status");
+        prompts::log::info("1. Chat:     zeroclaw agent -m \"Hello!\"")?;
+        prompts::log::info("2. Gateway:  zeroclaw gateway")?;
+        prompts::log::info("3. Status:   zeroclaw status")?;
     }
-    println!();
 
     Ok(config)
 }
@@ -1239,14 +1167,9 @@ pub fn models_endpoint_for_provider(provider_name: &str) -> Option<&'static str>
 
 // ── Step helpers ─────────────────────────────────────────────────
 
-pub fn print_step(current: u8, total: u8, title: &str) {
-    println!();
-    println!(
-        "  {} {}",
-        style(format!("[{current}/{total}]")).cyan().bold(),
-        style(title).white().bold()
-    );
-    println!("  {}", style("─".repeat(50)).dim());
+pub fn print_step(current: u8, total: u8, title: &str) -> Result<()> {
+    prompts::log::step(format!("[{current}/{total}] {title}"))?;
+    Ok(())
 }
 
 pub fn print_bullet(text: &str) {
@@ -1262,11 +1185,10 @@ fn resolve_interactive_onboarding_mode(
     }
 
     if force {
-        println!(
-            "  {} Existing config detected at {}. Proceeding with full onboarding because --force was provided.",
-            style("!").yellow().bold(),
-            style(config_path.display()).yellow()
-        );
+        prompts::log::warning(format!(
+            "Existing config detected at {}. Proceeding with full onboarding because --force was provided.",
+            config_path.display()
+        ))?;
         return Ok(InteractiveOnboardingMode::FullOnboarding);
     }
 
@@ -1277,20 +1199,14 @@ fn resolve_interactive_onboarding_mode(
         );
     }
 
-    let options = [
-        "Full onboarding (overwrite config.toml)",
-        "Update AI provider/model/API key only (preserve existing configuration)",
-        "Cancel",
-    ];
-
-    let mode = Select::new()
-        .with_prompt(format!(
-            "  Existing config found at {}. Select setup mode",
-            config_path.display()
-        ))
-        .items(options)
-        .default(1)
-        .interact()?;
+    let mode = prompts::select(format!(
+        "Existing config found at {}. Select setup mode",
+        config_path.display()
+    ))
+    .item(0, "Full onboarding (overwrite config.toml)", "Complete setup")
+    .item(1, "Update AI provider/model/API key only (preserve existing configuration)", "Quick update")
+    .item(2, "Cancel", "Exit without changes")
+    .interact()?;
 
     match mode {
         0 => Ok(InteractiveOnboardingMode::FullOnboarding),
@@ -1305,11 +1221,10 @@ fn ensure_onboard_overwrite_allowed(config_path: &Path, force: bool) -> Result<(
     }
 
     if force {
-        println!(
-            "  {} Existing config detected at {}. Proceeding because --force was provided.",
-            style("!").yellow().bold(),
-            style(config_path.display()).yellow()
-        );
+        prompts::log::warning(format!(
+            "Existing config detected at {}. Proceeding because --force was provided.",
+            config_path.display()
+        ))?;
         return Ok(());
     }
 
@@ -1330,13 +1245,12 @@ fn ensure_onboard_overwrite_allowed(config_path: &Path, force: bool) -> Result<(
             );
         }
 
-        let confirmed = Confirm::new()
-            .with_prompt(format!(
-                "  Existing config found at {}. Re-running onboarding will overwrite config.toml and may create missing workspace files (including BOOTSTRAP.md). Continue?",
-                config_path.display()
-            ))
-            .default(false)
-            .interact()?;
+        let confirmed = prompts::confirm(format!(
+            "Existing config found at {}. Re-running onboarding will overwrite config.toml and may create missing workspace files (including BOOTSTRAP.md). Continue?",
+            config_path.display()
+        ))
+        .initial_value(false)
+        .interact()?;
 
         if !confirmed {
             bail!("Onboarding canceled: existing configuration was left unchanged.");
@@ -1366,22 +1280,20 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
     let (default_config_dir, default_workspace_dir) =
         crate::config::schema::resolve_runtime_dirs_for_onboarding().await?;
 
-    print_bullet(&format!(
+    prompts::log::info(format!(
         "Default location: {}",
-        style(default_workspace_dir.display()).green()
-    ));
+        default_workspace_dir.display()
+    ))?;
 
-    let use_default = Confirm::new()
-        .with_prompt("  Use default workspace location?")
-        .default(true)
+    let use_default = prompts::confirm("Use default workspace location?")
+        .initial_value(true)
         .interact()?;
 
     let (config_dir, workspace_dir) = if use_default {
         (default_config_dir, default_workspace_dir)
     } else {
-        let custom: String = Input::new()
-            .with_prompt("  Enter workspace path")
-            .interact_text()?;
+        let custom = prompts::input::input("Enter workspace path")
+            .interact()?;
         let expanded = shellexpand::tilde(&custom).to_string();
         crate::config::schema::resolve_config_dir_for_workspace(&PathBuf::from(expanded))
     };
@@ -1392,11 +1304,7 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
         .await
         .context("Failed to create workspace directory")?;
 
-    println!(
-        "  {} Workspace: {}",
-        style("✓").green().bold(),
-        style(workspace_dir.display()).green()
-    );
+    prompts::log::success(format!("Workspace: {}", workspace_dir.display()))?;
 
     Ok((workspace_dir, config_path))
 }
@@ -1485,49 +1393,27 @@ pub fn provider_supports_device_flow(provider_name: &str) -> bool {
 // ── Step 5: Tool Mode & Security ────────────────────────────────
 
 fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
-    print_bullet("Choose how ZeroClaw connects to external apps.");
-    print_bullet("You can always change this later in config.toml.");
-    println!();
+    prompts::log::info("Choose how ZeroClaw connects to external apps.")?;
+    prompts::log::info("You can always change this later in config.toml.")?;
 
-    let options = vec![
-        "Sovereign (local only) — you manage API keys, full privacy (default)",
-        "Composio (managed OAuth) — 1000+ apps via OAuth, no raw keys shared",
-    ];
-
-    let choice = Select::new()
-        .with_prompt("  Select tool mode")
-        .items(&options)
-        .default(0)
+    let choice = prompts::select("Select tool mode")
+        .item(0, "Sovereign (local only)", "You manage API keys, full privacy (default)")
+        .item(1, "Composio (managed OAuth)", "1000+ apps via OAuth, no raw keys shared")
         .interact()?;
 
     let composio_config = if choice == 1 {
-        println!();
-        println!(
-            "  {} {}",
-            style("Composio Setup").white().bold(),
-            style("— 1000+ OAuth integrations (Gmail, Notion, GitHub, Slack, ...)").dim()
-        );
-        print_bullet("Get your API key at: https://app.composio.dev/settings");
-        print_bullet("ZeroClaw uses Composio as a tool — your core agent stays local.");
-        println!();
+        prompts::log::info("Composio Setup — 1000+ OAuth integrations (Gmail, Notion, GitHub, Slack, ...)")?;
+        prompts::log::info("Get your API key at: https://app.composio.dev/settings")?;
+        prompts::log::info("ZeroClaw uses Composio as a tool — your core agent stays local.")?;
 
-        let api_key: String = Input::new()
-            .with_prompt("  Composio API key (or Enter to skip)")
-            .allow_empty(true)
-            .interact_text()?;
+        let api_key = prompts::input::input("Composio API key (or Enter to skip)")
+            .interact()?;
 
         if api_key.trim().is_empty() {
-            println!(
-                "  {} Skipped — set composio.api_key in config.toml later",
-                style("→").dim()
-            );
+            prompts::log::info("Skipped — set composio.api_key in config.toml later")?;
             ComposioConfig::default()
         } else {
-            println!(
-                "  {} Composio: {} (1000+ OAuth tools available)",
-                style("✓").green().bold(),
-                style("enabled").green()
-            );
+            prompts::log::success("Composio: enabled (1000+ OAuth tools available)")?;
             ComposioConfig {
                 enabled: true,
                 api_key: Some(api_key),
@@ -1535,38 +1421,24 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
             }
         }
     } else {
-        println!(
-            "  {} Tool mode: {} — full privacy, you own every key",
-            style("✓").green().bold(),
-            style("Sovereign (local only)").green()
-        );
+        prompts::log::success("Tool mode: Sovereign (local only) — full privacy, you own every key")?;
         ComposioConfig::default()
     };
 
     // ── Encrypted secrets ──
-    println!();
-    print_bullet("ZeroClaw can encrypt API keys stored in config.toml.");
-    print_bullet("A local key file protects against plaintext exposure and accidental leaks.");
+    prompts::log::info("ZeroClaw can encrypt API keys stored in config.toml.")?;
+    prompts::log::info("A local key file protects against plaintext exposure and accidental leaks.")?;
 
-    let encrypt = Confirm::new()
-        .with_prompt("  Enable encrypted secret storage?")
-        .default(true)
+    let encrypt = prompts::toggle::toggle("Enable encrypted secret storage?")
+        .initial_value(true)
         .interact()?;
 
     let secrets_config = SecretsConfig { encrypt };
 
     if encrypt {
-        println!(
-            "  {} Secrets: {} — keys encrypted with local key file",
-            style("✓").green().bold(),
-            style("encrypted").green()
-        );
+        prompts::log::success("Secrets: encrypted — keys encrypted with local key file")?;
     } else {
-        println!(
-            "  {} Secrets: {} — keys stored as plaintext (not recommended)",
-            style("✓").green().bold(),
-            style("plaintext").yellow()
-        );
+        prompts::log::warning("Secrets: plaintext — keys stored as plaintext (not recommended)")?;
     }
 
     Ok((composio_config, secrets_config))
@@ -1575,30 +1447,17 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
 // ── Step 6: Hardware (Physical World) ───────────────────────────
 
 fn setup_hardware() -> Result<HardwareConfig> {
-    print_bullet("ZeroClaw can talk to physical hardware (LEDs, sensors, motors).");
-    print_bullet("Scanning for connected devices...");
-    println!();
+    prompts::log::info("ZeroClaw can talk to physical hardware (LEDs, sensors, motors).")?;
+    prompts::log::info("Scanning for connected devices...")?;
 
     // ── Auto-discovery ──
     let devices = hardware::discover_hardware();
 
     if devices.is_empty() {
-        println!(
-            "  {} {}",
-            style("ℹ").dim(),
-            style("No hardware devices detected on this system.").dim()
-        );
-        println!(
-            "  {} {}",
-            style("ℹ").dim(),
-            style("You can enable hardware later in config.toml under [hardware].").dim()
-        );
+        prompts::log::info("No hardware devices detected on this system.")?;
+        prompts::log::info("You can enable hardware later in config.toml under [hardware].")?;
     } else {
-        println!(
-            "  {} {} device(s) found:",
-            style("✓").green().bold(),
-            devices.len()
-        );
+        prompts::log::success(format!("{} device(s) found:", devices.len()))?;
         for device in &devices {
             let detail = device
                 .detail
@@ -1610,31 +1469,24 @@ fn setup_hardware() -> Result<HardwareConfig> {
                 .as_deref()
                 .map(|p| format!(" → {p}"))
                 .unwrap_or_default();
-            println!(
-                "    {} {}{}{} [{}]",
-                style("›").cyan(),
-                style(&device.name).green(),
-                style(&detail).dim(),
-                style(&path).dim(),
-                style(device.transport.to_string()).cyan()
-            );
+            prompts::log::info(format!(
+                "{}{}{} [{}]",
+                device.name,
+                detail,
+                path,
+                device.transport.to_string()
+            ))?;
         }
     }
-    println!();
-
-    let options = vec![
-        "🚀 Native — direct GPIO on this Linux board (Raspberry Pi, Orange Pi, etc.)",
-        "🔌 Tethered — control an Arduino/ESP32/Nucleo plugged into USB",
-        "🔬 Debug Probe — flash/read MCUs via SWD/JTAG (probe-rs)",
-        "☁️  Software Only — no hardware access (default)",
-    ];
 
     let recommended = hardware::recommended_wizard_default(&devices);
 
-    let choice = Select::new()
-        .with_prompt("  How should ZeroClaw interact with the physical world?")
-        .items(&options)
-        .default(recommended)
+    let choice = prompts::select("How should ZeroClaw interact with the physical world?")
+        .item(0, "🚀 Native — direct GPIO on this Linux board (Raspberry Pi, Orange Pi, etc.)", "Direct GPIO access")
+        .item(1, "🔌 Tethered — control an Arduino/ESP32/Nucleo plugged into USB", "USB serial connection")
+        .item(2, "🔬 Debug Probe — flash/read MCUs via SWD/JTAG (probe-rs)", "Debug probe interface")
+        .item(3, "☁️  Software Only — no hardware access (default)", "No hardware")
+        .initial_value(recommended)
         .interact()?;
 
     let mut hw_config = hardware::config_from_wizard_choice(choice, &devices);
@@ -1647,45 +1499,32 @@ fn setup_hardware() -> Result<HardwareConfig> {
             .collect();
 
         if serial_devices.len() > 1 {
-            let port_labels: Vec<String> = serial_devices
-                .iter()
-                .map(|d| {
-                    format!(
-                        "{} ({})",
-                        d.device_path.as_deref().unwrap_or("unknown"),
-                        d.name
-                    )
-                })
-                .collect();
-
-            let port_idx = Select::new()
-                .with_prompt("  Multiple serial devices found — select one")
-                .items(&port_labels)
-                .default(0)
-                .interact()?;
-
+            let mut select = prompts::select("Multiple serial devices found — select one");
+            for (idx, device) in serial_devices.iter().enumerate() {
+                let label = format!(
+                    "{} ({})",
+                    device.device_path.as_deref().unwrap_or("unknown"),
+                    device.name
+                );
+                select = select.item(idx, label.clone(), device.name.clone());
+            }
+            let port_idx = select.interact()?;
             hw_config.serial_port = serial_devices[port_idx].device_path.clone();
         } else if serial_devices.is_empty() {
             // User chose serial but no device discovered — ask for manual path
-            let manual_port: String = Input::new()
-                .with_prompt("  Serial port path (e.g. /dev/ttyUSB0)")
-                .default("/dev/ttyUSB0".into())
-                .interact_text()?;
+            let manual_port = prompts::input::input("Serial port path (e.g. /dev/ttyUSB0)")
+                .placeholder("/dev/ttyUSB0")
+                .interact()?;
             hw_config.serial_port = Some(manual_port);
         }
 
         // Baud rate
-        let baud_options = vec![
-            "115200 (default, recommended)",
-            "9600 (legacy Arduino)",
-            "57600",
-            "230400",
-            "Custom",
-        ];
-        let baud_idx = Select::new()
-            .with_prompt("  Serial baud rate")
-            .items(&baud_options)
-            .default(0)
+        let baud_idx = prompts::select("Serial baud rate")
+            .item(0, "115200 (default, recommended)", "Standard rate")
+            .item(1, "9600 (legacy Arduino)", "Legacy rate")
+            .item(2, "57600", "Medium rate")
+            .item(3, "230400", "High rate")
+            .item(4, "Custom", "Enter custom rate")
             .interact()?;
 
         hw_config.baud_rate = match baud_idx {
@@ -1693,10 +1532,9 @@ fn setup_hardware() -> Result<HardwareConfig> {
             2 => 57600,
             3 => 230_400,
             4 => {
-                let custom: String = Input::new()
-                    .with_prompt("  Custom baud rate")
-                    .default("115200".into())
-                    .interact_text()?;
+                let custom = prompts::input::input("Custom baud rate")
+                    .placeholder("115200")
+                    .interact()?;
                 custom.parse::<u32>().unwrap_or(115_200)
             }
             _ => 115_200,
@@ -1707,18 +1545,16 @@ fn setup_hardware() -> Result<HardwareConfig> {
     if hw_config.transport_mode() == hardware::HardwareTransport::Probe
         && hw_config.probe_target.is_none()
     {
-        let target: String = Input::new()
-            .with_prompt("  Target MCU chip (e.g. STM32F411CEUx, nRF52840_xxAA)")
-            .default("STM32F411CEUx".into())
-            .interact_text()?;
+        let target = prompts::input::input("Target MCU chip (e.g. STM32F411CEUx, nRF52840_xxAA)")
+            .placeholder("STM32F411CEUx")
+            .interact()?;
         hw_config.probe_target = Some(target);
     }
 
     // ── Datasheet RAG ──
     if hw_config.enabled {
-        let datasheets = Confirm::new()
-            .with_prompt("  Enable datasheet RAG? (index PDF schematics for AI pin lookups)")
-            .default(true)
+        let datasheets = prompts::toggle::toggle("Enable datasheet RAG? (index PDF schematics for AI pin lookups)")
+            .initial_value(true)
             .interact()?;
         hw_config.workspace_datasheets = datasheets;
     }
@@ -1739,22 +1575,17 @@ fn setup_hardware() -> Result<HardwareConfig> {
             hardware::HardwareTransport::None => "Software Only".to_string(),
         };
 
-        println!(
-            "  {} Hardware: {} | datasheets: {}",
-            style("✓").green().bold(),
-            style(&transport_label).green(),
+        prompts::log::success(format!(
+            "Hardware: {} | datasheets: {}",
+            transport_label,
             if hw_config.workspace_datasheets {
-                style("on").green().to_string()
+                "on"
             } else {
-                style("off").dim().to_string()
+                "off"
             }
-        );
+        ))?;
     } else {
-        println!(
-            "  {} Hardware: {}",
-            style("✓").green().bold(),
-            style("disabled (software only)").dim()
-        );
+        prompts::log::info("Hardware: disabled (software only)")?;
     }
 
     Ok(hw_config)
@@ -1763,67 +1594,56 @@ fn setup_hardware() -> Result<HardwareConfig> {
 // ── Step 6: Project Context ─────────────────────────────────────
 
 fn setup_project_context() -> Result<ProjectContext> {
-    print_bullet("Let's personalize your agent. You can always update these later.");
-    print_bullet("Press Enter to accept defaults.");
-    println!();
+    prompts::log::info("Let's personalize your agent. You can always update these later.")?;
+    prompts::log::info("Press Enter to accept defaults.")?;
 
-    let user_name: String = Input::new()
-        .with_prompt("  Your name")
-        .default("User".into())
-        .interact_text()?;
-
-    let tz_options = vec![
-        "US/Eastern (EST/EDT)",
-        "US/Central (CST/CDT)",
-        "US/Mountain (MST/MDT)",
-        "US/Pacific (PST/PDT)",
-        "Europe/London (GMT/BST)",
-        "Europe/Berlin (CET/CEST)",
-        "Asia/Tokyo (JST)",
-        "UTC",
-        "Other (type manually)",
-    ];
-
-    let tz_idx = Select::new()
-        .with_prompt("  Your timezone")
-        .items(&tz_options)
-        .default(0)
+    let user_name = prompts::input::input("Your name")
+        .placeholder("User")
         .interact()?;
 
-    let timezone = if tz_idx == tz_options.len() - 1 {
-        Input::new()
-            .with_prompt("  Enter timezone (e.g. America/New_York)")
-            .default("UTC".into())
-            .interact_text()?
+    let tz_idx = prompts::select("Your timezone")
+        .item(0, "US/Eastern (EST/EDT)", "Eastern Time")
+        .item(1, "US/Central (CST/CDT)", "Central Time")
+        .item(2, "US/Mountain (MST/MDT)", "Mountain Time")
+        .item(3, "US/Pacific (PST/PDT)", "Pacific Time")
+        .item(4, "Europe/London (GMT/BST)", "London Time")
+        .item(5, "Europe/Berlin (CET/CEST)", "Berlin Time")
+        .item(6, "Asia/Tokyo (JST)", "Tokyo Time")
+        .item(7, "UTC", "Universal Time")
+        .item(8, "Other (type manually)", "Custom timezone")
+        .interact()?;
+
+    let timezone = if tz_idx == 8 {
+        prompts::input::input("Enter timezone (e.g. America/New_York)")
+            .placeholder("UTC")
+            .interact()?
     } else {
-        // Extract the short label before the parenthetical
-        tz_options[tz_idx]
-            .split('(')
-            .next()
-            .unwrap_or("UTC")
-            .trim()
-            .to_string()
+        let tz_options = vec![
+            "US/Eastern",
+            "US/Central",
+            "US/Mountain",
+            "US/Pacific",
+            "Europe/London",
+            "Europe/Berlin",
+            "Asia/Tokyo",
+            "UTC",
+        ];
+        tz_options[tz_idx].to_string()
     };
 
-    let agent_name: String = Input::new()
-        .with_prompt("  Agent name")
-        .default("ZeroClaw".into())
-        .interact_text()?;
+    let agent_name = prompts::input::input("Agent name")
+        .placeholder("ZeroClaw")
+        .interact()?;
 
-    let style_options = vec![
-        "Direct & concise — skip pleasantries, get to the point",
-        "Friendly & casual — warm, human, and helpful",
-        "Professional & polished — calm, confident, and clear",
-        "Expressive & playful — more personality + natural emojis",
-        "Technical & detailed — thorough explanations, code-first",
-        "Balanced — adapt to the situation",
-        "Custom — write your own style guide",
-    ];
-
-    let style_idx = Select::new()
-        .with_prompt("  Communication style")
-        .items(&style_options)
-        .default(1)
+    let style_idx = prompts::select("Communication style")
+        .item(0, "Direct & concise — skip pleasantries, get to the point", "Direct")
+        .item(1, "Friendly & casual — warm, human, and helpful", "Friendly")
+        .item(2, "Professional & polished — calm, confident, and clear", "Professional")
+        .item(3, "Expressive & playful — more personality + natural emojis", "Expressive")
+        .item(4, "Technical & detailed — thorough explanations, code-first", "Technical")
+        .item(5, "Balanced — adapt to the situation", "Balanced")
+        .item(6, "Custom — write your own style guide", "Custom")
+        .initial_value(1)
         .interact()?;
 
     let communication_style = match style_idx {
@@ -1833,22 +1653,15 @@ fn setup_project_context() -> Result<ProjectContext> {
         3 => "Be expressive and playful when appropriate. Use relevant emojis naturally (0-2 max), and keep serious topics emoji-light.".to_string(),
         4 => "Be technical and detailed. Thorough explanations, code-first.".to_string(),
         5 => "Adapt to the situation. Default to warm and clear communication; be concise when needed, thorough when it matters.".to_string(),
-        _ => Input::new()
-            .with_prompt("  Custom communication style")
-            .default(
-                "Be warm, natural, and clear. Use occasional relevant emojis (1-2 max) and avoid robotic phrasing.".into(),
-            )
-            .interact_text()?,
+        _ => prompts::input::input("Custom communication style")
+            .placeholder("Be warm, natural, and clear. Use occasional relevant emojis (1-2 max) and avoid robotic phrasing.")
+            .interact()?,
     };
 
-    println!(
-        "  {} Context: {} | {} | {} | {}",
-        style("✓").green().bold(),
-        style(&user_name).green(),
-        style(&timezone).green(),
-        style(&agent_name).green(),
-        style(&communication_style).green().dim()
-    );
+    prompts::log::success(format!(
+        "Context: {} | {} | {} | {}",
+        user_name, timezone, agent_name, communication_style
+    ))?;
 
     Ok(ProjectContext {
         user_name,
@@ -1861,36 +1674,29 @@ fn setup_project_context() -> Result<ProjectContext> {
 // ── Step 6: Memory Configuration ───────────────────────────────
 
 fn setup_memory() -> Result<MemoryConfig> {
-    print_bullet("Choose how ZeroClaw stores and searches memories.");
-    print_bullet("You can always change this later in config.toml.");
-    println!();
+    prompts::log::info("Choose how ZeroClaw stores and searches memories.")?;
+    prompts::log::info("You can always change this later in config.toml.")?;
 
-    let options: Vec<&str> = selectable_memory_backends()
-        .iter()
-        .map(|backend| backend.label)
-        .collect();
-
-    let choice = Select::new()
-        .with_prompt("  Select memory backend")
-        .items(&options)
-        .default(0)
-        .interact()?;
+    let backends = selectable_memory_backends();
+    let mut select = prompts::select("Select memory backend");
+    for (idx, backend) in backends.iter().enumerate() {
+        select = select.item(idx, backend.label, backend.label);
+    }
+    let choice = select.interact()?;
 
     let backend = backend_key_from_choice(choice);
     let profile = memory_backend_profile(backend);
 
     let auto_save = profile.auto_save_default
-        && Confirm::new()
-            .with_prompt("  Auto-save conversations to memory?")
-            .default(true)
+        && prompts::toggle::toggle("Auto-save conversations to memory?")
+            .initial_value(true)
             .interact()?;
 
-    println!(
-        "  {} Memory: {} (auto-save: {})",
-        style("✓").green().bold(),
-        style(backend).green(),
+    prompts::log::success(format!(
+        "Memory: {} (auto-save: {})",
+        backend,
         if auto_save { "on" } else { "off" }
-    );
+    ))?;
 
     let mut config = memory_config_defaults_for_backend(backend);
     config.auto_save = auto_save;
@@ -1958,40 +1764,27 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
         TunnelConfig,
     };
 
-    print_bullet("A tunnel exposes your gateway to the internet securely.");
-    print_bullet("Skip this if you only use CLI or local channels.");
-    println!();
+    prompts::log::info("A tunnel exposes your gateway to the internet securely.")?;
+    prompts::log::info("Skip this if you only use CLI or local channels.")?;
 
-    let options = vec![
-        "Skip — local only (default)",
-        "Cloudflare Tunnel — Zero Trust, free tier",
-        "Tailscale — private tailnet or public Funnel",
-        "ngrok — instant public URLs",
-        "Custom — bring your own (bore, frp, ssh, etc.)",
-    ];
-
-    let choice = Select::new()
-        .with_prompt("  Select tunnel provider")
-        .items(&options)
-        .default(0)
+    let choice = prompts::select("Select tunnel provider")
+        .item(0, "Skip — local only (default)", "No tunnel")
+        .item(1, "Cloudflare Tunnel — Zero Trust, free tier", "Cloudflare")
+        .item(2, "Tailscale — private tailnet or public Funnel", "Tailscale")
+        .item(3, "ngrok — instant public URLs", "ngrok")
+        .item(4, "Custom — bring your own (bore, frp, ssh, etc.)", "Custom")
         .interact()?;
 
     let config = match choice {
         1 => {
-            println!();
-            print_bullet("Get your tunnel token from the Cloudflare Zero Trust dashboard.");
-            let tunnel_value: String = Input::new()
-                .with_prompt("  Cloudflare tunnel token")
-                .interact_text()?;
+            prompts::log::info("Get your tunnel token from the Cloudflare Zero Trust dashboard.")?;
+            let tunnel_value = prompts::input::input("Cloudflare tunnel token")
+                .interact()?;
             if tunnel_value.trim().is_empty() {
-                println!("  {} Skipped", style("→").dim());
+                prompts::log::info("Skipped")?;
                 TunnelConfig::default()
             } else {
-                println!(
-                    "  {} Tunnel: {}",
-                    style("✓").green().bold(),
-                    style("Cloudflare").green()
-                );
+                prompts::log::success("Tunnel: Cloudflare")?;
                 TunnelConfig {
                     provider: "cloudflare".into(),
                     cloudflare: Some(CloudflareTunnelConfig {
@@ -2002,22 +1795,18 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             }
         }
         2 => {
-            println!();
-            print_bullet("Tailscale must be installed and authenticated (tailscale up).");
-            let funnel = Confirm::new()
-                .with_prompt("  Use Funnel (public internet)? No = tailnet only")
-                .default(false)
+            prompts::log::info("Tailscale must be installed and authenticated (tailscale up).")?;
+            let funnel = prompts::toggle::toggle("Use Funnel (public internet)? No = tailnet only")
+                .initial_value(false)
                 .interact()?;
-            println!(
-                "  {} Tunnel: {} ({})",
-                style("✓").green().bold(),
-                style("Tailscale").green(),
+            prompts::log::success(format!(
+                "Tunnel: Tailscale ({})",
                 if funnel {
                     "Funnel — public"
                 } else {
                     "Serve — tailnet only"
                 }
-            );
+            ))?;
             TunnelConfig {
                 provider: "tailscale".into(),
                 tailscale: Some(TailscaleTunnelConfig {
@@ -2028,26 +1817,19 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             }
         }
         3 => {
-            println!();
-            print_bullet(
+            prompts::log::info(
                 "Get your auth token at https://dashboard.ngrok.com/get-started/your-authtoken",
-            );
-            let auth_token: String = Input::new()
-                .with_prompt("  ngrok auth token")
-                .interact_text()?;
+            )?;
+            let auth_token = prompts::input::input("ngrok auth token")
+                .interact()?;
             if auth_token.trim().is_empty() {
-                println!("  {} Skipped", style("→").dim());
+                prompts::log::info("Skipped")?;
                 TunnelConfig::default()
             } else {
-                let domain: String = Input::new()
-                    .with_prompt("  Custom domain (optional, Enter to skip)")
-                    .allow_empty(true)
-                    .interact_text()?;
-                println!(
-                    "  {} Tunnel: {}",
-                    style("✓").green().bold(),
-                    style("ngrok").green()
-                );
+                let domain = prompts::input::input("Custom domain (optional, Enter to skip)")
+                    .placeholder("")
+                    .interact()?;
+                prompts::log::success("Tunnel: ngrok")?;
                 TunnelConfig {
                     provider: "ngrok".into(),
                     ngrok: Some(NgrokTunnelConfig {
@@ -2063,23 +1845,16 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             }
         }
         4 => {
-            println!();
-            print_bullet("Enter the command to start your tunnel.");
-            print_bullet("Use {port} and {host} as placeholders.");
-            print_bullet("Example: bore local {port} --to bore.pub");
-            let cmd: String = Input::new()
-                .with_prompt("  Start command")
-                .interact_text()?;
+            prompts::log::info("Enter the command to start your tunnel.")?;
+            prompts::log::info("Use {port} and {host} as placeholders.")?;
+            prompts::log::info("Example: bore local {port} --to bore.pub")?;
+            let cmd = prompts::input::input("Start command")
+                .interact()?;
             if cmd.trim().is_empty() {
-                println!("  {} Skipped", style("→").dim());
+                prompts::log::info("Skipped")?;
                 TunnelConfig::default()
             } else {
-                println!(
-                    "  {} Tunnel: {} ({})",
-                    style("✓").green().bold(),
-                    style("Custom").green(),
-                    style(&cmd).dim()
-                );
+                prompts::log::success(format!("Tunnel: Custom ({})", cmd))?;
                 TunnelConfig {
                     provider: "custom".into(),
                     custom: Some(CustomTunnelConfig {
@@ -2092,11 +1867,7 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             }
         }
         _ => {
-            println!(
-                "  {} Tunnel: {}",
-                style("✓").green().bold(),
-                style("none (local only)").dim()
-            );
+            prompts::log::info("Tunnel: none (local only)")?;
             TunnelConfig::default()
         }
     };
@@ -2352,23 +2123,15 @@ async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Resul
         }
     }
 
-    println!(
-        "  {} Created {} files, skipped {} existing | {} subdirectories",
-        style("✓").green().bold(),
-        style(created).green(),
-        style(skipped).dim(),
-        style(subdirs.len()).green()
-    );
+    prompts::log::success(format!(
+        "Created {} files, skipped {} existing | {} subdirectories",
+        created, skipped, subdirs.len()
+    ))?;
 
-    // Show workspace tree
-    println!();
-    println!("  {}", style("Workspace layout:").dim());
-    println!(
-        "  {}",
-        style(format!("  {}/", workspace_dir.display())).dim()
-    );
+    prompts::log::info("Workspace layout:")?;
+    prompts::log::info(format!("  {}/", workspace_dir.display()))?;
     for dir in &subdirs {
-        println!("  {}", style(format!("  ├── {dir}/")).dim());
+        prompts::log::info(format!("  ├── {dir}/"))?;
     }
     for (i, (filename, _)) in files.iter().enumerate() {
         let prefix = if i == files.len() - 1 {
@@ -2376,7 +2139,7 @@ async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Resul
         } else {
             "├──"
         };
-        println!("  {}", style(format!("  {prefix} {filename}")).dim());
+        prompts::log::info(format!("  {prefix} {filename}"))?;
     }
 
     Ok(())
@@ -2385,51 +2148,28 @@ async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Resul
 // ── Final summary ────────────────────────────────────────────────
 
 #[allow(clippy::too_many_lines)]
-fn print_summary(config: &Config) {
+fn print_summary(config: &Config) -> Result<()> {
     let has_channels = has_launchable_channels(&config.channels_config);
 
-    println!();
-    println!(
-        "  {}",
-        style("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").cyan()
-    );
-    println!(
-        "  {}  {}",
-        style("⚡").cyan(),
-        style("ZeroClaw is ready!").white().bold()
-    );
-    println!(
-        "  {}",
-        style("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").cyan()
-    );
-    println!();
+    prompts::outro("⚡ ZeroClaw is ready!")?;
 
-    println!("  {}", style("Configuration saved to:").dim());
-    println!("    {}", style(config.config_path.display()).green());
-    println!();
+    prompts::log::info(format!("Configuration saved to: {}", config.config_path.display()))?;
 
-    println!("  {}", style("Quick summary:").white().bold());
-    println!(
-        "    {} Provider:      {}",
-        style("🤖").cyan(),
+    prompts::log::step("Quick summary:")?;
+    prompts::log::info(format!(
+        "🤖 Provider:      {}",
         config.default_provider.as_deref().unwrap_or("openrouter")
-    );
-    println!(
-        "    {} Model:         {}",
-        style("🧠").cyan(),
+    ))?;
+    prompts::log::info(format!(
+        "🧠 Model:         {}",
         config.default_model.as_deref().unwrap_or("(default)")
-    );
-    println!(
-        "    {} Autonomy:      {:?}",
-        style("🛡️").cyan(),
-        config.autonomy.level
-    );
-    println!(
-        "    {} Memory:        {} (auto-save: {})",
-        style("🧠").cyan(),
+    ))?;
+    prompts::log::info(format!("🛡️ Autonomy:      {:?}", config.autonomy.level))?;
+    prompts::log::info(format!(
+        "🧠 Memory:        {} (auto-save: {})",
         config.memory.backend,
         if config.memory.auto_save { "on" } else { "off" }
-    );
+    ))?;
 
     // Channels summary
     let channels = config.channels_config.channels();
@@ -2438,184 +2178,124 @@ fn print_summary(config: &Config) {
         .filter_map(|(channel, ok)| ok.then_some(channel.name()));
     let channels: Vec<_> = std::iter::once("Cli").chain(channels).collect();
 
-    println!(
-        "    {} Channels:      {}",
-        style("📡").cyan(),
-        channels.join(", ")
-    );
+    prompts::log::info(format!("📡 Channels:      {}", channels.join(", ")))?;
 
-    println!(
-        "    {} API Key:       {}",
-        style("🔑").cyan(),
+    prompts::log::info(format!(
+        "🔑 API Key:       {}",
         if config.api_key.is_some() {
-            style("configured").green().to_string()
+            "configured"
         } else {
-            style("not set (set via env var or config)")
-                .yellow()
-                .to_string()
+            "not set (set via env var or config)"
         }
-    );
+    ))?;
 
     // Tunnel
-    println!(
-        "    {} Tunnel:        {}",
-        style("🌐").cyan(),
+    prompts::log::info(format!(
+        "🌐 Tunnel:        {}",
         if config.tunnel.provider == "none" || config.tunnel.provider.is_empty() {
             "none (local only)".to_string()
         } else {
             config.tunnel.provider.clone()
         }
-    );
+    ))?;
 
     // Composio
-    println!(
-        "    {} Composio:      {}",
-        style("🔗").cyan(),
+    prompts::log::info(format!(
+        "🔗 Composio:      {}",
         if config.composio.enabled {
-            style("enabled (1000+ OAuth apps)").green().to_string()
+            "enabled (1000+ OAuth apps)"
         } else {
-            "disabled (sovereign mode)".to_string()
+            "disabled (sovereign mode)"
         }
-    );
+    ))?;
 
     // Secrets
-    println!("    {} Secrets:       configured", style("🔒").cyan());
+    prompts::log::info("🔒 Secrets:       configured")?;
 
     // Gateway
-    println!(
-        "    {} Gateway:       {}",
-        style("🚪").cyan(),
+    prompts::log::info(format!(
+        "🚪 Gateway:       {}",
         if config.gateway.require_pairing {
             "pairing required (secure)"
         } else {
             "pairing disabled"
         }
-    );
+    ))?;
 
     // Hardware
-    println!(
-        "    {} Hardware:      {}",
-        style("🔌").cyan(),
+    prompts::log::info(format!(
+        "🔌 Hardware:      {}",
         if config.hardware.enabled {
             let mode = config.hardware.transport_mode();
             match mode {
-                hardware::HardwareTransport::Native => {
-                    style("Native GPIO (direct)").green().to_string()
-                }
+                hardware::HardwareTransport::Native => "Native GPIO (direct)".to_string(),
                 hardware::HardwareTransport::Serial => format!(
-                    "{}",
-                    style(format!(
-                        "Serial → {} @ {} baud",
-                        config.hardware.serial_port.as_deref().unwrap_or("?"),
-                        config.hardware.baud_rate
-                    ))
-                    .green()
+                    "Serial → {} @ {} baud",
+                    config.hardware.serial_port.as_deref().unwrap_or("?"),
+                    config.hardware.baud_rate
                 ),
                 hardware::HardwareTransport::Probe => format!(
-                    "{}",
-                    style(format!(
-                        "Probe → {}",
-                        config.hardware.probe_target.as_deref().unwrap_or("?")
-                    ))
-                    .green()
+                    "Probe → {}",
+                    config.hardware.probe_target.as_deref().unwrap_or("?")
                 ),
                 hardware::HardwareTransport::None => "disabled (software only)".to_string(),
             }
         } else {
             "disabled (software only)".to_string()
         }
-    );
+    ))?;
 
-    println!();
-    println!("  {}", style("Next steps:").white().bold());
-    println!();
+    prompts::log::step("Next steps:")?;
 
     let mut step = 1u8;
 
     let provider = config.default_provider.as_deref().unwrap_or("openrouter");
     if config.api_key.is_none() && !provider_supports_keyless_local_usage(provider) {
         if provider == "openai-codex" {
-            println!(
-                "    {} Authenticate OpenAI Codex:",
-                style(format!("{step}.")).cyan().bold()
-            );
-            println!(
-                "       {}",
-                style("zeroclaw auth login --provider openai-codex --device-code").yellow()
-            );
+            prompts::log::info(format!(
+                "{}. Authenticate OpenAI Codex:",
+                step
+            ))?;
+            prompts::log::info("   zeroclaw auth login --provider openai-codex --device-code")?;
         } else if provider == "anthropic" {
-            println!(
-                "    {} Configure Anthropic auth:",
-                style(format!("{step}.")).cyan().bold()
-            );
-            println!(
-                "       {}",
-                style("export ANTHROPIC_API_KEY=\"sk-ant-...\"").yellow()
-            );
-            println!(
-                "       {}",
-                style(
-                    "or: zeroclaw auth paste-token --provider anthropic --auth-kind authorization"
-                )
-                .yellow()
-            );
+            prompts::log::info(format!(
+                "{}. Configure Anthropic auth:",
+                step
+            ))?;
+            prompts::log::info("   export ANTHROPIC_API_KEY=\"sk-ant-...\"")?;
+            prompts::log::info(
+                "   or: zeroclaw auth paste-token --provider anthropic --auth-kind authorization",
+            )?;
         } else {
             let env_var = provider_env_var(provider);
-            println!(
-                "    {} Set your API key:",
-                style(format!("{step}.")).cyan().bold()
-            );
-            println!(
-                "       {}",
-                style(format!("export {env_var}=\"sk-...\"")).yellow()
-            );
+            prompts::log::info(format!("{}. Set your API key:", step))?;
+            prompts::log::info(format!("   export {env_var}=\"sk-...\""))?;
         }
-        println!();
         step += 1;
     }
 
     // If channels are configured, show channel start as the primary next step
     if has_channels {
-        println!(
-            "    {} {} (connected channels → AI → reply):",
-            style(format!("{step}.")).cyan().bold(),
-            style("Launch your channels").white().bold()
-        );
-        println!("       {}", style("zeroclaw channel start").yellow());
-        println!();
+        prompts::log::info(format!(
+            "{}. Launch your channels (connected channels → AI → reply):",
+            step
+        ))?;
+        prompts::log::info("   zeroclaw channel start")?;
         step += 1;
     }
 
-    println!(
-        "    {} Send a quick message:",
-        style(format!("{step}.")).cyan().bold()
-    );
-    println!(
-        "       {}",
-        style("zeroclaw agent -m \"Hello, ZeroClaw!\"").yellow()
-    );
-    println!();
+    prompts::log::info(format!("{}. Send a quick message:", step))?;
+    prompts::log::info("   zeroclaw agent -m \"Hello, ZeroClaw!\"")?;
     step += 1;
 
-    println!(
-        "    {} Start interactive CLI mode:",
-        style(format!("{step}.")).cyan().bold()
-    );
-    println!("       {}", style("zeroclaw agent").yellow());
-    println!();
+    prompts::log::info(format!("{}. Start interactive CLI mode:", step))?;
+    prompts::log::info("   zeroclaw agent")?;
     step += 1;
 
-    println!(
-        "    {} Check full status:",
-        style(format!("{step}.")).cyan().bold()
-    );
-    println!("       {}", style("zeroclaw status").yellow());
+    prompts::log::info(format!("{}. Check full status:", step))?;
+    prompts::log::info("   zeroclaw status")?;
 
-    println!();
-    println!(
-        "  {} {}",
-        style("⚡").cyan(),
-        style("Happy hacking! 🦀").white().bold()
-    );
-    println!();
+    prompts::log::success("⚡ Happy hacking! 🦀")?;
+
+    Ok(())
 }

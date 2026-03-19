@@ -1,4 +1,4 @@
-So I'm forking zero claw to beat openclaw. Now I already created some tool that I can integrate in the fork zero claw project, like DX serializer, which saves more than 70% of data on tool calling against JSON, like the tool protocol. Now I also have RLM, which saves 90% of tokens as shown in MIT research.                                                    I will integrate this into our DX zero claw fork and beat open claw. Now even if zero claw is slower than the open claw go version, I have to optimize it so it will be the fastest option and add my own features to make DX and beat everyone else.
+So I'm forking zero claw to beat openclaw. Now I already created some tool that I can integrate in the fork zero claw project, like DX serializer, which saves more than 70% of data on tool calling against JSON, like the tool protocol. Now I also have RLM, which saves 90% of tokens as shown in MIT research. I will integrate this into our DX zero claw fork and beat open claw. Now even if zero claw is slower than the open claw go version, I have to optimize it so it will be the fastest option and add my own features to make DX and beat everyone else.
 
 Please look at our root onboard folder. It's a separate UI framework that I created to use on this big project.
 Now about our root src folder, big project, please look for all of the places that use a UI and use our onboarding theming logic, rainbow colors, and effects. Ask me where to put what so that for clarification questions so that we can make our whole project beautiful like the onboard project, tui UI.
@@ -11,4 +11,21 @@ As you can see the wizard file is used and yet it is so bad UI plus bad coding p
 
 Now, now what do you think? Should we first split the whole file into smaller files then update it to use our UI framework or will we use our UI framework and then split the huge file as we just have to use our UI but everything else should be same
 
-Now as we split the monster wizard.rs files into smaller files, check the root onboarding folder; that is our UI framework. Use that in our main onboarding at the src folder and update the current dialog with our beautiful onboarding components from our root onboarding project. Instead of the zero claw logo and other useless UI, use our onboarding UI throughout the whole onboarding. 
+Now as we split the monster wizard.rs files into smaller files, check the root onboarding folder; that is our UI framework. Use that in our main onboarding at the src folder and update the current dialog with our beautiful onboarding components from our root onboarding project. Instead of the zero claw logo and other useless UI, use our onboarding UI throughout the whole onboarding.
+
+## CRITICAL RULES
+
+### ❌ NEVER CREATE STRAY FILES
+- **DO NOT** create summary markdown files (SUMMARY.md, WORK_SUMMARY.md, ONBOARD_UI_INTEGRATION.md, etc.)
+- **DO NOT** create documentation files unless explicitly requested
+- **DO NOT** create script files, helper files, notes files, or todo files
+- **DO NOT** create any files that are not part of the actual codebase
+- **ONLY CREATE**: Source code (.rs, .ts, .py), required config files (.toml, .json), or explicitly requested files
+- **VIOLATION = AI SLOP**: Creating unnecessary files is noise, clutter, and waste
+
+### ✅ UI FRAMEWORK USAGE
+- Use the `/onboard` UI framework throughout the project
+- Replace ALL dialoguer prompts with onboard prompts
+- Use rainbow effects, splash screens, and styled sections
+- Follow the professional UI patterns from onboard
+- NO plain println! or basic console output - use onboard components
