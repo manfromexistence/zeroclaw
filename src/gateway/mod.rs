@@ -12,6 +12,7 @@ pub mod api_pairing;
 #[cfg(feature = "plugins-wasm")]
 pub mod api_plugins;
 pub mod nodes;
+pub mod qr;
 pub mod sse;
 pub mod static_files;
 pub mod ws;
@@ -340,6 +341,10 @@ pub struct AppState {
     pub device_registry: Option<Arc<api_pairing::DeviceRegistry>>,
     /// Pending pairing request store
     pub pending_pairings: Option<Arc<api_pairing::PairingStore>>,
+    /// Public tunnel URL (if tunnel is active)
+    pub tunnel_url: Option<Arc<str>>,
+    /// Local gateway address for fallback
+    pub local_addr: Arc<str>,
 }
 
 /// Run the HTTP gateway using axum with proper HTTP/1.1 compliance.
@@ -632,10 +637,23 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
     println!("  🌐 Web Dashboard: http://{display_addr}/");
     if let Some(code) = pairing.pairing_code() {
         println!();
-        println!("  🔐 PAIRING REQUIRED — use this one-time code:");
-        println!("     ┌──────────────┐");
-        println!("     │  {code}  │");
-        println!("     └──────────────┘");
+        println!("  🔐 PAIRING REQUIRED — Scan QR code or use code:");
+        println!();
+        
+        // Generate and display QR code
+        let fallback_url = format!("ws://{}", display_addr);
+        let gateway_url = tunnel_url.as_deref().unwrap_or(&fallback_url);
+        
+        if let Ok(qr) = qr::generate_pairing_qr(&code, gateway_url) {
+            // Display QR code with border
+            for line in qr.lines() {
+                println!("     {}", line);
+            }
+            println!();
+        }
+        
+        println!("     Manual code: {code}");
+        println!("     Gateway URL: {gateway_url}");
         println!();
     } else if pairing.require_pairing() {
         println!("  🔒 Pairing: ACTIVE (bearer token required)");
@@ -733,6 +751,8 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         session_backend,
         device_registry,
         pending_pairings,
+        tunnel_url: tunnel_url.clone().map(Arc::from),
+        local_addr: Arc::from(display_addr.clone()),
     };
 
     // Config PUT needs larger body limit (1MB)
@@ -784,6 +804,7 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         .route("/api/sessions/{id}", delete(api::handle_api_session_delete))
         // ── Pairing + Device management API ──
         .route("/api/pairing/initiate", post(api_pairing::initiate_pairing))
+        .route("/api/pairing/qr.png", get(api_pairing::get_pairing_qr_png))
         .route("/api/pair", post(api_pairing::submit_pairing_enhanced))
         .route("/api/devices", get(api_pairing::list_devices))
         .route("/api/devices/{id}", delete(api_pairing::revoke_device))
@@ -1905,6 +1926,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let response = handle_metrics(State(state)).await.into_response();
@@ -1960,6 +1983,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let response = handle_metrics(State(state)).await.into_response();
@@ -2339,6 +2364,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let mut headers = HeaderMap::new();
@@ -2408,6 +2435,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let headers = HeaderMap::new();
@@ -2489,6 +2518,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let response = handle_webhook(
@@ -2542,6 +2573,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let mut headers = HeaderMap::new();
@@ -2600,6 +2633,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let mut headers = HeaderMap::new();
@@ -2663,6 +2698,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let response = Box::pin(handle_nextcloud_talk_webhook(
@@ -2722,6 +2759,8 @@ mod tests {
             session_backend: None,
             device_registry: None,
             pending_pairings: None,
+            tunnel_url: None,
+            local_addr: Arc::from("127.0.0.1:42617"),
         };
 
         let mut headers = HeaderMap::new();

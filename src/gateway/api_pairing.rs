@@ -244,11 +244,29 @@ pub async fn initiate_pairing(
     }
 
     match state.pairing.generate_new_pairing_code() {
-        Some(code) => Json(serde_json::json!({
-            "pairing_code": code,
-            "message": "New pairing code generated"
-        }))
-        .into_response(),
+        Some(code) => {
+            // Get gateway URL from tunnel or use local address
+            let gateway_url = state
+                .tunnel_url
+                .as_deref()
+                .unwrap_or_else(|| state.local_addr.as_ref());
+
+            // Generate QR codes in multiple formats
+            let qr_ascii = super::qr::generate_pairing_qr(&code, gateway_url)
+                .unwrap_or_else(|e| format!("QR generation failed: {}", e));
+
+            let qr_data_url = super::qr::generate_pairing_qr_data_url(&code, gateway_url).ok();
+
+            Json(serde_json::json!({
+                "pairing_code": code,
+                "qr_code_ascii": qr_ascii,
+                "qr_code_url": qr_data_url,
+                "gateway_url": gateway_url,
+                "expires_in": 300,
+                "message": "Scan QR code or enter pairing code manually"
+            }))
+            .into_response()
+        }
         None => (
             StatusCode::SERVICE_UNAVAILABLE,
             "Pairing is disabled or not available",
@@ -377,6 +395,43 @@ pub async fn rotate_token(
         None => (
             StatusCode::SERVICE_UNAVAILABLE,
             "Cannot generate new pairing code",
+        )
+            .into_response(),
+    }
+}
+
+/// GET /api/pairing/qr.png — get QR code as PNG image
+pub async fn get_pairing_qr_png(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> impl IntoResponse {
+    if let Err(e) = require_auth(&state, &headers) {
+        return e.into_response();
+    }
+
+    match state.pairing.pairing_code() {
+        Some(code) => {
+            let gateway_url = state
+                .tunnel_url
+                .as_deref()
+                .unwrap_or_else(|| state.local_addr.as_ref());
+
+            match super::qr::generate_pairing_qr_png(&code, gateway_url) {
+                Ok(png_bytes) => (
+                    [(header::CONTENT_TYPE, "image/png")],
+                    png_bytes,
+                )
+                    .into_response(),
+                Err(e) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Failed to generate QR code: {}", e),
+                )
+                    .into_response(),
+            }
+        }
+        None => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "No active pairing code",
         )
             .into_response(),
     }

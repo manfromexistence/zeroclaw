@@ -173,6 +173,7 @@ opentelemetry-otlp = { version = "0.31", default-features = false, features = ["
 tokio-serial = { version = "5", default-features = false, optional = true }
 ctrlc = "3.5.2"
 once_cell = "1.21.4"
+qrcode = "0.14"
 
 # USB device enumeration (hardware discovery) — only on platforms nusb supports
 # (Linux, macOS, Windows). Android/Termux uses target_os="android" and is excluded.
