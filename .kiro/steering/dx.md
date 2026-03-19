@@ -14,6 +14,16 @@ inclusion: always
 
 ---
 
+## CRITICAL RULES
+
+### ❌ NEVER CREATE STRAY FILES
+- **DO NOT** create summary markdown files (SUMMARY.md, WORK_SUMMARY.md, ONBOARD_UI_INTEGRATION.md, etc.)
+- **DO NOT** create documentation files unless explicitly requested
+- **DO NOT** create script files, helper files, notes files, or todo files
+- **DO NOT** create any files that are not part of the actual codebase
+- **ONLY CREATE**: Source code (.rs, .ts, .py), required config files (.toml, .json), or explicitly requested files
+- **VIOLATION = AI SLOP**: Creating unnecessary files is noise, clutter, and waste
+
 ## 0. Technology & Date Awareness
 
 ### 0.1 — Always Use Latest Technologies
