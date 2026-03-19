@@ -4,7 +4,7 @@
 //! from various providers.
 
 use anyhow::{bail, Context, Result};
-use onboard::prompts;
+use crate::ui::prompts;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;

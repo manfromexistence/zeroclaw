@@ -4,8 +4,8 @@
 //! (Telegram, Discord, Slack, Matrix, etc.)
 
 use anyhow::Result;
-use onboard::prompts;
-use onboard::prompts::PromptInteraction;
+use crate::ui::prompts;
+use crate::ui::prompts::PromptInteraction;
 use serde_json::Value;
 use std::time::Duration;
 

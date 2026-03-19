@@ -35,13 +35,13 @@
 
 use anyhow::{bail, Context, Result};
 use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
-use onboard::prompts::PromptInteraction;
-use onboard::{effects::RainbowEffect, splash};
 use serde::{Deserialize, Serialize};
 use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use tracing::{info, warn};
 use tracing_subscriber::{fmt, EnvFilter};
+use zeroclaw::ui::{effects::RainbowEffect, splash};
+use zeroclaw::ui::prompts::PromptInteraction;
 
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
@@ -1469,7 +1469,7 @@ fn handle_estop_command(
                     );
                 }
                 if otp_code.is_none() {
-                    let entered = onboard::prompts::password::password("Enter OTP code").interact()?;
+                    let entered = zeroclaw::ui::prompts::password::password("Enter OTP code").interact()?;
                     otp_code = Some(entered);
                 }
 
@@ -1815,12 +1815,12 @@ fn clear_pending_oauth_login(config: &Config, provider: &str) {
 }
 
 fn read_auth_input(prompt: &str) -> Result<String> {
-    let input = onboard::prompts::password::password(prompt).interact()?;
+    let input = zeroclaw::ui::prompts::password::password(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 
 fn read_plain_input(prompt: &str) -> Result<String> {
-    let input = onboard::prompts::input::input(prompt).interact()?;
+    let input = zeroclaw::ui::prompts::input::input(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 

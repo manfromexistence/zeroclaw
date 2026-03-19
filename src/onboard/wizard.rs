@@ -17,9 +17,9 @@ use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
-// Import onboard UI framework
-use onboard::{effects::RainbowEffect, prompts, splash};
-use onboard::prompts::PromptInteraction;
+// Import UI framework
+use crate::ui::{effects::RainbowEffect, prompts, splash};
+use crate::ui::prompts::PromptInteraction;
 
 // ── Project context collected during wizard ──────────────────────
 

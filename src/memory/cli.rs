@@ -4,11 +4,11 @@ use super::{
     MemoryBackendKind,
 };
 use crate::config::Config;
+use crate::ui::prompts::PromptInteraction;
 #[cfg(feature = "memory-postgres")]
 use anyhow::Context;
 use anyhow::{bail, Result};
 use console::style;
-use onboard::prompts::PromptInteraction;
 
 /// Handle `zeroclaw memory <subcommand>` CLI commands.
 pub async fn handle_command(command: crate::MemoryCommands, config: &Config) -> Result<()> {
@@ -225,7 +225,7 @@ async fn handle_clear(
     println!("Found {} entries in '{scope}'.", entries.len());
 
     if !yes {
-        let confirmed = onboard::prompts::confirm(&format!("  Delete {} entries?", entries.len()))
+        let confirmed = crate::ui::prompts::confirm(&format!("  Delete {} entries?", entries.len()))
             .initial_value(false)
             .interact()?;
         if !confirmed {
@@ -280,7 +280,7 @@ async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> 
     };
 
     if !yes {
-        let confirmed = onboard::prompts::confirm(&format!("  Delete '{target}'?"))
+        let confirmed = crate::ui::prompts::confirm(&format!("  Delete '{target}'?"))
             .initial_value(false)
             .interact()?;
         if !confirmed {

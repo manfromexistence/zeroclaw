@@ -3,8 +3,8 @@
 //! This module handles interactive provider selection and API key configuration.
 
 use anyhow::{Context, Result};
-use onboard::prompts;
-use onboard::prompts::PromptInteraction;
+use crate::ui::prompts;
+use crate::ui::prompts::PromptInteraction;
 use std::path::Path;
 
 // Import from wizard.rs - the provider helper functions

@@ -1,11 +1,11 @@
 [workspace]
-members = [".", "crates/robot-kit", "onboard"]
+members = [".", "crates/robot-kit"]
 resolver = "2"
 
 [package]
 name = "zeroclawlabs"
 version = "0.5.0"
-edition = "2021"
+edition = "2024"
 authors = ["theonlyhennygod"]
 license = "MIT OR Apache-2.0"
 description = "Zero overhead. Zero compromise. 100% Rust. The fastest, smallest AI assistant."
@@ -95,7 +95,7 @@ sha2 = "0.10"
 hex = "0.4"
 
 # CSPRNG for secure token generation
-rand = "0.10"
+rand = { version = "0.8", features = ["std_rng"] }
 
 # Portable atomic fallbacks for targets without native 64-bit atomics
 portable-atomic = "1"
@@ -125,6 +125,10 @@ cron = "0.15"
 # Interactive CLI prompts
 dialoguer = { version = "0.12", features = ["fuzzy-select"] }
 console = "0.16"
+owo-colors = { version = "4.0", features = ["supports-colors"] }
+terminal_size = "0.4.3"
+textwrap = "0.16"
+zeroize = { version = "1.8", features = ["derive"] }
 
 # Hardware discovery (device path globbing)
 glob = "0.3"
