@@ -1,0 +1,81 @@
+# Onboard Theme Configuration
+# Customize the colors and symbols used throughout the onboarding experience
+
+[colors]
+# Primary color for main UI elements (white/neutral)
+primary = "#FFFFFF"
+
+# Success color for completed actions (green)
+success = "#00FF00"
+
+# Warning color for cautions (yellow)
+warning = "#FFFF00"
+
+# Error color for failures (red)
+error = "#FF0000"
+
+# Dim color for borders and secondary elements (gray)
+dim = "#808080"
+
+[symbols]
+# Step indicators
+step_active = ">"
+step_cancel = "x"
+step_error = "!"
+step_submit = ">"
+
+# Border elements
+bar_start = "╭"
+bar = "│"
+bar_end = "╰"
+bar_h = "─"
+
+# Corners
+corner_top_right = "╮"
+corner_bottom_right = "╯"
+connect_left = "├"
+
+# Box drawing
+box_top_left = "╭"
+box_top_right = "╮"
+box_bottom_left = "╰"
+box_bottom_right = "╯"
+box_horizontal = "─"
+box_vertical = "│"
+box_left_t = "├"
+box_right_t = "╯"
+
+# Selection indicators
+radio_active = "(*)"
+radio_inactive = "( )"
+checkbox_active = "[ ]"
+checkbox_selected = "[x]"
+checkbox_inactive = "[ ]"
+
+# Password masking character
+password_mask = "*"
+
+# UI symbols (no emojis)
+checkmark = "√"
+info = "i"
+arrow_right = ">"
+
+# Slider symbols
+slider_filled = "="
+slider_empty = "-"
+slider_handle = "O"
+
+[rainbow]
+# Enable rainbow effects for special symbols
+enabled = true
+
+# Rainbow animation speed (higher = faster)
+speed = 1.0
+
+# Usage Instructions:
+# 
+# 1. Place this file in the same directory as your onboard binary
+# 2. Customize colors using hex color codes (#RRGGBB format)
+# 3. Customize symbols using any Unicode characters (emojis removed by default)
+# 4. The theme will be automatically loaded when the application starts
+# 5. If this file is missing, default theme values will be used
