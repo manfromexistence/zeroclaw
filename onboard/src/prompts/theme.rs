@@ -259,7 +259,7 @@ fn default_info() -> String {
     "♠".to_string()
 }
 fn default_arrow_right() -> String {
-    ">".to_string()
+    "♦".to_string()
 }
 fn default_slider_filled() -> String {
     "=".to_string()

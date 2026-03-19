@@ -817,6 +817,35 @@ async fn main() -> Result<()> {
         memory,
     } = &cli.command
     {
+        // Set up Ctrl+C handler to show train animation on exit (only for interactive onboard)
+        let is_tty = std::io::stdin().is_terminal() && std::io::stdout().is_terminal();
+        let has_provider_flags =
+            api_key.is_some() || provider.is_some() || model.is_some() || memory.is_some();
+        
+        if is_tty && !has_provider_flags {
+            ctrlc::set_handler(|| {
+                use onboard::effects::RainbowEffect;
+                use onboard::splash::render_train_animation;
+                use std::thread;
+                use std::time::Duration;
+                
+                let rainbow = RainbowEffect::new();
+                println!();
+                println!("🚂 Exiting ZeroClaw... Here's a farewell train!");
+                println!();
+
+                print!("\x1B[2J\x1B[H"); // Clear screen
+                for frame in 0..15 {
+                    print!("\x1B[H"); // Move cursor to top
+                    let _ = render_train_animation(&rainbow, frame);
+                    thread::sleep(Duration::from_millis(200));
+                }
+
+                std::process::exit(0);
+            })
+            .expect("Error setting Ctrl-C handler");
+        }
+
         let force = *force;
         let reinit = *reinit;
         let channels_only = *channels_only;
@@ -880,9 +909,6 @@ async fn main() -> Result<()> {
 
         // Auto-detect: run the interactive wizard when in a TTY with no
         // provider flags, quick setup otherwise (scriptable path).
-        let has_provider_flags =
-            api_key.is_some() || provider.is_some() || model.is_some() || memory.is_some();
-        let is_tty = std::io::stdin().is_terminal() && std::io::stdout().is_terminal();
 
         let config = if channels_only {
             Box::pin(onboard::run_channels_repair_wizard()).await
