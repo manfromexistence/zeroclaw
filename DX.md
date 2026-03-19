@@ -12,3 +12,5 @@ As you can see the wizard file is used and yet it is so bad UI plus bad coding p
 Now, now what do you think? Should we first split the whole file into smaller files then update it to use our UI framework or will we use our UI framework and then split the huge file as we just have to use our UI but everything else should be same
 
 Now as we split the monster wizard.rs files into smaller files, check the root onboarding folder; that is our UI framework. Use that in our main onboarding at the src folder and update the current dialog with our beautiful onboarding components from our root onboarding project. Instead of the zero claw logo and other useless UI, use our onboarding UI throughout the whole onboarding.
+
+Now look for our main SRC folder and check for any other places that we are using bad UI so that we have to update it with our on-board UI framework. 
