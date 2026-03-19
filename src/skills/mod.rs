@@ -163,11 +163,10 @@ fn load_skills_from_directory(skills_dir: &Path) -> Vec<Skill> {
             if let Ok(skill) = load_skill_toml(&manifest_path) {
                 skills.push(skill);
             }
-        } else if md_path.exists() {
-            if let Ok(skill) = load_skill_md(&md_path, &path) {
+        } else if md_path.exists()
+            && let Ok(skill) = load_skill_md(&md_path, &path) {
                 skills.push(skill);
             }
-        }
     }
 
     skills
@@ -226,11 +225,10 @@ fn load_open_skills_from_directory(skills_dir: &Path) -> Vec<Skill> {
             if let Ok(skill) = load_skill_toml(&manifest_path) {
                 skills.push(finalize_open_skill(skill));
             }
-        } else if md_path.exists() {
-            if let Ok(skill) = load_open_skill_md(&md_path) {
+        } else if md_path.exists()
+            && let Ok(skill) = load_open_skill_md(&md_path) {
                 skills.push(skill);
             }
-        }
     }
 
     skills
@@ -397,15 +395,14 @@ fn ensure_open_skills_repo(
 }
 
 fn clone_open_skills_repo(repo_dir: &Path) -> bool {
-    if let Some(parent) = repo_dir.parent() {
-        if let Err(err) = std::fs::create_dir_all(parent) {
+    if let Some(parent) = repo_dir.parent()
+        && let Err(err) = std::fs::create_dir_all(parent) {
             tracing::warn!(
                 "failed to create open-skills parent directory {}: {err}",
                 parent.display()
             );
             return false;
         }
-    }
 
     let output = Command::new("git")
         .args(["clone", "--depth", "1", OPEN_SKILLS_REPO_URL])
@@ -563,11 +560,10 @@ struct ParsedSkillMarkdown {
 }
 
 fn parse_skill_markdown(content: &str) -> ParsedSkillMarkdown {
-    if let Some((frontmatter, body)) = split_skill_frontmatter(content) {
-        if let Ok(meta) = serde_yaml::from_str::<SkillMarkdownMeta>(&frontmatter) {
+    if let Some((frontmatter, body)) = split_skill_frontmatter(content)
+        && let Ok(meta) = serde_yaml::from_str::<SkillMarkdownMeta>(&frontmatter) {
             return ParsedSkillMarkdown { meta, body };
         }
-    }
 
     ParsedSkillMarkdown {
         meta: SkillMarkdownMeta::default(),
@@ -635,11 +631,10 @@ fn resolve_skill_location(skill: &Skill, workspace_dir: &Path) -> PathBuf {
 
 fn render_skill_location(skill: &Skill, workspace_dir: &Path, prefer_relative: bool) -> String {
     let location = resolve_skill_location(skill, workspace_dir);
-    if prefer_relative {
-        if let Ok(relative) = location.strip_prefix(workspace_dir) {
+    if prefer_relative
+        && let Ok(relative) = location.strip_prefix(workspace_dir) {
             return relative.display().to_string();
         }
-    }
     location.display().to_string()
 }
 
@@ -963,7 +958,7 @@ fn install_git_skill_source(source: &str, skills_path: &Path) -> Result<(PathBuf
 #[allow(clippy::too_many_lines)]
 pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Config) -> Result<()> {
     use crate::theme::{print_error, print_info, print_success};
-    
+
     let workspace_dir = &config.workspace_dir;
     match command {
         crate::SkillCommands::List => {
@@ -972,7 +967,9 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
                 print_info("No skills installed.");
                 print_info("");
                 print_info("  Create one: mkdir -p ~/.zeroclaw/workspace/skills/my-skill");
-                print_info("              echo '# My Skill' > ~/.zeroclaw/workspace/skills/my-skill/SKILL.md");
+                print_info(
+                    "              echo '# My Skill' > ~/.zeroclaw/workspace/skills/my-skill/SKILL.md",
+                );
                 print_info("");
                 print_info("  Or install: zeroclaw skills install <source>");
             } else {
@@ -981,9 +978,7 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
                 for skill in &skills {
                     print_info(format!(
                         "  {} v{} — {}",
-                        skill.name,
-                        skill.version,
-                        skill.description
+                        skill.name, skill.version, skill.description
                     ));
                     if !skill.tools.is_empty() {
                         print_info(format!(
@@ -1072,11 +1067,10 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
             let canonical_skills = skills_dir(workspace_dir)
                 .canonicalize()
                 .unwrap_or_else(|_| skills_dir(workspace_dir));
-            if let Ok(canonical_skill) = skill_path.canonicalize() {
-                if !canonical_skill.starts_with(&canonical_skills) {
+            if let Ok(canonical_skill) = skill_path.canonicalize()
+                && !canonical_skill.starts_with(&canonical_skills) {
                     anyhow::bail!("Skill path escapes skills directory: {name}");
                 }
-            }
 
             if !skill_path.exists() {
                 anyhow::bail!("Skill not found: {name}");
@@ -1109,7 +1103,7 @@ mod tests {
     impl EnvVarGuard {
         fn unset(key: &'static str) -> Self {
             let original = std::env::var(key).ok();
-            std::env::remove_var(key);
+            unsafe { std::env::remove_var(key) };
             Self { key, original }
         }
     }
@@ -1117,9 +1111,9 @@ mod tests {
     impl Drop for EnvVarGuard {
         fn drop(&mut self) {
             if let Some(value) = &self.original {
-                std::env::set_var(self.key, value);
+                unsafe { std::env::set_var(self.key, value) };
             } else {
-                std::env::remove_var(self.key);
+                unsafe { std::env::remove_var(self.key) };
             }
         }
     }

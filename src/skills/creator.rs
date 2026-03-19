@@ -49,11 +49,10 @@ impl SkillCreator {
         }
 
         // Deduplicate via embeddings when an embedding provider is available.
-        if let Some(provider) = embedding_provider {
-            if provider.name() != "none" && self.is_duplicate(task_description, provider).await? {
+        if let Some(provider) = embedding_provider
+            && provider.name() != "none" && self.is_duplicate(task_description, provider).await? {
                 return Ok(None);
             }
-        }
 
         let slug = Self::generate_slug(task_description);
         if !Self::validate_slug(&slug) {
@@ -292,8 +291,8 @@ pub fn extract_tool_calls_from_history(
         }
 
         // Try parsing as JSON (native tool_calls format).
-        if let Ok(value) = serde_json::from_str::<serde_json::Value>(&msg.content) {
-            if let Some(tool_calls) = value.get("tool_calls").and_then(|v| v.as_array()) {
+        if let Ok(value) = serde_json::from_str::<serde_json::Value>(&msg.content)
+            && let Some(tool_calls) = value.get("tool_calls").and_then(|v| v.as_array()) {
                 for call in tool_calls {
                     if let Some(function) = call.get("function") {
                         let name = function
@@ -312,7 +311,6 @@ pub fn extract_tool_calls_from_history(
                     }
                 }
             }
-        }
 
         // Also try XML tool call format: <tool_name>...</tool_name>
         // Simple extraction for `<shell>{"command":"..."}</shell>` style tags.
@@ -623,18 +621,22 @@ tags = ["auto-generated"]
         // High similarity provider -> should detect as duplicate.
         let provider = MockEmbeddingProvider::new(0.95);
         let creator = SkillCreator::new(dir.path().to_path_buf(), config.clone());
-        assert!(creator
-            .is_duplicate("Build the project", &provider)
-            .await
-            .unwrap());
+        assert!(
+            creator
+                .is_duplicate("Build the project", &provider)
+                .await
+                .unwrap()
+        );
 
         // Low similarity provider -> not a duplicate.
         let provider_low = MockEmbeddingProvider::new(0.3);
         let creator2 = SkillCreator::new(dir.path().to_path_buf(), config);
-        assert!(!creator2
-            .is_duplicate("Completely different task", &provider_low)
-            .await
-            .unwrap());
+        assert!(
+            !creator2
+                .is_duplicate("Completely different task", &provider_low)
+                .await
+                .unwrap()
+        );
     }
 
     // ── LRU eviction ─────────────────────────────────────────────

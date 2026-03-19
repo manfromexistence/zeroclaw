@@ -17,27 +17,27 @@ pub mod static_files;
 pub mod ws;
 
 use crate::channels::{
-    session_backend::SessionBackend, session_sqlite::SqliteSessionBackend, Channel, LinqChannel,
-    NextcloudTalkChannel, SendMessage, WatiChannel, WhatsAppChannel,
+    Channel, LinqChannel, NextcloudTalkChannel, SendMessage, WatiChannel, WhatsAppChannel,
+    session_backend::SessionBackend, session_sqlite::SqliteSessionBackend,
 };
 use crate::config::Config;
 use crate::cost::CostTracker;
 use crate::memory::{self, Memory, MemoryCategory};
 use crate::providers::{self, ChatMessage, Provider};
 use crate::runtime;
-use crate::security::pairing::{constant_time_eq, is_public_bind, PairingGuard};
 use crate::security::SecurityPolicy;
+use crate::security::pairing::{PairingGuard, constant_time_eq, is_public_bind};
 use crate::tools;
 use crate::tools::traits::ToolSpec;
 use crate::util::truncate_with_ellipsis;
 use anyhow::{Context, Result};
 use axum::{
+    Router,
     body::Bytes,
     extract::{ConnectInfo, Query, State},
-    http::{header, HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header},
     response::{IntoResponse, Json},
     routing::{delete, get, post, put},
-    Router,
 };
 use parking_lot::Mutex;
 use std::collections::HashMap;
@@ -279,11 +279,10 @@ fn client_key_from_request(
     headers: &HeaderMap,
     trust_forwarded_headers: bool,
 ) -> String {
-    if trust_forwarded_headers {
-        if let Some(ip) = forwarded_client_ip(headers) {
+    if trust_forwarded_headers
+        && let Some(ip) = forwarded_client_ip(headers) {
             return ip.to_string();
         }
-    }
 
     peer_addr
         .map(|addr| addr.ip().to_string())
@@ -569,13 +568,11 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         match SqliteSessionBackend::new(&config.workspace_dir) {
             Ok(b) => {
                 tracing::info!("Gateway session persistence enabled (SQLite)");
-                if config.gateway.session_ttl_hours > 0 {
-                    if let Ok(cleaned) = b.cleanup_stale(config.gateway.session_ttl_hours) {
-                        if cleaned > 0 {
+                if config.gateway.session_ttl_hours > 0
+                    && let Ok(cleaned) = b.cleanup_stale(config.gateway.session_ttl_hours)
+                        && cleaned > 0 {
                             tracing::info!("Cleaned up {cleaned} stale gateway sessions");
                         }
-                    }
-                }
                 Some(Arc::new(b))
             }
             Err(e) => {
@@ -855,7 +852,9 @@ async fn handle_health(State(state): State<AppState>) -> impl IntoResponse {
 const PROMETHEUS_CONTENT_TYPE: &str = "text/plain; version=0.0.4; charset=utf-8";
 
 fn prometheus_disabled_hint() -> String {
-    String::from("# Prometheus backend not enabled. Set [observability] backend = \"prometheus\" in config.\n")
+    String::from(
+        "# Prometheus backend not enabled. Set [observability] backend = \"prometheus\" in config.\n",
+    )
 }
 
 /// GET /metrics — Prometheus text exposition format
@@ -1087,8 +1086,7 @@ async fn handle_webhook(
         .and_then(|v| v.to_str().ok())
         .map(str::trim)
         .filter(|value| !value.is_empty())
-    {
-        if !state.idempotency_store.record_if_new(idempotency_key) {
+        && !state.idempotency_store.record_if_new(idempotency_key) {
             tracing::info!("Webhook duplicate ignored (idempotency key: {idempotency_key})");
             let body = serde_json::json!({
                 "status": "duplicate",
@@ -1097,7 +1095,6 @@ async fn handle_webhook(
             });
             return (StatusCode::OK, Json(body));
         }
-    }
 
     let message = &webhook_body.message;
     let session_id = webhook_session_id(&headers);

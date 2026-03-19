@@ -14,7 +14,7 @@ pub use openvpn::OpenVpnTunnel;
 pub use tailscale::TailscaleTunnel;
 
 use crate::config::schema::{TailscaleTunnelConfig, TunnelConfig};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -77,10 +77,11 @@ pub fn create_tunnel(config: &TunnelConfig) -> Result<Option<Box<dyn Tunnel>>> {
         "none" | "" => Ok(None),
 
         "cloudflare" => {
-            let cf = config
-                .cloudflare
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("tunnel.provider = \"cloudflare\" but [tunnel.cloudflare] section is missing"))?;
+            let cf = config.cloudflare.as_ref().ok_or_else(|| {
+                anyhow::anyhow!(
+                    "tunnel.provider = \"cloudflare\" but [tunnel.cloudflare] section is missing"
+                )
+            })?;
             Ok(Some(Box::new(CloudflareTunnel::new(cf.token.clone()))))
         }
 
@@ -96,10 +97,9 @@ pub fn create_tunnel(config: &TunnelConfig) -> Result<Option<Box<dyn Tunnel>>> {
         }
 
         "ngrok" => {
-            let ng = config
-                .ngrok
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("tunnel.provider = \"ngrok\" but [tunnel.ngrok] section is missing"))?;
+            let ng = config.ngrok.as_ref().ok_or_else(|| {
+                anyhow::anyhow!("tunnel.provider = \"ngrok\" but [tunnel.ngrok] section is missing")
+            })?;
             Ok(Some(Box::new(NgrokTunnel::new(
                 ng.auth_token.clone(),
                 ng.domain.clone(),
@@ -107,10 +107,11 @@ pub fn create_tunnel(config: &TunnelConfig) -> Result<Option<Box<dyn Tunnel>>> {
         }
 
         "openvpn" => {
-            let ov = config
-                .openvpn
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("tunnel.provider = \"openvpn\" but [tunnel.openvpn] section is missing"))?;
+            let ov = config.openvpn.as_ref().ok_or_else(|| {
+                anyhow::anyhow!(
+                    "tunnel.provider = \"openvpn\" but [tunnel.openvpn] section is missing"
+                )
+            })?;
             Ok(Some(Box::new(OpenVpnTunnel::new(
                 ov.config_file.clone(),
                 ov.auth_file.clone(),
@@ -121,10 +122,11 @@ pub fn create_tunnel(config: &TunnelConfig) -> Result<Option<Box<dyn Tunnel>>> {
         }
 
         "custom" => {
-            let cu = config
-                .custom
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("tunnel.provider = \"custom\" but [tunnel.custom] section is missing"))?;
+            let cu = config.custom.as_ref().ok_or_else(|| {
+                anyhow::anyhow!(
+                    "tunnel.provider = \"custom\" but [tunnel.custom] section is missing"
+                )
+            })?;
             Ok(Some(Box::new(CustomTunnel::new(
                 cu.start_command.clone(),
                 cu.health_url.clone(),
@@ -132,7 +134,9 @@ pub fn create_tunnel(config: &TunnelConfig) -> Result<Option<Box<dyn Tunnel>>> {
             ))))
         }
 
-        other => bail!("Unknown tunnel provider: \"{other}\". Valid: none, cloudflare, tailscale, ngrok, openvpn, custom"),
+        other => bail!(
+            "Unknown tunnel provider: \"{other}\". Valid: none, cloudflare, tailscale, ngrok, openvpn, custom"
+        ),
     }
 }
 

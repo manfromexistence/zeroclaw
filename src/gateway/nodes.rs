@@ -16,10 +16,10 @@
 use super::AppState;
 use axum::{
     extract::{
-        ws::{Message, WebSocket},
         Query, State, WebSocketUpgrade,
+        ws::{Message, WebSocket},
     },
-    http::{header, HeaderMap},
+    http::{HeaderMap, header},
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -197,11 +197,9 @@ fn extract_node_ws_token<'a>(
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
         .and_then(|auth| auth.strip_prefix("Bearer "))
-    {
-        if !t.is_empty() {
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     // 2. Sec-WebSocket-Protocol: bearer.<token>
     if let Some(t) = headers
@@ -213,18 +211,15 @@ fn extract_node_ws_token<'a>(
                 .map(|p| p.trim())
                 .find_map(|p| p.strip_prefix(BEARER_SUBPROTO_PREFIX))
         })
-    {
-        if !t.is_empty() {
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     // 3. ?token= query parameter
-    if let Some(t) = query_token {
-        if !t.is_empty() {
+    if let Some(t) = query_token
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     None
 }

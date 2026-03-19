@@ -510,8 +510,8 @@ fn format_line_output(
             }
             "count" => {
                 // Format: path:count — filter out zero-count entries
-                if let Some((path, count)) = parse_count_line(&relativized) {
-                    if count > 0 {
+                if let Some((path, count)) = parse_count_line(&relativized)
+                    && count > 0 {
                         file_set.insert(path.to_string());
                         total_matches += count;
                         lines.push(format!("{path}:{count}"));
@@ -520,7 +520,6 @@ fn format_line_output(
                             break;
                         }
                     }
-                }
             }
             _ => {
                 // content mode: pass through with relativized paths
@@ -705,10 +704,12 @@ mod tests {
         assert!(schema["properties"]["pattern"].is_object());
         assert!(schema["properties"]["path"].is_object());
         assert!(schema["properties"]["output_mode"].is_object());
-        assert!(schema["required"]
-            .as_array()
-            .unwrap()
-            .contains(&json!("pattern")));
+        assert!(
+            schema["required"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("pattern"))
+        );
     }
 
     #[tokio::test]
@@ -855,11 +856,13 @@ mod tests {
             .unwrap();
 
         assert!(!result.success);
-        assert!(result
-            .error
-            .as_ref()
-            .unwrap()
-            .contains("Invalid output_mode"));
+        assert!(
+            result
+                .error
+                .as_ref()
+                .unwrap()
+                .contains("Invalid output_mode")
+        );
     }
 
     #[tokio::test]

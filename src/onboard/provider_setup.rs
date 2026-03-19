@@ -2,33 +2,36 @@
 //!
 //! This module handles interactive provider selection and API key configuration.
 
-use anyhow::{Context, Result};
 use crate::ui::prompts;
 use crate::ui::prompts::PromptInteraction;
+use anyhow::{Context, Result};
 use std::path::Path;
 
 // Import from wizard.rs - the provider helper functions
 use super::wizard::{
-    allows_unauthenticated_model_fetch, canonical_provider_name, curated_models_for_provider, 
-    default_model_for_provider, local_provider_choices, provider_env_var, 
-    supports_live_model_fetch, CUSTOM_MODEL_SENTINEL, LIVE_MODEL_MAX_OPTIONS, MODEL_CACHE_TTL_SECS,
+    CUSTOM_MODEL_SENTINEL, LIVE_MODEL_MAX_OPTIONS, MODEL_CACHE_TTL_SECS,
+    allows_unauthenticated_model_fetch, canonical_provider_name, curated_models_for_provider,
+    default_model_for_provider, local_provider_choices, provider_env_var,
+    supports_live_model_fetch,
 };
 
 // Import from models.rs - model fetching and caching functions
 use super::models::{
-    build_model_options, cache_live_models_for_provider, 
-    fetch_live_models_for_provider, humanize_age, load_any_cached_models_for_provider,
-    load_cached_models_for_provider, normalize_ollama_endpoint_url, ollama_uses_remote_endpoint,
+    build_model_options, cache_live_models_for_provider, fetch_live_models_for_provider,
+    humanize_age, load_any_cached_models_for_provider, load_cached_models_for_provider,
+    normalize_ollama_endpoint_url, ollama_uses_remote_endpoint,
 };
 
 // Import provider alias functions
 use crate::providers::{
-    is_glm_alias, is_glm_cn_alias, is_minimax_alias, is_moonshot_alias, 
-    is_qianfan_alias, is_qwen_alias, is_zai_alias, is_zai_cn_alias,
+    is_glm_alias, is_glm_cn_alias, is_minimax_alias, is_moonshot_alias, is_qianfan_alias,
+    is_qwen_alias, is_zai_alias, is_zai_cn_alias,
 };
 
 #[allow(clippy::too_many_lines)]
-pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, String, Option<String>)> {
+pub async fn setup_provider(
+    workspace_dir: &Path,
+) -> Result<(String, String, String, Option<String>)> {
     // ── Tier selection ──
     let tier_idx = prompts::select("Select provider category")
         .item(0, "⭐ Recommended", "OpenRouter, Venice, Anthropic, OpenAI, Gemini")
@@ -41,16 +44,25 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
 
     let providers: Vec<(&str, &str)> = match tier_idx {
         0 => vec![
-            ("openrouter", "OpenRouter — 200+ models, 1 API key (recommended)"),
+            (
+                "openrouter",
+                "OpenRouter — 200+ models, 1 API key (recommended)",
+            ),
             ("venice", "Venice AI — privacy-first (Llama, Opus)"),
             ("anthropic", "Anthropic — Claude Sonnet & Opus (direct)"),
             ("openai", "OpenAI — GPT-4o, o1, GPT-5 (direct)"),
-            ("openai-codex", "OpenAI Codex (ChatGPT subscription OAuth, no API key)"),
+            (
+                "openai-codex",
+                "OpenAI Codex (ChatGPT subscription OAuth, no API key)",
+            ),
             ("deepseek", "DeepSeek — V3 & R1 (affordable)"),
             ("mistral", "Mistral — Large & Codestral"),
             ("xai", "xAI — Grok 3 & 4"),
             ("perplexity", "Perplexity — search-augmented AI"),
-            ("gemini", "Google Gemini — Gemini 2.0 Flash & Pro (supports CLI auth)"),
+            (
+                "gemini",
+                "Google Gemini — Gemini 2.0 Flash & Pro (supports CLI auth)",
+            ),
         ],
         1 => vec![
             ("groq", "Groq — ultra-fast LPU inference"),
@@ -62,17 +74,32 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
         2 => vec![
             ("vercel", "Vercel AI Gateway"),
             ("cloudflare", "Cloudflare AI Gateway"),
-            ("astrai", "Astrai — compliant AI routing (PII stripping, cost optimization)"),
+            (
+                "astrai",
+                "Astrai — compliant AI routing (PII stripping, cost optimization)",
+            ),
             ("bedrock", "Amazon Bedrock — AWS managed models"),
         ],
         3 => vec![
-            ("kimi-code", "Kimi Code — coding-optimized Kimi API (KimiCLI)"),
-            ("qwen-code", "Qwen Code — OAuth tokens reused from ~/.qwen/oauth_creds.json"),
+            (
+                "kimi-code",
+                "Kimi Code — coding-optimized Kimi API (KimiCLI)",
+            ),
+            (
+                "qwen-code",
+                "Qwen Code — OAuth tokens reused from ~/.qwen/oauth_creds.json",
+            ),
             ("moonshot", "Moonshot — Kimi API (China endpoint)"),
-            ("moonshot-intl", "Moonshot — Kimi API (international endpoint)"),
+            (
+                "moonshot-intl",
+                "Moonshot — Kimi API (international endpoint)",
+            ),
             ("glm", "GLM — ChatGLM / Zhipu (international endpoint)"),
             ("glm-cn", "GLM — ChatGLM / Zhipu (China endpoint)"),
-            ("minimax", "MiniMax — international endpoint (api.minimax.io)"),
+            (
+                "minimax",
+                "MiniMax — international endpoint (api.minimax.io)",
+            ),
             ("minimax-cn", "MiniMax — China endpoint (api.minimaxi.com)"),
             ("qwen", "Qwen — DashScope China endpoint"),
             ("qwen-intl", "Qwen — DashScope international endpoint"),
@@ -91,13 +118,25 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
 
     // ── Custom / BYOP flow ──
     if providers.is_empty() {
-        prompts::section_with_width("Custom Provider Setup — any OpenAI-compatible API", 70, |lines: &mut Vec<String>| {
-            lines.push("ZeroClaw works with ANY API that speaks the OpenAI chat completions format.".to_string());
-            lines.push("Examples: LiteLLM, LocalAI, vLLM, text-generation-webui, LM Studio, etc.".to_string());
-        })?;
+        prompts::section_with_width(
+            "Custom Provider Setup — any OpenAI-compatible API",
+            70,
+            |lines: &mut Vec<String>| {
+                lines.push(
+                    "ZeroClaw works with ANY API that speaks the OpenAI chat completions format."
+                        .to_string(),
+                );
+                lines.push(
+                    "Examples: LiteLLM, LocalAI, vLLM, text-generation-webui, LM Studio, etc."
+                        .to_string(),
+                );
+            },
+        )?;
 
-        let base_url = prompts::input::input("API base URL (e.g. http://localhost:1234 or https://my-api.com)")
-            .interact()?;
+        let base_url = prompts::input::input(
+            "API base URL (e.g. http://localhost:1234 or https://my-api.com)",
+        )
+        .interact()?;
 
         let base_url = base_url.trim().trim_end_matches('/').to_string();
         if base_url.is_empty() {
@@ -130,9 +169,10 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
     // ── API key / endpoint ──
     let mut provider_api_url: Option<String> = None;
     let api_key = if provider_name == "ollama" {
-        let use_remote_ollama = prompts::confirm("Use a remote Ollama endpoint (for example Ollama Cloud)?")
-            .initial_value(false)
-            .interact()?;
+        let use_remote_ollama =
+            prompts::confirm("Use a remote Ollama endpoint (for example Ollama Cloud)?")
+                .initial_value(false)
+                .interact()?;
 
         if use_remote_ollama {
             let raw_url = prompts::input::input("Remote Ollama endpoint URL")
@@ -157,17 +197,22 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
             }
             prompts::log::step("If you use cloud-only models, append :cloud to the model ID.")?;
 
-            let key = prompts::input::input("API key for remote Ollama endpoint (or Enter to skip)")
-                .placeholder("optional")
-                .interact()?;
+            let key =
+                prompts::input::input("API key for remote Ollama endpoint (or Enter to skip)")
+                    .placeholder("optional")
+                    .interact()?;
 
             if key.trim().is_empty() {
-                prompts::log::info("No API key provided. Set OLLAMA_API_KEY later if required by your endpoint.")?;
+                prompts::log::info(
+                    "No API key provided. Set OLLAMA_API_KEY later if required by your endpoint.",
+                )?;
             }
 
             key
         } else {
-            prompts::log::info("Using local Ollama at http://localhost:11434 (no API key needed).")?;
+            prompts::log::info(
+                "Using local Ollama at http://localhost:11434 (no API key needed).",
+            )?;
             String::new()
         }
     } else if matches!(provider_name, "llamacpp" | "llama.cpp") {
@@ -181,15 +226,22 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
         }
         provider_api_url = Some(normalized_url.clone());
 
-        prompts::log::info(format!("Using llama.cpp server endpoint: {}", normalized_url))?;
-        prompts::log::step("No API key needed unless your llama.cpp server is started with --api-key.")?;
+        prompts::log::info(format!(
+            "Using llama.cpp server endpoint: {}",
+            normalized_url
+        ))?;
+        prompts::log::step(
+            "No API key needed unless your llama.cpp server is started with --api-key.",
+        )?;
 
         let key = prompts::input::input("API key for llama.cpp server (or Enter to skip)")
             .placeholder("optional")
             .interact()?;
 
         if key.trim().is_empty() {
-            prompts::log::info("No API key provided. Set LLAMACPP_API_KEY later only if your server requires authentication.")?;
+            prompts::log::info(
+                "No API key provided. Set LLAMACPP_API_KEY later only if your server requires authentication.",
+            )?;
         }
 
         key
@@ -212,7 +264,9 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
             .interact()?;
 
         if key.trim().is_empty() {
-            prompts::log::info("No API key provided. Set SGLANG_API_KEY later only if your server requires authentication.")?;
+            prompts::log::info(
+                "No API key provided. Set SGLANG_API_KEY later only if your server requires authentication.",
+            )?;
         }
 
         key
@@ -235,7 +289,9 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
             .interact()?;
 
         if key.trim().is_empty() {
-            prompts::log::info("No API key provided. Set VLLM_API_KEY later only if your server requires authentication.")?;
+            prompts::log::info(
+                "No API key provided. Set VLLM_API_KEY later only if your server requires authentication.",
+            )?;
         }
 
         key
@@ -251,14 +307,18 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
         provider_api_url = Some(normalized_url.clone());
 
         prompts::log::info(format!("Using Osaurus server endpoint: {}", normalized_url))?;
-        prompts::log::step("No API key needed unless your Osaurus server requires authentication.")?;
+        prompts::log::step(
+            "No API key needed unless your Osaurus server requires authentication.",
+        )?;
 
         let key = prompts::input::input("API key for Osaurus server (or Enter to skip)")
             .placeholder("optional")
             .interact()?;
 
         if key.trim().is_empty() {
-            prompts::log::info("No API key provided. Set OSAURUS_API_KEY later only if your server requires authentication.")?;
+            prompts::log::info(
+                "No API key provided. Set OSAURUS_API_KEY later only if your server requires authentication.",
+            )?;
         }
 
         key
@@ -303,12 +363,15 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
             prompts::log::step("Get your API key at: https://console.anthropic.com/settings/keys")?;
             prompts::log::step("Or run `claude setup-token` to get an OAuth setup-token.")?;
 
-            let key = prompts::input::input("Paste your API key or setup-token (or press Enter to skip)")
-                .placeholder("optional")
-                .interact()?;
+            let key =
+                prompts::input::input("Paste your API key or setup-token (or press Enter to skip)")
+                    .placeholder("optional")
+                    .interact()?;
 
             if key.is_empty() {
-                prompts::log::info("Skipped. Set ANTHROPIC_API_KEY or ANTHROPIC_OAUTH_TOKEN or edit config.toml later.")?;
+                prompts::log::info(
+                    "Skipped. Set ANTHROPIC_API_KEY or ANTHROPIC_OAUTH_TOKEN or edit config.toml later.",
+                )?;
             }
 
             key
@@ -318,16 +381,24 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
             prompts::log::success("QWEN_OAUTH_TOKEN environment variable detected!")?;
             "qwen-oauth".to_string()
         } else {
-            prompts::log::step("Qwen Code OAuth credentials are usually stored in ~/.qwen/oauth_creds.json.")?;
-            prompts::log::step("Run `qwen` once and complete OAuth login to populate cached credentials.")?;
+            prompts::log::step(
+                "Qwen Code OAuth credentials are usually stored in ~/.qwen/oauth_creds.json.",
+            )?;
+            prompts::log::step(
+                "Run `qwen` once and complete OAuth login to populate cached credentials.",
+            )?;
             prompts::log::step("You can also set QWEN_OAUTH_TOKEN directly.")?;
 
-            let key = prompts::input::input("Paste your Qwen OAuth token (or press Enter to auto-detect cached OAuth)")
-                .placeholder("optional")
-                .interact()?;
+            let key = prompts::input::input(
+                "Paste your Qwen OAuth token (or press Enter to auto-detect cached OAuth)",
+            )
+            .placeholder("optional")
+            .interact()?;
 
             if key.trim().is_empty() {
-                prompts::log::info("Using OAuth auto-detection. Set QWEN_OAUTH_TOKEN and optional QWEN_OAUTH_RESOURCE_URL if needed.")?;
+                prompts::log::info(
+                    "Using OAuth auto-detection. Set QWEN_OAUTH_TOKEN and optional QWEN_OAUTH_RESOURCE_URL if needed.",
+                )?;
                 "qwen-oauth".to_string()
             } else {
                 key
@@ -377,7 +448,9 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
         if matches!(provider_name, "bedrock" | "aws-bedrock") {
             // Bedrock uses AWS AKSK, not a single API key.
             prompts::log::step("Bedrock uses AWS credentials (not a single API key).")?;
-            prompts::log::step("Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.")?;
+            prompts::log::step(
+                "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
+            )?;
             prompts::log::step("Optionally set AWS_REGION for the region (default: us-east-1).")?;
             if !key_url.is_empty() {
                 prompts::log::step(format!("Manage IAM credentials at: {}", key_url))?;
@@ -395,7 +468,10 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
 
             if key.is_empty() {
                 let env_var = provider_env_var(provider_name);
-                prompts::log::info(format!("Skipped. Set {} or edit config.toml later.", env_var))?;
+                prompts::log::info(format!(
+                    "Skipped. Set {} or edit config.toml later.",
+                    env_var
+                ))?;
             }
 
             key
@@ -424,7 +500,9 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
                     .is_some_and(|value| !value.trim().is_empty()));
 
         if canonical_provider == "ollama" && ollama_remote && !has_api_key {
-            prompts::log::info("Remote Ollama live-model refresh needs an API key (OLLAMA_API_KEY); using curated models.")?;
+            prompts::log::info(
+                "Remote Ollama live-model refresh needs an API key (OLLAMA_API_KEY); using curated models.",
+            )?;
         }
 
         if can_fetch_without_key || has_api_key {
@@ -498,8 +576,8 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
                             error
                         ))?;
 
-                        if live_options.is_none() {
-                            if let Some(stale) =
+                        if live_options.is_none()
+                            && let Some(stale) =
                                 load_any_cached_models_for_provider(workspace_dir, provider_name)
                                     .await?
                             {
@@ -517,7 +595,6 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
                                     "stale-cache",
                                 ));
                             }
-                        }
                     }
                 }
             }
@@ -529,8 +606,16 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
 
     if let Some(live_model_options) = live_options {
         let source_idx = prompts::select("Model source")
-            .item(0, format!("Provider model list ({})", live_model_options.len()), "")
-            .item(1, format!("Curated starter list ({})", model_options.len()), "")
+            .item(
+                0,
+                format!("Provider model list ({})", live_model_options.len()),
+                "",
+            )
+            .item(
+                1,
+                format!("Curated starter list ({})", model_options.len()),
+                "",
+            )
             .interact()?;
 
         if source_idx == 0 {

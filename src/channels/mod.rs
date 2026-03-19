@@ -95,7 +95,7 @@ use crate::config::Config;
 use crate::identity;
 use crate::memory::{self, Memory};
 use crate::observability::traits::{ObserverEvent, ObserverMetric};
-use crate::observability::{self, runtime_trace, Observer};
+use crate::observability::{self, Observer, runtime_trace};
 use crate::providers::{self, ChatMessage, Provider};
 use crate::runtime;
 use crate::security::SecurityPolicy;
@@ -607,14 +607,13 @@ fn normalize_cached_channel_turns(turns: Vec<ChatMessage>) -> Vec<ChatMessage> {
             // Interrupted channel turns can produce consecutive user messages
             // (no assistant persisted yet). Merge instead of dropping.
             (false, "user") | (true, "assistant") => {
-                if let Some(last_turn) = normalized.last_mut() {
-                    if !turn.content.is_empty() {
+                if let Some(last_turn) = normalized.last_mut()
+                    && !turn.content.is_empty() {
                         if !last_turn.content.is_empty() {
                             last_turn.content.push_str("\n\n");
                         }
                         last_turn.content.push_str(&turn.content);
                     }
-                }
             }
             _ => {}
         }
@@ -774,15 +773,14 @@ fn decrypt_optional_secret_for_runtime_reload(
     value: &mut Option<String>,
     field_name: &str,
 ) -> Result<()> {
-    if let Some(raw) = value.clone() {
-        if crate::security::SecretStore::is_encrypted(&raw) {
+    if let Some(raw) = value.clone()
+        && crate::security::SecretStore::is_encrypted(&raw) {
             *value = Some(
                 store
                     .decrypt(&raw)
                     .with_context(|| format!("Failed to decrypt {field_name}"))?,
             );
         }
-    }
     Ok(())
 }
 
@@ -838,11 +836,10 @@ async fn maybe_apply_runtime_config_update(ctx: &ChannelRuntimeContext) -> Resul
         let store = runtime_config_store()
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        if let Some(state) = store.get(&config_path) {
-            if state.last_applied_stamp == Some(stamp) {
+        if let Some(state) = store.get(&config_path)
+            && state.last_applied_stamp == Some(stamp) {
                 return Ok(());
             }
-        }
     }
 
     let next_defaults = load_runtime_defaults_from_config_file(&config_path).await?;
@@ -1003,11 +1000,10 @@ fn proactive_trim_turns(turns: &mut Vec<ChatMessage>, budget: usize) -> usize {
 
 fn append_sender_turn(ctx: &ChannelRuntimeContext, sender_key: &str, turn: ChatMessage) {
     // Persist to JSONL before adding to in-memory history.
-    if let Some(ref store) = ctx.session_store {
-        if let Err(e) = store.append(sender_key, &turn) {
+    if let Some(ref store) = ctx.session_store
+        && let Err(e) = store.append(sender_key, &turn) {
             tracing::warn!("Failed to persist session turn: {e}");
         }
-    }
 
     let mut histories = ctx
         .conversation_histories
@@ -1047,11 +1043,10 @@ fn rollback_orphan_user_turn(
 
     // Also remove the orphan turn from the persisted JSONL session store so
     // it doesn't resurface after a daemon restart (fixes #3674).
-    if let Some(ref store) = ctx.session_store {
-        if let Err(e) = store.remove_last(sender_key) {
+    if let Some(ref store) = ctx.session_store
+        && let Err(e) = store.remove_last(sender_key) {
             tracing::warn!("Failed to rollback session store entry: {e}");
         }
-    }
 
     true
 }
@@ -1320,15 +1315,15 @@ async fn handle_runtime_command_if_needed(
                             }
 
                             format!(
-                            "Provider switched to `{provider_name}` for this sender session. Current model is `{}`.\nUse `/model <model-id>` to set a provider-compatible model.",
-                            current.model
-                        )
+                                "Provider switched to `{provider_name}` for this sender session. Current model is `{}`.\nUse `/model <model-id>` to set a provider-compatible model.",
+                                current.model
+                            )
                         }
                         Err(err) => {
                             let safe_err = providers::sanitize_api_error(&err.to_string());
                             format!(
-                            "Failed to initialize provider `{provider_name}`. Route unchanged.\nDetails: {safe_err}"
-                        )
+                                "Failed to initialize provider `{provider_name}`. Route unchanged.\nDetails: {safe_err}"
+                            )
                         }
                     }
                 }
@@ -1462,19 +1457,18 @@ fn extract_tool_context_summary(history: &[ChatMessage], start_index: usize) -> 
             for segment in content.split(open_tag) {
                 if let Some(json_end) = segment.find(close_tag) {
                     let json_str = segment[..json_end].trim();
-                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(json_str) {
-                        if let Some(name) = val.get("name").and_then(|n| n.as_str()) {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(json_str)
+                        && let Some(name) = val.get("name").and_then(|n| n.as_str()) {
                             push_unique_tool_name(tool_names, name);
                         }
-                    }
                 }
             }
         }
     }
 
     fn collect_tool_names_from_native_json(content: &str, tool_names: &mut Vec<String>) {
-        if let Ok(val) = serde_json::from_str::<serde_json::Value>(content) {
-            if let Some(calls) = val.get("tool_calls").and_then(|c| c.as_array()) {
+        if let Ok(val) = serde_json::from_str::<serde_json::Value>(content)
+            && let Some(calls) = val.get("tool_calls").and_then(|c| c.as_array()) {
                 for call in calls {
                     let name = call
                         .get("function")
@@ -1486,7 +1480,6 @@ fn extract_tool_context_summary(history: &[ChatMessage], start_index: usize) -> 
                     }
                 }
             }
-        }
     }
 
     fn collect_tool_names_from_tool_results(content: &str, tool_names: &mut Vec<String>) {
@@ -1667,8 +1660,8 @@ fn sanitize_tool_json_value(
 
     let object = value.as_object()?;
 
-    if let Some(tool_calls) = object.get("tool_calls").and_then(|value| value.as_array()) {
-        if !tool_calls.is_empty()
+    if let Some(tool_calls) = object.get("tool_calls").and_then(|value| value.as_array())
+        && !tool_calls.is_empty()
             && tool_calls
                 .iter()
                 .all(|call| is_tool_call_payload(call, known_tool_names))
@@ -1681,7 +1674,6 @@ fn sanitize_tool_json_value(
                 .to_string();
             return Some((content, true));
         }
-    }
 
     if is_tool_result_payload(object, saw_tool_call_payload) {
         return Some((String::new(), false));
@@ -1721,8 +1713,8 @@ fn strip_isolated_tool_json_artifacts(message: &str, known_tool_names: &HashSet<
             let consumed = stream.byte_offset();
             if consumed > 0 {
                 let end = start + consumed;
-                if is_line_isolated_json_segment(message, start, end) {
-                    if let Some((replacement, marks_tool_call)) =
+                if is_line_isolated_json_segment(message, start, end)
+                    && let Some((replacement, marks_tool_call)) =
                         sanitize_tool_json_value(&value, known_tool_names, saw_tool_call_payload)
                     {
                         if marks_tool_call {
@@ -1734,7 +1726,6 @@ fn strip_isolated_tool_json_artifacts(message: &str, known_tool_names: &HashSet<
                         cursor = end;
                         continue;
                     }
-                }
             }
         }
 
@@ -1850,7 +1841,9 @@ fn spawn_scoped_typing_task(
 ) -> tokio::task::JoinHandle<()> {
     let stop_signal = cancellation_token;
     let refresh_interval = Duration::from_secs(CHANNEL_TYPING_REFRESH_INTERVAL_SECS);
-    let handle = tokio::spawn(async move {
+    
+
+    tokio::spawn(async move {
         let mut interval = tokio::time::interval(refresh_interval);
         interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
 
@@ -1868,9 +1861,7 @@ fn spawn_scoped_typing_task(
         if let Err(e) = channel.stop_typing(&recipient).await {
             tracing::debug!("Failed to stop typing on {}: {e}", channel.name());
         }
-    });
-
-    handle
+    })
 }
 
 async fn process_channel_message(
@@ -1940,8 +1931,7 @@ async fn process_channel_message(
 
     // ── Query classification: override route when a rule matches ──
     if let Some(hint) = crate::agent::classifier::classify(&ctx.query_classification, &msg.content)
-    {
-        if let Some(matched_route) = ctx
+        && let Some(matched_route) = ctx
             .model_routes
             .iter()
             .find(|r| r.hint.eq_ignore_ascii_case(&hint))
@@ -1960,7 +1950,6 @@ async fn process_channel_message(
                 api_key: matched_route.api_key.clone(),
             };
         }
-    }
 
     let runtime_defaults = runtime_defaults_snapshot(ctx.as_ref());
     let active_provider = match get_or_create_provider(
@@ -2082,11 +2071,10 @@ async fn process_channel_message(
             Some(&history_key),
         )
         .await;
-        if let Some(last_turn) = prior_turns.last_mut() {
-            if last_turn.role == "user" && !memory_context.is_empty() {
+        if let Some(last_turn) = prior_turns.last_mut()
+            && last_turn.role == "user" && !memory_context.is_empty() {
                 last_turn.content = format!("{memory_context}{}", msg.content);
             }
-        }
     }
 
     let system_prompt =
@@ -2162,16 +2150,14 @@ async fn process_channel_message(
     };
 
     // React with 👀 to acknowledge the incoming message
-    if ctx.ack_reactions {
-        if let Some(channel) = target_channel.as_ref() {
-            if let Err(e) = channel
+    if ctx.ack_reactions
+        && let Some(channel) = target_channel.as_ref()
+            && let Err(e) = channel
                 .add_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
                 .await
             {
                 tracing::debug!("Failed to add reaction: {e}");
             }
-        }
-    }
 
     let typing_cancellation = target_channel.as_ref().map(|_| CancellationToken::new());
     let typing_task = match (target_channel.as_ref(), typing_cancellation.as_ref()) {
@@ -2305,11 +2291,9 @@ async fn process_channel_message(
             );
             if let (Some(channel), Some(draft_id)) =
                 (target_channel.as_ref(), draft_message_id.as_deref())
-            {
-                if let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
+                && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
                     tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
                 }
-            }
         }
         LlmExecutionResult::Completed(Ok(Ok(response))) => {
             // ── Hook: on_message_sending (modifying) ─────────
@@ -2485,11 +2469,9 @@ async fn process_channel_message(
                 );
                 if let (Some(channel), Some(draft_id)) =
                     (target_channel.as_ref(), draft_message_id.as_deref())
-                {
-                    if let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
+                    && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
                         tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
                     }
-                }
             } else if is_context_window_overflow_error(&e) {
                 let compacted = compact_sender_history(ctx.as_ref(), &history_key);
                 let error_text = if compacted {
@@ -2630,8 +2612,8 @@ async fn process_channel_message(
     }
 
     // Swap 👀 → ✅ (or ⚠️ on error) to signal processing is complete
-    if ctx.ack_reactions {
-        if let Some(channel) = target_channel.as_ref() {
+    if ctx.ack_reactions
+        && let Some(channel) = target_channel.as_ref() {
             let _ = channel
                 .remove_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
                 .await;
@@ -2639,7 +2621,6 @@ async fn process_channel_message(
                 .add_reaction(&msg.reply_target, &msg.id, reaction_done_emoji)
                 .await;
         }
-    }
 }
 
 async fn run_message_dispatch_loop(
@@ -3104,8 +3085,8 @@ fn maybe_restart_managed_daemon_service() -> Result<bool> {
     if cfg!(target_os = "linux") {
         // OpenRC (system-wide) takes precedence over systemd (user-level)
         let openrc_init_script = PathBuf::from("/etc/init.d/zeroclaw");
-        if openrc_init_script.exists() {
-            if let Ok(status_output) = Command::new("rc-service").args(OPENRC_STATUS_ARGS).output()
+        if openrc_init_script.exists()
+            && let Ok(status_output) = Command::new("rc-service").args(OPENRC_STATUS_ARGS).output()
             {
                 // rc-service exits 0 if running, non-zero otherwise
                 if status_output.status.success() {
@@ -3120,7 +3101,6 @@ fn maybe_restart_managed_daemon_service() -> Result<bool> {
                     return Ok(true);
                 }
             }
-        }
 
         // Systemd (user-level)
         let home = directories::UserDirs::new()
@@ -3455,7 +3435,9 @@ fn collect_configured_channels(
                         )),
                     });
                 } else {
-                    tracing::warn!("WhatsApp Cloud API configured but missing required fields (phone_number_id, access_token, verify_token)");
+                    tracing::warn!(
+                        "WhatsApp Cloud API configured but missing required fields (phone_number_id, access_token, verify_token)"
+                    );
                 }
             }
             "web" => {
@@ -3480,13 +3462,19 @@ fn collect_configured_channels(
                 }
                 #[cfg(not(feature = "whatsapp-web"))]
                 {
-                    tracing::warn!("WhatsApp Web backend requires 'whatsapp-web' feature. Enable with: cargo build --features whatsapp-web");
-                    eprintln!("  ⚠ WhatsApp Web is configured but the 'whatsapp-web' feature is not compiled in.");
+                    tracing::warn!(
+                        "WhatsApp Web backend requires 'whatsapp-web' feature. Enable with: cargo build --features whatsapp-web"
+                    );
+                    eprintln!(
+                        "  ⚠ WhatsApp Web is configured but the 'whatsapp-web' feature is not compiled in."
+                    );
                     eprintln!("    Rebuild with: cargo build --features whatsapp-web");
                 }
             }
             _ => {
-                tracing::warn!("WhatsApp config invalid: neither phone_number_id (Cloud API) nor session_path (Web) is set");
+                tracing::warn!(
+                    "WhatsApp config invalid: neither phone_number_id (Cloud API) nor session_path (Web) is set"
+                );
             }
         }
     }
@@ -4247,8 +4235,8 @@ mod tests {
     use crate::providers::{ChatMessage, Provider};
     use crate::tools::{Tool, ToolResult};
     use std::collections::{HashMap, HashSet};
-    use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
     use std::sync::Arc;
+    use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
     use tempfile::TempDir;
 
     fn make_workspace() -> TempDir {
@@ -6372,12 +6360,16 @@ BTC is currently around $65,000 based on latest tool output."#
             .unwrap_or_else(|e| e.into_inner());
         assert_eq!(calls.len(), 2);
         let second_call = &calls[1];
-        assert!(second_call
-            .iter()
-            .any(|(role, content)| { role == "user" && content.contains("forwarded content") }));
-        assert!(second_call
-            .iter()
-            .any(|(role, content)| { role == "user" && content.contains("summarize this") }));
+        assert!(
+            second_call
+                .iter()
+                .any(|(role, content)| { role == "user" && content.contains("forwarded content") })
+        );
+        assert!(
+            second_call
+                .iter()
+                .any(|(role, content)| { role == "user" && content.contains("summarize this") })
+        );
         assert!(
             !second_call.iter().any(|(role, _)| role == "assistant"),
             "cancelled turn should not persist an assistant response"
@@ -6480,12 +6472,16 @@ BTC is currently around $65,000 based on latest tool output."#
             .unwrap_or_else(|e| e.into_inner());
         assert_eq!(calls.len(), 2);
         let second_call = &calls[1];
-        assert!(second_call
-            .iter()
-            .any(|(role, content)| { role == "user" && content.contains("first question") }));
-        assert!(second_call
-            .iter()
-            .any(|(role, content)| { role == "user" && content.contains("second question") }));
+        assert!(
+            second_call
+                .iter()
+                .any(|(role, content)| { role == "user" && content.contains("first question") })
+        );
+        assert!(
+            second_call
+                .iter()
+                .any(|(role, content)| { role == "user" && content.contains("second question") })
+        );
         assert!(
             !second_call.iter().any(|(role, _)| role == "assistant"),
             "cancelled turn should not persist an assistant response"
@@ -6919,8 +6915,11 @@ BTC is currently around $65,000 based on latest tool output."#
         assert!(prompt.contains("<description>Review code for bugs</description>"));
         assert!(prompt.contains("SKILL.md</location>"));
         assert!(prompt.contains("<instructions>"));
-        assert!(prompt
-            .contains("<instruction>Always run cargo test before final response.</instruction>"));
+        assert!(
+            prompt.contains(
+                "<instruction>Always run cargo test before final response.</instruction>"
+            )
+        );
         assert!(prompt.contains("<tools>"));
         assert!(prompt.contains("<name>lint</name>"));
         assert!(prompt.contains("<kind>shell</kind>"));
@@ -6963,8 +6962,11 @@ BTC is currently around $65,000 based on latest tool output."#
         assert!(prompt.contains("<location>skills/code-review/SKILL.md</location>"));
         assert!(prompt.contains("loaded on demand"));
         assert!(!prompt.contains("<instructions>"));
-        assert!(!prompt
-            .contains("<instruction>Always run cargo test before final response.</instruction>"));
+        assert!(
+            !prompt.contains(
+                "<instruction>Always run cargo test before final response.</instruction>"
+            )
+        );
         assert!(!prompt.contains("<tools>"));
     }
 
@@ -7845,12 +7847,16 @@ This is an example JSON object for profile settings."#;
 
         let channels = collect_configured_channels(&config, "test");
 
-        assert!(channels
-            .iter()
-            .any(|entry| entry.display_name == "Mattermost"));
-        assert!(channels
-            .iter()
-            .any(|entry| entry.channel.name() == "mattermost"));
+        assert!(
+            channels
+                .iter()
+                .any(|entry| entry.display_name == "Mattermost")
+        );
+        assert!(
+            channels
+                .iter()
+                .any(|entry| entry.channel.name() == "mattermost")
+        );
     }
 
     struct AlwaysFailChannel {
@@ -7922,10 +7928,12 @@ This is an example JSON object for profile settings."#;
         let component = &snapshot["components"]["channel:test-supervised-fail"];
         assert_eq!(component["status"], "error");
         assert!(component["restart_count"].as_u64().unwrap_or(0) >= 1);
-        assert!(component["last_error"]
-            .as_str()
-            .unwrap_or("")
-            .contains("listen boom"));
+        assert!(
+            component["last_error"]
+                .as_str()
+                .unwrap_or("")
+                .contains("listen boom")
+        );
         assert!(calls.load(Ordering::SeqCst) >= 1);
     }
 
@@ -7949,19 +7957,19 @@ This is an example JSON object for profile settings."#;
         );
 
         tokio::time::sleep(Duration::from_millis(35)).await;
-        let first_last_ok = crate::health::snapshot_json()["components"][&component_name]
-            ["last_ok"]
-            .as_str()
-            .unwrap_or("")
-            .to_string();
+        let first_last_ok =
+            crate::health::snapshot_json()["components"][&component_name]["last_ok"]
+                .as_str()
+                .unwrap_or("")
+                .to_string();
         assert!(!first_last_ok.is_empty());
 
         tokio::time::sleep(Duration::from_millis(70)).await;
-        let second_last_ok = crate::health::snapshot_json()["components"][&component_name]
-            ["last_ok"]
-            .as_str()
-            .unwrap_or("")
-            .to_string();
+        let second_last_ok =
+            crate::health::snapshot_json()["components"][&component_name]["last_ok"]
+                .as_str()
+                .unwrap_or("")
+                .to_string();
         let first = chrono::DateTime::parse_from_rfc3339(&first_last_ok)
             .expect("last_ok should be valid RFC3339");
         let second = chrono::DateTime::parse_from_rfc3339(&second_last_ok)

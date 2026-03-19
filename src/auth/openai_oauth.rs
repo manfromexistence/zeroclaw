@@ -13,7 +13,7 @@ use tokio::net::TcpListener;
 
 // Re-export for external use (used by main.rs)
 #[allow(unused_imports)]
-pub use crate::auth::oauth_common::{generate_pkce_state, PkceState};
+pub use crate::auth::oauth_common::{PkceState, generate_pkce_state};
 
 pub const OPENAI_OAUTH_CLIENT_ID: &str = "app_EMoamEEZ73f0CkXaXp7hrann";
 pub const OPENAI_OAUTH_AUTHORIZE_URL: &str = "https://auth.openai.com/oauth/authorize";
@@ -328,11 +328,10 @@ pub fn extract_account_id_from_jwt(token: &str) -> Option<String> {
         "sub",
         "https://api.openai.com/account_id",
     ] {
-        if let Some(value) = claims.get(key).and_then(|v| v.as_str()) {
-            if !value.trim().is_empty() {
+        if let Some(value) = claims.get(key).and_then(|v| v.as_str())
+            && !value.trim().is_empty() {
                 return Some(value.to_string());
             }
-        }
     }
 
     None
@@ -409,9 +408,10 @@ mod tests {
             Some("xyz"),
         )
         .unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("OpenAI OAuth error: access_denied"));
+        assert!(
+            err.to_string()
+                .contains("OpenAI OAuth error: access_denied")
+        );
     }
 
     #[test]

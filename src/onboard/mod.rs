@@ -1,7 +1,7 @@
 // Module declarations
+mod channel_setup;
 mod models;
 mod provider_setup;
-mod channel_setup;
 
 pub mod wizard;
 

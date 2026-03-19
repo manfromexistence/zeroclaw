@@ -12,10 +12,10 @@
 use super::AppState;
 use axum::{
     extract::{
-        ws::{Message, WebSocket},
         Query, State, WebSocketUpgrade,
+        ws::{Message, WebSocket},
     },
-    http::{header, HeaderMap},
+    http::{HeaderMap, header},
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -70,11 +70,9 @@ fn extract_ws_token<'a>(headers: &'a HeaderMap, query_token: Option<&'a str>) ->
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
         .and_then(|auth| auth.strip_prefix("Bearer "))
-    {
-        if !t.is_empty() {
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     // 2. Sec-WebSocket-Protocol: bearer.<token>
     if let Some(t) = headers
@@ -86,18 +84,15 @@ fn extract_ws_token<'a>(headers: &'a HeaderMap, query_token: Option<&'a str>) ->
                 .map(|p| p.trim())
                 .find_map(|p| p.strip_prefix(BEARER_SUBPROTO_PREFIX))
         })
-    {
-        if !t.is_empty() {
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     // 3. ?token= query parameter
-    if let Some(t) = query_token {
-        if !t.is_empty() {
+    if let Some(t) = query_token
+        && !t.is_empty() {
             return Some(t);
         }
-    }
 
     None
 }
@@ -226,9 +221,9 @@ async fn handle_socket(socket: WebSocket, state: AppState, session_id: Option<St
     }
 
     // Process the first message if it was not a connect frame
-    if let Some(ref text) = first_msg_fallback {
-        if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(text) {
-            if parsed["type"].as_str() == Some("message") {
+    if let Some(ref text) = first_msg_fallback
+        && let Ok(parsed) = serde_json::from_str::<serde_json::Value>(text)
+            && parsed["type"].as_str() == Some("message") {
                 let content = parsed["content"].as_str().unwrap_or("").to_string();
                 if !content.is_empty() {
                     // Persist user message
@@ -240,8 +235,6 @@ async fn handle_socket(socket: WebSocket, state: AppState, session_id: Option<St
                         .await;
                 }
             }
-        }
-    }
 
     while let Some(msg) = receiver.next().await {
         let msg = match msg {

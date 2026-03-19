@@ -703,11 +703,10 @@ impl Channel for DiscordChannel {
                     if let Some(ref gid) = guild_filter {
                         let msg_guild = d.get("guild_id").and_then(serde_json::Value::as_str);
                         // DMs have no guild_id — let them through; for guild messages, enforce the filter
-                        if let Some(g) = msg_guild {
-                            if g != gid {
+                        if let Some(g) = msg_guild
+                            && g != gid {
                                 continue;
                             }
-                        }
                     }
 
                     let content = d.get("content").and_then(|c| c.as_str()).unwrap_or("");
@@ -1105,9 +1104,11 @@ mod tests {
         let chunks = split_message_for_discord(&msg);
         // Should split into 5 chunks of <= 2000 chars
         assert_eq!(chunks.len(), 5);
-        assert!(chunks
-            .iter()
-            .all(|chunk| chunk.chars().count() <= DISCORD_MAX_MESSAGE_LENGTH));
+        assert!(
+            chunks
+                .iter()
+                .all(|chunk| chunk.chars().count() <= DISCORD_MAX_MESSAGE_LENGTH)
+        );
         // Verify total content is preserved
         let reconstructed = chunks.concat();
         assert_eq!(reconstructed, msg);
@@ -1202,9 +1203,11 @@ mod tests {
     fn split_chunks_always_within_discord_limit() {
         let msg = "x".repeat(12_345);
         let chunks = split_message_for_discord(&msg);
-        assert!(chunks
-            .iter()
-            .all(|chunk| chunk.chars().count() <= DISCORD_MAX_MESSAGE_LENGTH));
+        assert!(
+            chunks
+                .iter()
+                .all(|chunk| chunk.chars().count() <= DISCORD_MAX_MESSAGE_LENGTH)
+        );
     }
 
     #[test]

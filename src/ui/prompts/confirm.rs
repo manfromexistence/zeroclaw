@@ -54,11 +54,11 @@ impl PromptInteraction for Confirm {
                 console::Key::ArrowLeft | console::Key::ArrowRight | console::Key::Tab => {
                     self.value = !self.value;
                 }
-                console::Key::Char('y') | console::Key::Char('Y') => {
+                console::Key::Char('y' | 'Y') => {
                     self.value = true;
                     self.state = State::Submit;
                 }
-                console::Key::Char('n') | console::Key::Char('N') => {
+                console::Key::Char('n' | 'N') => {
                     self.value = false;
                     self.state = State::Submit;
                 }
@@ -91,10 +91,10 @@ impl PromptInteraction for Confirm {
                 } else {
                     theme.dim.apply_to("Yes").to_string()
                 };
-                let no = if !self.value {
-                    theme.primary.apply_to("No").to_string()
-                } else {
+                let no = if self.value {
                     theme.dim.apply_to("No").to_string()
+                } else {
+                    theme.primary.apply_to("No").to_string()
                 };
                 term.write_line(&format!(
                     "{} {}  {}  /  {}",

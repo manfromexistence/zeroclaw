@@ -4,7 +4,6 @@
 //! and provides consistent styling across all CLI and TUI components.
 
 use console::Style;
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -16,6 +15,7 @@ use std::sync::RwLock;
 
 /// Complete theme configuration loaded from TOML
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Default)]
 pub struct ThemeConfig {
     #[serde(default)]
     pub colors: ColorConfig,
@@ -25,15 +25,6 @@ pub struct ThemeConfig {
     pub rainbow: RainbowConfig,
 }
 
-impl Default for ThemeConfig {
-    fn default() -> Self {
-        Self {
-            colors: ColorConfig::default(),
-            symbols: SymbolConfig::default(),
-            rainbow: RainbowConfig::default(),
-        }
-    }
-}
 
 /// Color configuration from TOML
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -159,45 +150,43 @@ fn default_rainbow_speed() -> f32 {
 /// Find theme.toml in current directory or parent directories
 fn find_theme_file() -> Option<PathBuf> {
     let cwd = std::env::current_dir().ok()?;
-    
+
     // Check current directory first
     let theme_path = cwd.join("theme.toml");
     if theme_path.exists() {
         return Some(theme_path);
     }
-    
+
     // Check onboard subdirectory
     let onboard_theme = cwd.join("onboard").join("theme.toml");
     if onboard_theme.exists() {
         return Some(onboard_theme);
     }
-    
+
     // Walk up parent directories
     for ancestor in cwd.ancestors().skip(1) {
         let theme_path = ancestor.join("theme.toml");
         if theme_path.exists() {
             return Some(theme_path);
         }
-        
+
         let onboard_theme = ancestor.join("onboard").join("theme.toml");
         if onboard_theme.exists() {
             return Some(onboard_theme);
         }
     }
-    
+
     None
 }
 
 /// Load theme configuration from TOML file
 pub fn load_theme_config() -> ThemeConfig {
-    if let Some(theme_path) = find_theme_file() {
-        if let Ok(content) = fs::read_to_string(&theme_path) {
-            if let Ok(config) = toml::from_str::<ThemeConfig>(&content) {
+    if let Some(theme_path) = find_theme_file()
+        && let Ok(content) = fs::read_to_string(&theme_path)
+            && let Ok(config) = toml::from_str::<ThemeConfig>(&content) {
                 return config;
             }
-        }
-    }
-    
+
     ThemeConfig::default()
 }
 
@@ -206,7 +195,7 @@ pub fn load_theme_config() -> ThemeConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Global theme configuration
-pub static THEME: Lazy<RwLock<ThemeConfig>> = Lazy::new(|| RwLock::new(load_theme_config()));
+pub static THEME: std::sync::LazyLock<RwLock<ThemeConfig>> = std::sync::LazyLock::new(|| RwLock::new(load_theme_config()));
 
 /// Get the current theme configuration
 pub fn theme() -> ThemeConfig {
@@ -228,7 +217,11 @@ pub fn reload_theme() {
 pub fn print_success(msg: impl AsRef<str>) {
     let theme = theme();
     let style = Style::new().green();
-    println!("  {} {}", style.apply_to(&theme.symbols.checkmark), msg.as_ref());
+    println!(
+        "  {} {}",
+        style.apply_to(&theme.symbols.checkmark),
+        msg.as_ref()
+    );
 }
 
 /// Print an info message with themed styling
@@ -242,19 +235,31 @@ pub fn print_info(msg: impl AsRef<str>) {
 pub fn print_warning(msg: impl AsRef<str>) {
     let theme = theme();
     let style = Style::new().yellow();
-    println!("  {} {}", style.apply_to(&theme.symbols.step_error), msg.as_ref());
+    println!(
+        "  {} {}",
+        style.apply_to(&theme.symbols.step_error),
+        msg.as_ref()
+    );
 }
 
 /// Print an error message with themed styling
 pub fn print_error(msg: impl AsRef<str>) {
     let theme = theme();
     let style = Style::new().red();
-    eprintln!("  {} {}", style.apply_to(&theme.symbols.step_cancel), msg.as_ref());
+    eprintln!(
+        "  {} {}",
+        style.apply_to(&theme.symbols.step_cancel),
+        msg.as_ref()
+    );
 }
 
 /// Print a step message with themed styling
 pub fn print_step(msg: impl AsRef<str>) {
     let theme = theme();
     let style = Style::new().white();
-    println!("  {} {}", style.apply_to(&theme.symbols.arrow_right), msg.as_ref());
+    println!(
+        "  {} {}",
+        style.apply_to(&theme.symbols.arrow_right),
+        msg.as_ref()
+    );
 }

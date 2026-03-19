@@ -10,7 +10,7 @@ fn main() {
     {
         println!("cargo:rustc-link-arg=/STACK:8388608");
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         // On Unix-like systems, set stack size via environment variable at runtime
@@ -38,8 +38,8 @@ fn main() {
     // build still succeeds.
     let needs_build = web_build_required(web_dir, dist_dir);
 
-    if needs_build && web_dir.join("package.json").exists() {
-        if let Ok(npm) = which_npm() {
+    if needs_build && web_dir.join("package.json").exists()
+        && let Ok(npm) = which_npm() {
             eprintln!("cargo:warning=Building web frontend (web/dist is missing or stale)...");
 
             // npm ci / npm install
@@ -92,7 +92,6 @@ fn main() {
                 }
             }
         }
-    }
 
     ensure_dist_dir(dist_dir);
 }

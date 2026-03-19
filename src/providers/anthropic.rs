@@ -218,8 +218,8 @@ impl AnthropicProvider {
 
     /// Apply cache control to the last message content block
     fn apply_cache_to_last_message(messages: &mut [NativeMessage]) {
-        if let Some(last_msg) = messages.last_mut() {
-            if let Some(last_content) = last_msg.content.last_mut() {
+        if let Some(last_msg) = messages.last_mut()
+            && let Some(last_content) = last_msg.content.last_mut() {
                 match last_content {
                     NativeContentOut::Text { cache_control, .. }
                     | NativeContentOut::ToolResult { cache_control, .. } => {
@@ -228,7 +228,6 @@ impl AnthropicProvider {
                     NativeContentOut::ToolUse { .. } | NativeContentOut::Image { .. } => {}
                 }
             }
-        }
     }
 
     fn convert_tools<'a>(tools: Option<&'a [ToolSpec]>) -> Option<Vec<NativeToolSpec<'a>>> {
@@ -485,11 +484,10 @@ impl AnthropicProvider {
         for block in response.content {
             match block.kind.as_str() {
                 "text" => {
-                    if let Some(text) = block.text.map(|t| t.trim().to_string()) {
-                        if !text.is_empty() {
+                    if let Some(text) = block.text.map(|t| t.trim().to_string())
+                        && !text.is_empty() {
                             text_parts.push(text);
                         }
-                    }
                 }
                 "tool_use" => {
                     let name = block.name.unwrap_or_default();
@@ -692,7 +690,7 @@ impl Provider for AnthropicProvider {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::auth::anthropic_token::{detect_auth_kind, AnthropicAuthKind};
+    use crate::auth::anthropic_token::{AnthropicAuthKind, detect_auth_kind};
 
     #[test]
     fn creates_with_key() {
@@ -1320,7 +1318,7 @@ mod tests {
     /// ALL conversation turns and native tool definitions.
     #[tokio::test]
     async fn chat_with_tools_sends_full_history_and_native_tools() {
-        use axum::{routing::post, Json, Router};
+        use axum::{Json, Router, routing::post};
         use std::sync::{Arc, Mutex};
         use tokio::net::TcpListener;
 
@@ -1364,7 +1362,9 @@ mod tests {
         let messages = vec![
             ChatMessage::system("You are a helpful assistant."),
             ChatMessage::user("gen a 2 sum in golang"),
-            ChatMessage::assistant("```go\nfunc twoSum(nums []int, target int) []int {\n    m := make(map[int]int)\n    for i, n := range nums {\n        if j, ok := m[target-n]; ok {\n            return []int{j, i}\n        }\n        m[n] = i\n    }\n    return nil\n}\n```"),
+            ChatMessage::assistant(
+                "```go\nfunc twoSum(nums []int, target int) []int {\n    m := make(map[int]int)\n    for i, n := range nums {\n        if j, ok := m[target-n]; ok {\n            return []int{j, i}\n        }\n        m[n] = i\n    }\n    return nil\n}\n```",
+            ),
             ChatMessage::user("what's meaning of make here?"),
         ];
 

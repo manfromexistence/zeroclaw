@@ -1,6 +1,6 @@
 use crate::tools::ToolSpec;
 use async_trait::async_trait;
-use futures_util::{stream, StreamExt};
+use futures_util::{StreamExt, stream};
 use serde::{Deserialize, Serialize};
 use std::fmt::Write;
 
@@ -336,8 +336,8 @@ pub trait Provider: Send + Sync {
     ) -> anyhow::Result<ChatResponse> {
         // If tools are provided but provider doesn't support native tools,
         // inject tool instructions into system prompt as fallback.
-        if let Some(tools) = request.tools {
-            if !tools.is_empty() && !self.supports_native_tools() {
+        if let Some(tools) = request.tools
+            && !tools.is_empty() && !self.supports_native_tools() {
                 let tool_instructions = match self.convert_tools(tools) {
                     ToolsPayload::PromptGuided { instructions } => instructions,
                     payload => {
@@ -371,7 +371,6 @@ pub trait Provider: Send + Sync {
                     reasoning_content: None,
                 });
             }
-        }
 
         let text = self
             .chat_with_history(request.messages, model, temperature)

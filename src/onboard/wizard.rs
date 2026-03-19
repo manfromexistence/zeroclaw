@@ -11,14 +11,14 @@ use crate::memory::{
     default_memory_backend_key, memory_backend_profile, selectable_memory_backends,
 };
 use crate::providers::{canonical_china_provider_name, is_qwen_oauth_alias};
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
 // Import UI framework
-use crate::ui::{effects::RainbowEffect, prompts, splash};
 use crate::ui::prompts::PromptInteraction;
+use crate::ui::{effects::RainbowEffect, prompts, splash};
 
 // ── Project context collected during wizard ──────────────────────
 
@@ -66,7 +66,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
     prompts::section_with_width("Welcome to ZeroClaw", 80, |lines: &mut Vec<String>| {
         lines.push("The fastest, smallest AI assistant.".to_string());
         lines.push("100% Rust. 100% Agnostic. Zero compromise.".to_string());
-        lines.push("".to_string());
+        lines.push(String::new());
         lines.push("This wizard will configure your agent in under 60 seconds.".to_string());
     })?;
 
@@ -176,10 +176,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         locale: None,
     };
 
-    prompts::log::success(format!(
-        "Security: {} | workspace-scoped",
-        "Supervised"
-    ))?;
+    prompts::log::success(format!("Security: {} | workspace-scoped", "Supervised"))?;
     prompts::log::success(format!(
         "Memory: {} (auto-save: {})",
         config.memory.backend,
@@ -290,7 +287,9 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
 
 /// Interactive flow: update only provider/model/api key while preserving existing config.
 async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) -> Result<Config> {
-    prompts::log::info("Existing config detected. Running provider-only update mode (preserving channels, memory, tunnel, hooks, and other settings).")?;
+    prompts::log::info(
+        "Existing config detected. Running provider-only update mode (preserving channels, memory, tunnel, hooks, and other settings).",
+    )?;
 
     let raw = fs::read_to_string(config_path).await.with_context(|| {
         format!(
@@ -610,9 +609,9 @@ async fn run_quick_setup_with_home(
     prompts::log::success("Gateway: pairing required (127.0.0.1:8080)")?;
     prompts::log::info("Tunnel: none (local only)")?;
     prompts::log::info("Composio: disabled (sovereign mode)")?;
-    
+
     prompts::log::success(format!("Config saved: {}", config_path.display()))?;
-    
+
     prompts::log::step("Next steps:")?;
     if credential_override.is_none() {
         if provider_supports_keyless_local_usage(&provider_name) {
@@ -1248,8 +1247,16 @@ fn resolve_interactive_onboarding_mode(
         "Existing config found at {}. Select setup mode",
         config_path.display()
     ))
-    .item(0, "Full onboarding (overwrite config.toml)", "Complete setup")
-    .item(1, "Update AI provider/model/API key only (preserve existing configuration)", "Quick update")
+    .item(
+        0,
+        "Full onboarding (overwrite config.toml)",
+        "Complete setup",
+    )
+    .item(
+        1,
+        "Update AI provider/model/API key only (preserve existing configuration)",
+        "Quick update",
+    )
     .item(2, "Cancel", "Exit without changes")
     .interact()?;
 
@@ -1337,8 +1344,7 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
     let (config_dir, workspace_dir): (PathBuf, PathBuf) = if use_default {
         (default_config_dir, default_workspace_dir)
     } else {
-        let custom = prompts::input::input("Enter workspace path")
-            .interact()?;
+        let custom = prompts::input::input("Enter workspace path").interact()?;
         let expanded = shellexpand::tilde(&custom).to_string();
         crate::config::schema::resolve_config_dir_for_workspace(&PathBuf::from(expanded))
     };
@@ -1355,7 +1361,6 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
 }
 
 // ── Step 2: Provider & API Key ───────────────────────────────────
-
 
 pub fn local_provider_choices() -> Vec<(&'static str, &'static str)> {
     vec![
@@ -1442,17 +1447,26 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
     prompts::log::info("You can always change this later in config.toml.")?;
 
     let choice = prompts::select("Select tool mode")
-        .item(0, "Sovereign (local only)", "You manage API keys, full privacy (default)")
-        .item(1, "Composio (managed OAuth)", "1000+ apps via OAuth, no raw keys shared")
+        .item(
+            0,
+            "Sovereign (local only)",
+            "You manage API keys, full privacy (default)",
+        )
+        .item(
+            1,
+            "Composio (managed OAuth)",
+            "1000+ apps via OAuth, no raw keys shared",
+        )
         .interact()?;
 
     let composio_config = if choice == 1 {
-        prompts::log::info("Composio Setup — 1000+ OAuth integrations (Gmail, Notion, GitHub, Slack, ...)")?;
+        prompts::log::info(
+            "Composio Setup — 1000+ OAuth integrations (Gmail, Notion, GitHub, Slack, ...)",
+        )?;
         prompts::log::info("Get your API key at: https://app.composio.dev/settings")?;
         prompts::log::info("ZeroClaw uses Composio as a tool — your core agent stays local.")?;
 
-        let api_key = prompts::input::input("Composio API key (or Enter to skip)")
-            .interact()?;
+        let api_key = prompts::input::input("Composio API key (or Enter to skip)").interact()?;
 
         if api_key.trim().is_empty() {
             prompts::log::info("Skipped — set composio.api_key in config.toml later")?;
@@ -1466,13 +1480,17 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
             }
         }
     } else {
-        prompts::log::success("Tool mode: Sovereign (local only) — full privacy, you own every key")?;
+        prompts::log::success(
+            "Tool mode: Sovereign (local only) — full privacy, you own every key",
+        )?;
         ComposioConfig::default()
     };
 
     // ── Encrypted secrets ──
     prompts::log::info("ZeroClaw can encrypt API keys stored in config.toml.")?;
-    prompts::log::info("A local key file protects against plaintext exposure and accidental leaks.")?;
+    prompts::log::info(
+        "A local key file protects against plaintext exposure and accidental leaks.",
+    )?;
 
     let encrypt = prompts::toggle::toggle("Enable encrypted secret storage?")
         .initial_value(true)
@@ -1519,7 +1537,7 @@ fn setup_hardware() -> Result<HardwareConfig> {
                 device.name,
                 detail,
                 path,
-                device.transport.to_string()
+                device.transport
             ))?;
         }
     }
@@ -1527,10 +1545,26 @@ fn setup_hardware() -> Result<HardwareConfig> {
     let recommended = hardware::recommended_wizard_default(&devices);
 
     let choice = prompts::select("How should ZeroClaw interact with the physical world?")
-        .item(0, "🚀 Native — direct GPIO on this Linux board (Raspberry Pi, Orange Pi, etc.)", "Direct GPIO access")
-        .item(1, "🔌 Tethered — control an Arduino/ESP32/Nucleo plugged into USB", "USB serial connection")
-        .item(2, "🔬 Debug Probe — flash/read MCUs via SWD/JTAG (probe-rs)", "Debug probe interface")
-        .item(3, "☁️  Software Only — no hardware access (default)", "No hardware")
+        .item(
+            0,
+            "🚀 Native — direct GPIO on this Linux board (Raspberry Pi, Orange Pi, etc.)",
+            "Direct GPIO access",
+        )
+        .item(
+            1,
+            "🔌 Tethered — control an Arduino/ESP32/Nucleo plugged into USB",
+            "USB serial connection",
+        )
+        .item(
+            2,
+            "🔬 Debug Probe — flash/read MCUs via SWD/JTAG (probe-rs)",
+            "Debug probe interface",
+        )
+        .item(
+            3,
+            "☁️  Software Only — no hardware access (default)",
+            "No hardware",
+        )
         .initial_value(recommended)
         .interact()?;
 
@@ -1598,9 +1632,11 @@ fn setup_hardware() -> Result<HardwareConfig> {
 
     // ── Datasheet RAG ──
     if hw_config.enabled {
-        let datasheets = prompts::toggle::toggle("Enable datasheet RAG? (index PDF schematics for AI pin lookups)")
-            .initial_value(true)
-            .interact()?;
+        let datasheets = prompts::toggle::toggle(
+            "Enable datasheet RAG? (index PDF schematics for AI pin lookups)",
+        )
+        .initial_value(true)
+        .interact()?;
         hw_config.workspace_datasheets = datasheets;
     }
 
@@ -1663,16 +1699,14 @@ fn setup_project_context() -> Result<ProjectContext> {
             .placeholder("UTC")
             .interact()?
     } else {
-        let tz_options = vec![
-            "US/Eastern",
+        let tz_options = ["US/Eastern",
             "US/Central",
             "US/Mountain",
             "US/Pacific",
             "Europe/London",
             "Europe/Berlin",
             "Asia/Tokyo",
-            "UTC",
-        ];
+            "UTC"];
         tz_options[tz_idx].to_string()
     };
 
@@ -1681,11 +1715,31 @@ fn setup_project_context() -> Result<ProjectContext> {
         .interact()?;
 
     let style_idx = prompts::select("Communication style")
-        .item(0, "Direct & concise — skip pleasantries, get to the point", "Direct")
-        .item(1, "Friendly & casual — warm, human, and helpful", "Friendly")
-        .item(2, "Professional & polished — calm, confident, and clear", "Professional")
-        .item(3, "Expressive & playful — more personality + natural emojis", "Expressive")
-        .item(4, "Technical & detailed — thorough explanations, code-first", "Technical")
+        .item(
+            0,
+            "Direct & concise — skip pleasantries, get to the point",
+            "Direct",
+        )
+        .item(
+            1,
+            "Friendly & casual — warm, human, and helpful",
+            "Friendly",
+        )
+        .item(
+            2,
+            "Professional & polished — calm, confident, and clear",
+            "Professional",
+        )
+        .item(
+            3,
+            "Expressive & playful — more personality + natural emojis",
+            "Expressive",
+        )
+        .item(
+            4,
+            "Technical & detailed — thorough explanations, code-first",
+            "Technical",
+        )
         .item(5, "Balanced — adapt to the situation", "Balanced")
         .item(6, "Custom — write your own style guide", "Custom")
         .initial_value(1)
@@ -1799,7 +1853,6 @@ pub fn channel_menu_choices() -> &'static [ChannelMenuChoice] {
 
 // setup_channels
 
-
 // ── Step 4: Tunnel ──────────────────────────────────────────────
 
 #[allow(clippy::too_many_lines)]
@@ -1815,16 +1868,23 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
     let choice = prompts::select("Select tunnel provider")
         .item(0, "Skip — local only (default)", "No tunnel")
         .item(1, "Cloudflare Tunnel — Zero Trust, free tier", "Cloudflare")
-        .item(2, "Tailscale — private tailnet or public Funnel", "Tailscale")
+        .item(
+            2,
+            "Tailscale — private tailnet or public Funnel",
+            "Tailscale",
+        )
         .item(3, "ngrok — instant public URLs", "ngrok")
-        .item(4, "Custom — bring your own (bore, frp, ssh, etc.)", "Custom")
+        .item(
+            4,
+            "Custom — bring your own (bore, frp, ssh, etc.)",
+            "Custom",
+        )
         .interact()?;
 
     let config = match choice {
         1 => {
             prompts::log::info("Get your tunnel token from the Cloudflare Zero Trust dashboard.")?;
-            let tunnel_value = prompts::input::input("Cloudflare tunnel token")
-                .interact()?;
+            let tunnel_value = prompts::input::input("Cloudflare tunnel token").interact()?;
             if tunnel_value.trim().is_empty() {
                 prompts::log::info("Skipped")?;
                 TunnelConfig::default()
@@ -1865,8 +1925,7 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             prompts::log::info(
                 "Get your auth token at https://dashboard.ngrok.com/get-started/your-authtoken",
             )?;
-            let auth_token = prompts::input::input("ngrok auth token")
-                .interact()?;
+            let auth_token = prompts::input::input("ngrok auth token").interact()?;
             if auth_token.trim().is_empty() {
                 prompts::log::info("Skipped")?;
                 TunnelConfig::default()
@@ -1893,8 +1952,7 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
             prompts::log::info("Enter the command to start your tunnel.")?;
             prompts::log::info("Use {port} and {host} as placeholders.")?;
             prompts::log::info("Example: bore local {port} --to bore.pub")?;
-            let cmd = prompts::input::input("Start command")
-                .interact()?;
+            let cmd = prompts::input::input("Start command").interact()?;
             if cmd.trim().is_empty() {
                 prompts::log::info("Skipped")?;
                 TunnelConfig::default()
@@ -2170,7 +2228,9 @@ async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Resul
 
     prompts::log::success(format!(
         "Created {} files, skipped {} existing | {} subdirectories",
-        created, skipped, subdirs.len()
+        created,
+        skipped,
+        subdirs.len()
     ))?;
 
     prompts::log::info("Workspace layout:")?;
@@ -2198,7 +2258,10 @@ fn print_summary(config: &Config) -> Result<()> {
 
     prompts::outro("⚡ ZeroClaw is ready!")?;
 
-    prompts::log::info(format!("Configuration saved to: {}", config.config_path.display()))?;
+    prompts::log::info(format!(
+        "Configuration saved to: {}",
+        config.config_path.display()
+    ))?;
 
     prompts::log::step("Quick summary:")?;
     prompts::log::info(format!(
@@ -2297,16 +2360,10 @@ fn print_summary(config: &Config) -> Result<()> {
     let provider = config.default_provider.as_deref().unwrap_or("openrouter");
     if config.api_key.is_none() && !provider_supports_keyless_local_usage(provider) {
         if provider == "openai-codex" {
-            prompts::log::info(format!(
-                "{}. Authenticate OpenAI Codex:",
-                step
-            ))?;
+            prompts::log::info(format!("{}. Authenticate OpenAI Codex:", step))?;
             prompts::log::info("   zeroclaw auth login --provider openai-codex --device-code")?;
         } else if provider == "anthropic" {
-            prompts::log::info(format!(
-                "{}. Configure Anthropic auth:",
-                step
-            ))?;
+            prompts::log::info(format!("{}. Configure Anthropic auth:", step))?;
             prompts::log::info("   export ANTHROPIC_API_KEY=\"sk-ant-...\"")?;
             prompts::log::info(
                 "   or: zeroclaw auth paste-token --provider anthropic --auth-kind authorization",

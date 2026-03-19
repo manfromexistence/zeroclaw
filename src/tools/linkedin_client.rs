@@ -1,7 +1,7 @@
 use crate::config::LinkedInImageConfig;
 use anyhow::Context;
-use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Method;
+use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::json;
 use std::path::{Path, PathBuf};
 
@@ -225,8 +225,8 @@ impl LinkedInClient {
 
         // Add scheduled publish options if a future timestamp is provided.
         // The timestamp must be ISO 8601 / RFC 3339, e.g. "2026-03-17T08:00:00Z".
-        if let Some(ts) = scheduled_at {
-            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) {
+        if let Some(ts) = scheduled_at
+            && let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) {
                 let epoch_ms = dt.timestamp_millis();
                 body.as_object_mut().unwrap().insert(
                     "scheduledPublishOptions".to_string(),
@@ -235,7 +235,6 @@ impl LinkedInClient {
                 // Scheduled posts use DRAFT lifecycle
                 body["lifecycleState"] = json!("DRAFT");
             }
-        }
 
         if let Some(url) = article_url {
             let mut article = json!({
@@ -653,15 +652,14 @@ impl LinkedInClient {
             }
         });
 
-        if let Some(ts) = scheduled_at {
-            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) {
+        if let Some(ts) = scheduled_at
+            && let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) {
                 let epoch_ms = dt.timestamp_millis();
                 body.as_object_mut().unwrap().insert(
                     "scheduledPublishOptions".to_string(),
                     json!({ "scheduledPublishTime": epoch_ms }),
                 );
             }
-        }
 
         let url = format!("{LINKEDIN_API_BASE}/rest/posts");
         let response = self
@@ -836,14 +834,13 @@ impl ImageGenerator {
                 continue;
             }
             let line = line.strip_prefix("export ").map(str::trim).unwrap_or(line);
-            if let Some((key, value)) = line.split_once('=') {
-                if key.trim() == var_name {
+            if let Some((key, value)) = line.split_once('=')
+                && key.trim() == var_name {
                     let val = LinkedInClient::parse_env_value(value);
                     if !val.is_empty() {
                         return Ok(val);
                     }
                 }
-            }
         }
 
         anyhow::bail!("{var_name} not found or empty in .env")
@@ -1638,10 +1635,12 @@ mod tests {
         let generator = ImageGenerator::new(config, tmp.path().to_path_buf());
         let result = generator.generate("Test").await;
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("All image generation providers failed"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("All image generation providers failed")
+        );
     }
 
     #[tokio::test]
@@ -1706,10 +1705,12 @@ mod tests {
 
         let result = ImageGenerator::read_env_var(tmp.path(), "STABILITY_API_KEY").await;
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("STABILITY_API_KEY"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("STABILITY_API_KEY")
+        );
     }
 
     #[test]

@@ -33,16 +33,14 @@ pub fn classify_with_decision(
 
     for rule in rules {
         // Length constraints
-        if let Some(min) = rule.min_length {
-            if len < min {
+        if let Some(min) = rule.min_length
+            && len < min {
                 continue;
             }
-        }
-        if let Some(max) = rule.max_length {
-            if len > max {
+        if let Some(max) = rule.max_length
+            && len > max {
                 continue;
             }
-        }
 
         // Check keywords (case-insensitive) and patterns (case-sensitive)
         let keyword_hit = rule

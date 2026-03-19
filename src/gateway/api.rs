@@ -5,7 +5,7 @@
 use super::AppState;
 use axum::{
     extract::{Path, Query, State},
-    http::{header, HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header},
     response::{IntoResponse, Json},
 };
 use serde::Deserialize;
@@ -648,11 +648,10 @@ fn restore_required_secret(value: &mut String, current: &str) {
 
 fn restore_vec_secrets(values: &mut [String], current: &[String]) {
     for (idx, value) in values.iter_mut().enumerate() {
-        if is_masked_secret(value) {
-            if let Some(existing) = current.get(idx) {
+        if is_masked_secret(value)
+            && let Some(existing) = current.get(idx) {
                 *value = existing.clone();
             }
-        }
     }
 }
 
@@ -1547,13 +1546,17 @@ mod tests {
             Some("route-embed-key-1")
         );
         assert_eq!(hydrated.embedding_routes[2].api_key, None);
-        assert!(hydrated
-            .model_routes
-            .iter()
-            .all(|route| route.api_key.as_deref() != Some(MASKED_SECRET)));
-        assert!(hydrated
-            .embedding_routes
-            .iter()
-            .all(|route| route.api_key.as_deref() != Some(MASKED_SECRET)));
+        assert!(
+            hydrated
+                .model_routes
+                .iter()
+                .all(|route| route.api_key.as_deref() != Some(MASKED_SECRET))
+        );
+        assert!(
+            hydrated
+                .embedding_routes
+                .iter()
+                .all(|route| route.api_key.as_deref() != Some(MASKED_SECRET))
+        );
     }
 }

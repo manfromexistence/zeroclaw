@@ -2,15 +2,15 @@
 
 use std::borrow::Cow;
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, Command};
-use tokio::sync::{oneshot, Mutex, Notify};
-use tokio::time::{timeout, Duration};
+use tokio::sync::{Mutex, Notify, oneshot};
+use tokio::time::{Duration, timeout};
 use tokio_stream::StreamExt;
 
 use crate::config::schema::{McpServerConfig, McpTransport};
-use crate::tools::mcp_protocol::{JsonRpcError, JsonRpcRequest, JsonRpcResponse, INTERNAL_ERROR};
+use crate::tools::mcp_protocol::{INTERNAL_ERROR, JsonRpcError, JsonRpcRequest, JsonRpcResponse};
 
 /// Maximum bytes for a single JSON-RPC response.
 const MAX_LINE_BYTES: usize = 4 * 1024 * 1024; // 4 MB
@@ -317,12 +317,11 @@ impl SseTransport {
         if self.stream_state == SseStreamState::Unsupported {
             return Ok(());
         }
-        if let Some(task) = &self.reader_task {
-            if !task.is_finished() {
+        if let Some(task) = &self.reader_task
+            && !task.is_finished() {
                 self.stream_state = SseStreamState::Connected;
                 return Ok(());
             }
-        }
 
         let has_accept = self
             .headers
@@ -720,13 +719,12 @@ impl McpTransportConn for SseTransport {
             for _ in 0..3 {
                 {
                     let guard = self.shared.lock().await;
-                    if guard.message_url_from_endpoint {
-                        if let Some(url) = &guard.message_url {
+                    if guard.message_url_from_endpoint
+                        && let Some(url) = &guard.message_url {
                             message_url = url.clone();
                             from_endpoint = true;
                             break;
                         }
-                    }
                 }
                 let _ = timeout(Duration::from_millis(300), self.notify.notified()).await;
             }
@@ -746,8 +744,8 @@ impl McpTransportConn for SseTransport {
         let has_secondary = secondary_url.is_some();
 
         let mut rx = None;
-        if let Some(id) = id {
-            if self.stream_state == SseStreamState::Connected {
+        if let Some(id) = id
+            && self.stream_state == SseStreamState::Connected {
                 let (tx, ch) = oneshot::channel();
                 {
                     let mut guard = self.shared.lock().await;
@@ -755,7 +753,6 @@ impl McpTransportConn for SseTransport {
                 }
                 rx = Some((id, ch));
             }
-        }
 
         let mut got_direct = None;
         let mut last_status = None;
@@ -868,12 +865,11 @@ impl McpTransportConn for SseTransport {
             if got_direct.is_some() {
                 let mut guard = self.shared.lock().await;
                 guard.pending.remove(id);
-            } else if let Some(status) = last_status {
-                if !status.is_success() {
+            } else if let Some(status) = last_status
+                && !status.is_success() {
                     let mut guard = self.shared.lock().await;
                     guard.pending.remove(id);
                 }
-            }
         }
 
         if let Some(resp) = got_direct {

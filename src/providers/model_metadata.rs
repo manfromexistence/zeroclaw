@@ -1,5 +1,5 @@
 //! Model metadata from LiteLLM's comprehensive database
-//! 
+//!
 //! This module provides access to pricing, context limits, and capabilities
 //! for 2600+ models across 140+ providers.
 
@@ -11,61 +11,61 @@ use std::collections::HashMap;
 pub struct ModelInfo {
     #[serde(default)]
     pub litellm_provider: String,
-    
+
     #[serde(default)]
     pub mode: String,
-    
+
     #[serde(default)]
     pub max_tokens: Option<u32>,
-    
+
     #[serde(default)]
     pub max_input_tokens: Option<u32>,
-    
+
     #[serde(default)]
     pub max_output_tokens: Option<u32>,
-    
+
     #[serde(default)]
     pub input_cost_per_token: Option<f64>,
-    
+
     #[serde(default)]
     pub output_cost_per_token: Option<f64>,
-    
+
     #[serde(default)]
     pub output_cost_per_reasoning_token: Option<f64>,
-    
+
     #[serde(default)]
     pub supports_vision: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_function_calling: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_parallel_function_calling: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_prompt_caching: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_reasoning: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_response_schema: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_system_messages: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_audio_input: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_audio_output: Option<bool>,
-    
+
     #[serde(default)]
     pub supports_web_search: Option<bool>,
-    
+
     #[serde(default)]
     pub deprecation_date: Option<String>,
-    
+
     #[serde(default)]
     pub supported_regions: Option<Vec<String>>,
 }
@@ -75,17 +75,17 @@ impl ModelInfo {
     pub fn effective_max_input_tokens(&self) -> Option<u32> {
         self.max_input_tokens.or(self.max_tokens)
     }
-    
+
     /// Get the effective max output tokens
     pub fn effective_max_output_tokens(&self) -> Option<u32> {
         self.max_output_tokens.or(self.max_tokens)
     }
-    
+
     /// Check if the model is deprecated
     pub fn is_deprecated(&self) -> bool {
         self.deprecation_date.is_some()
     }
-    
+
     /// Check if the model supports chat mode
     pub fn is_chat_model(&self) -> bool {
         self.mode == "chat"
@@ -96,14 +96,14 @@ impl ModelInfo {
 static MODEL_DATABASE: &str = include_str!("model_prices_and_context_window.json");
 
 /// Lazy-loaded model database
-static MODEL_DB: once_cell::sync::Lazy<HashMap<String, ModelInfo>> = 
-    once_cell::sync::Lazy::new(|| {
+static MODEL_DB: std::sync::LazyLock<HashMap<String, ModelInfo>> =
+    std::sync::LazyLock::new(|| {
         let raw: HashMap<String, serde_json::Value> = serde_json::from_str(MODEL_DATABASE)
             .unwrap_or_else(|e| {
                 eprintln!("Warning: Failed to parse model database: {}", e);
                 HashMap::new()
             });
-        
+
         // Filter out sample_spec and parse valid entries
         raw.into_iter()
             .filter(|(k, _)| k != "sample_spec")

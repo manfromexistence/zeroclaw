@@ -219,17 +219,15 @@ fn home_dir() -> Option<PathBuf> {
 }
 
 fn expand_user_path(path: &str) -> PathBuf {
-    if path == "~" {
-        if let Some(home) = home_dir() {
+    if path == "~"
+        && let Some(home) = home_dir() {
             return home;
         }
-    }
 
-    if let Some(stripped) = path.strip_prefix("~/") {
-        if let Some(home) = home_dir() {
+    if let Some(stripped) = path.strip_prefix("~/")
+        && let Some(home) = home_dir() {
             return home.join(stripped);
         }
-    }
 
     PathBuf::from(path)
 }
@@ -573,11 +571,7 @@ fn attached_short_option_value(token: &str) -> Option<&str> {
         return None;
     }
     let value = body[1..].trim_start_matches('=').trim();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value)
-    }
+    if value.is_empty() { None } else { Some(value) }
 }
 
 fn redirection_target(token: &str) -> Option<&str> {
@@ -963,12 +957,12 @@ impl SecurityPolicy {
         }
 
         // At least one command must be present
-        let has_cmd = segments.iter().any(|s| {
+        
+
+        segments.iter().any(|s| {
             let s = skip_env_assignments(s.trim());
             s.split_whitespace().next().is_some_and(|w| !w.is_empty())
-        });
-
-        has_cmd
+        })
     }
 
     /// Check for dangerous arguments that allow sub-command execution.
@@ -1019,11 +1013,10 @@ impl SecurityPolicy {
             };
 
             // Cover inline forms like `cat</etc/passwd`.
-            if let Some(target) = redirection_target(strip_wrapping_quotes(executable)) {
-                if let Some(blocked) = forbidden_candidate(target) {
+            if let Some(target) = redirection_target(strip_wrapping_quotes(executable))
+                && let Some(blocked) = forbidden_candidate(target) {
                     return Some(blocked);
                 }
-            }
 
             for token in words {
                 let candidate = strip_wrapping_quotes(token).trim();
@@ -1031,24 +1024,21 @@ impl SecurityPolicy {
                     continue;
                 }
 
-                if let Some(target) = redirection_target(candidate) {
-                    if let Some(blocked) = forbidden_candidate(target) {
+                if let Some(target) = redirection_target(candidate)
+                    && let Some(blocked) = forbidden_candidate(target) {
                         return Some(blocked);
                     }
-                }
 
                 // Handle option assignment forms like `--file=/etc/passwd`.
                 if candidate.starts_with('-') {
-                    if let Some((_, value)) = candidate.split_once('=') {
-                        if let Some(blocked) = forbidden_candidate(value) {
+                    if let Some((_, value)) = candidate.split_once('=')
+                        && let Some(blocked) = forbidden_candidate(value) {
                             return Some(blocked);
                         }
-                    }
-                    if let Some(value) = attached_short_option_value(candidate) {
-                        if let Some(blocked) = forbidden_candidate(value) {
+                    if let Some(value) = attached_short_option_value(candidate)
+                        && let Some(blocked) = forbidden_candidate(value) {
                             return Some(blocked);
                         }
-                    }
                     continue;
                 }
 
@@ -1355,9 +1345,10 @@ mod tests {
     #[test]
     fn enforce_tool_operation_read_allowed_in_readonly_mode() {
         let p = readonly_policy();
-        assert!(p
-            .enforce_tool_operation(ToolOperation::Read, "memory_recall")
-            .is_ok());
+        assert!(
+            p.enforce_tool_operation(ToolOperation::Read, "memory_recall")
+                .is_ok()
+        );
     }
 
     #[test]

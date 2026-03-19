@@ -125,8 +125,8 @@ impl Tool for FileWriteTool {
         let resolved_target = resolved_parent.join(file_name);
 
         // If the target already exists and is a symlink, refuse to follow it
-        if let Ok(meta) = tokio::fs::symlink_metadata(&resolved_target).await {
-            if meta.file_type().is_symlink() {
+        if let Ok(meta) = tokio::fs::symlink_metadata(&resolved_target).await
+            && meta.file_type().is_symlink() {
                 return Ok(ToolResult {
                     success: false,
                     output: String::new(),
@@ -136,7 +136,6 @@ impl Tool for FileWriteTool {
                     )),
                 });
             }
-        }
 
         if !self.security.record_action() {
             return Ok(ToolResult {
@@ -352,11 +351,13 @@ mod tests {
             .unwrap();
 
         assert!(!result.success);
-        assert!(result
-            .error
-            .as_deref()
-            .unwrap_or("")
-            .contains("escapes workspace"));
+        assert!(
+            result
+                .error
+                .as_deref()
+                .unwrap_or("")
+                .contains("escapes workspace")
+        );
         assert!(!outside.join("hijack.txt").exists());
 
         let _ = tokio::fs::remove_dir_all(&root).await;
@@ -398,11 +399,13 @@ mod tests {
             .unwrap();
 
         assert!(!result.success);
-        assert!(result
-            .error
-            .as_deref()
-            .unwrap_or("")
-            .contains("Rate limit exceeded"));
+        assert!(
+            result
+                .error
+                .as_deref()
+                .unwrap_or("")
+                .contains("Rate limit exceeded")
+        );
         assert!(!dir.join("out.txt").exists());
 
         let _ = tokio::fs::remove_dir_all(&dir).await;

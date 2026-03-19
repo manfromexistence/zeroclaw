@@ -82,10 +82,10 @@ impl PromptInteraction for Toggle {
                 | console::Key::Tab => {
                     self.value = !self.value;
                 }
-                console::Key::Char('y') | console::Key::Char('Y') => {
+                console::Key::Char('y' | 'Y') => {
                     self.value = true;
                 }
-                console::Key::Char('n') | console::Key::Char('N') => {
+                console::Key::Char('n' | 'N') => {
                     self.value = false;
                 }
                 _ => {}

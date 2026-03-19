@@ -92,15 +92,14 @@ impl ScreenshotTool {
         };
 
         // macOS region flags
-        if cfg!(target_os = "macos") {
-            if let Some(region) = args.get("region").and_then(|v| v.as_str()) {
+        if cfg!(target_os = "macos")
+            && let Some(region) = args.get("region").and_then(|v| v.as_str()) {
                 match region {
                     "selection" => cmd_args.insert(1, "-s".into()),
                     "window" => cmd_args.insert(1, "-w".into()),
                     _ => {} // ignore unknown regions
                 }
             }
-        }
 
         let program = cmd_args.remove(0);
         let result = tokio::time::timeout(
@@ -153,8 +152,8 @@ impl ScreenshotTool {
     async fn read_and_encode(output_path: &std::path::Path) -> anyhow::Result<ToolResult> {
         // Check file size before reading to prevent OOM on large screenshots
         const MAX_RAW_BYTES: u64 = 1_572_864; // ~1.5 MB (base64 expands ~33%)
-        if let Ok(meta) = tokio::fs::metadata(output_path).await {
-            if meta.len() > MAX_RAW_BYTES {
+        if let Ok(meta) = tokio::fs::metadata(output_path).await
+            && meta.len() > MAX_RAW_BYTES {
                 return Ok(ToolResult {
                     success: true,
                     output: format!(
@@ -165,7 +164,6 @@ impl ScreenshotTool {
                     error: None,
                 });
             }
-        }
 
         match tokio::fs::read(output_path).await {
             Ok(bytes) => {

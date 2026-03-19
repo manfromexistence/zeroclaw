@@ -478,15 +478,14 @@ pub fn all_tools_with_runtime(
         )));
     }
 
-    if let Some(key) = composio_key {
-        if !key.is_empty() {
+    if let Some(key) = composio_key
+        && !key.is_empty() {
             tool_arcs.push(Arc::new(ComposioTool::new(
                 key,
                 composio_entity_id,
                 security.clone(),
             )));
         }
-    }
 
     // Microsoft 365 Graph API integration
     if root_config.microsoft365.enabled {

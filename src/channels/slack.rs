@@ -244,11 +244,10 @@ impl SlackChannel {
             return None;
         };
 
-        if let Some(entry) = cache.get(user_id) {
-            if now <= entry.expires_at {
+        if let Some(entry) = cache.get(user_id)
+            && now <= entry.expires_at {
                 return Some(entry.display_name.clone());
             }
-        }
 
         cache.remove(user_id);
         None
@@ -459,22 +458,20 @@ impl SlackChannel {
             .await
             .unwrap_or_else(|| raw_file.clone());
 
-        if Self::is_image_file(&file) {
-            if let Some(marker) = self.fetch_image_marker(&file).await {
+        if Self::is_image_file(&file)
+            && let Some(marker) = self.fetch_image_marker(&file).await {
                 return Some(marker);
             }
-        }
 
         let mut snippet = Self::file_text_preview(&file);
         if snippet.is_none() && Self::is_probably_text_file(&file) {
             snippet = self.download_text_snippet(&file).await;
         }
 
-        if let Some(text) = snippet {
-            if !text.trim().is_empty() {
+        if let Some(text) = snippet
+            && !text.trim().is_empty() {
                 return Some(Self::format_snippet_attachment(&file, &text));
             }
-        }
 
         Some(Self::format_attachment_summary(&file))
     }
@@ -942,15 +939,13 @@ impl SlackChannel {
 
         if let Some(ext) = Self::file_extension(source_url)
             .or_else(|| Self::file_extension(&Self::slack_file_name(file)))
-        {
-            if let Some(mime) = Self::mime_from_extension(&ext) {
+            && let Some(mime) = Self::mime_from_extension(&ext) {
                 tracing::warn!(
                     "Slack image MIME mismatch for {}: filename extension implies {}, but bytes do not match a supported image signature",
                     redacted_source,
                     mime
                 );
             }
-        }
 
         None
     }
@@ -962,11 +957,7 @@ impl SlackChannel {
             .unwrap_or_default()
             .trim()
             .to_ascii_lowercase();
-        if mime.is_empty() {
-            None
-        } else {
-            Some(mime)
-        }
+        if mime.is_empty() { None } else { Some(mime) }
     }
 
     fn is_supported_image_mime(mime: &str) -> bool {
@@ -1719,11 +1710,10 @@ impl SlackChannel {
                 if channel_id.is_empty() {
                     continue;
                 }
-                if let Some(ref configured_channels) = scoped_channels {
-                    if !configured_channels.iter().any(|id| id == &channel_id) {
+                if let Some(ref configured_channels) = scoped_channels
+                    && !configured_channels.iter().any(|id| id == &channel_id) {
                         continue;
                     }
-                }
 
                 let user = event
                     .get("user")

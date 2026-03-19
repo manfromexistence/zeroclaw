@@ -20,7 +20,7 @@ pub struct Slider {
 impl Slider {
     /// Creates a new slider prompt.
     pub fn new(message: impl Into<String>, min: i64, max: i64) -> Self {
-        let mid = (min + max) / 2;
+        let mid = i64::midpoint(min, max);
         Self {
             message: message.into(),
             value: mid,

@@ -7,8 +7,8 @@
 // The Composio API key is stored in the encrypted secret store.
 
 use super::traits::{Tool, ToolResult};
-use crate::security::policy::ToolOperation;
 use crate::security::SecurityPolicy;
+use crate::security::policy::ToolOperation;
 use anyhow::Context;
 use async_trait::async_trait;
 use parking_lot::RwLock;
@@ -221,8 +221,8 @@ impl ComposioTool {
 
         let mut slug_candidates = self.build_v3_slug_candidates(action_name);
         let mut prime_error = None;
-        if slug_candidates.is_empty() {
-            if let Some(app) = app_hint.as_deref() {
+        if slug_candidates.is_empty()
+            && let Some(app) = app_hint.as_deref() {
                 match self.list_actions(Some(app)).await {
                     Ok(_) => {
                         slug_candidates = self.build_v3_slug_candidates(action_name);
@@ -234,7 +234,6 @@ impl ComposioTool {
                     }
                 }
             }
-        }
 
         if slug_candidates.is_empty() {
             anyhow::bail!(
@@ -788,14 +787,7 @@ impl Tool for ComposioTool {
                 let acct_ref = args.get("connected_account_id").and_then(|v| v.as_str());
 
                 match self
-                    .execute_action(
-                        action_name,
-                        app,
-                        params,
-                        text,
-                        Some(entity_id),
-                        acct_ref,
-                    )
+                    .execute_action(action_name, app, params, text, Some(entity_id), acct_ref)
                     .await
                 {
                     Ok(result) => {
@@ -819,9 +811,7 @@ impl Tool for ComposioTool {
                         Ok(ToolResult {
                             success: false,
                             output: String::new(),
-                            error: Some(format!(
-                                "Action execution failed: {e}{schema_hint}"
-                            )),
+                            error: Some(format!("Action execution failed: {e}{schema_hint}")),
                         })
                     }
                 }
@@ -853,15 +843,18 @@ impl Tool for ComposioTool {
                     Ok(link) => {
                         let target =
                             app.unwrap_or(auth_config_id.unwrap_or("provided auth config"));
-                        let mut output = format!(
-                            "Open this URL to connect {target}:\n{}",
-                            link.redirect_url
-                        );
+                        let mut output =
+                            format!("Open this URL to connect {target}:\n{}", link.redirect_url);
                         if let Some(connected_account_id) = link.connected_account_id.as_deref() {
                             if let Some(app_name) = app {
-                                self.cache_connected_account(app_name, entity_id, connected_account_id);
+                                self.cache_connected_account(
+                                    app_name,
+                                    entity_id,
+                                    connected_account_id,
+                                );
                             }
-                            let _ = write!(output, "\nConnected account ID: {connected_account_id}");
+                            let _ =
+                                write!(output, "\nConnected account ID: {connected_account_id}");
                         }
                         Ok(ToolResult {
                             success: true,
@@ -1347,12 +1340,16 @@ mod tests {
     #[test]
     fn composio_tool_has_description() {
         let _tool = ComposioTool::new("test-key", None, test_security());
-        assert!(!ComposioTool::new("test-key", None, test_security())
-            .description()
-            .is_empty());
-        assert!(ComposioTool::new("test-key", None, test_security())
-            .description()
-            .contains("1000+"));
+        assert!(
+            !ComposioTool::new("test-key", None, test_security())
+                .description()
+                .is_empty()
+        );
+        assert!(
+            ComposioTool::new("test-key", None, test_security())
+                .description()
+                .contains("1000+")
+        );
     }
 
     #[test]
@@ -1431,11 +1428,13 @@ mod tests {
             .await
             .unwrap();
         assert!(!result.success);
-        assert!(result
-            .error
-            .as_deref()
-            .unwrap_or("")
-            .contains("read-only mode"));
+        assert!(
+            result
+                .error
+                .as_deref()
+                .unwrap_or("")
+                .contains("read-only mode")
+        );
     }
 
     #[tokio::test]
@@ -1453,11 +1452,13 @@ mod tests {
             .await
             .unwrap();
         assert!(!result.success);
-        assert!(result
-            .error
-            .as_deref()
-            .unwrap_or("")
-            .contains("Rate limit exceeded"));
+        assert!(
+            result
+                .error
+                .as_deref()
+                .unwrap_or("")
+                .contains("Rate limit exceeded")
+        );
     }
 
     // ── API response parsing ──────────────────────────────────

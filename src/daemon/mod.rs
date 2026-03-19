@@ -13,7 +13,7 @@ const STATUS_FLUSH_SECONDS: u64 = 5;
 async fn wait_for_shutdown_signal() -> Result<()> {
     #[cfg(unix)]
     {
-        use tokio::signal::unix::{signal, SignalKind};
+        use tokio::signal::unix::{SignalKind, signal};
 
         let mut sigint = signal(SignalKind::interrupt())?;
         let mut sigterm = signal(SignalKind::terminate())?;
@@ -216,7 +216,7 @@ where
 
 async fn run_heartbeat_worker(config: Config) -> Result<()> {
     use crate::heartbeat::engine::{
-        compute_adaptive_interval, HeartbeatEngine, HeartbeatTask, TaskPriority, TaskStatus,
+        HeartbeatEngine, HeartbeatTask, TaskPriority, TaskStatus, compute_adaptive_interval,
     };
     use std::sync::Arc;
 
@@ -245,8 +245,8 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
             loop {
                 tokio::time::sleep(check_interval).await;
                 let last_tick = dm_metrics.lock().last_tick_at;
-                if let Some(last) = last_tick {
-                    if chrono::Utc::now() - last > timeout {
+                if let Some(last) = last_tick
+                    && chrono::Utc::now() - last > timeout {
                         let alert = format!(
                             "⚠️ Heartbeat dead-man's switch: no tick in {deadman_timeout} minutes"
                         );
@@ -269,7 +269,6 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
                         )
                         .await;
                     }
-                }
             }
         });
     }
@@ -398,8 +397,8 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
                     } else {
                         output
                     };
-                    if let Some((channel, target)) = &delivery {
-                        if let Err(e) = crate::cron::scheduler::deliver_announcement(
+                    if let Some((channel, target)) = &delivery
+                        && let Err(e) = crate::cron::scheduler::deliver_announcement(
                             &config,
                             channel,
                             target,
@@ -413,7 +412,6 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
                             );
                             tracing::warn!("Heartbeat delivery failed: {e}");
                         }
-                    }
                 }
                 Err(e) => {
                     tick_had_error = true;
@@ -602,10 +600,12 @@ mod tests {
         let component = &snapshot["components"]["daemon-test-fail"];
         assert_eq!(component["status"], "error");
         assert!(component["restart_count"].as_u64().unwrap_or(0) >= 1);
-        assert!(component["last_error"]
-            .as_str()
-            .unwrap_or("")
-            .contains("boom"));
+        assert!(
+            component["last_error"]
+                .as_str()
+                .unwrap_or("")
+                .contains("boom")
+        );
     }
 
     #[tokio::test]
@@ -620,10 +620,12 @@ mod tests {
         let component = &snapshot["components"]["daemon-test-exit"];
         assert_eq!(component["status"], "error");
         assert!(component["restart_count"].as_u64().unwrap_or(0) >= 1);
-        assert!(component["last_error"]
-            .as_str()
-            .unwrap_or("")
-            .contains("component exited unexpectedly"));
+        assert!(
+            component["last_error"]
+                .as_str()
+                .unwrap_or("")
+                .contains("component exited unexpectedly")
+        );
     }
 
     #[test]
@@ -707,9 +709,10 @@ mod tests {
         let mut config = Config::default();
         config.heartbeat.target = Some("telegram".into());
         let err = resolve_heartbeat_delivery(&config).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("heartbeat.to is required when heartbeat.target is set"));
+        assert!(
+            err.to_string()
+                .contains("heartbeat.to is required when heartbeat.target is set")
+        );
     }
 
     #[test]
@@ -717,9 +720,10 @@ mod tests {
         let mut config = Config::default();
         config.heartbeat.to = Some("123456".into());
         let err = resolve_heartbeat_delivery(&config).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("heartbeat.target is required when heartbeat.to is set"));
+        assert!(
+            err.to_string()
+                .contains("heartbeat.target is required when heartbeat.to is set")
+        );
     }
 
     #[test]
@@ -728,9 +732,10 @@ mod tests {
         config.heartbeat.target = Some("email".into());
         config.heartbeat.to = Some("ops@example.com".into());
         let err = resolve_heartbeat_delivery(&config).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("unsupported heartbeat.target channel"));
+        assert!(
+            err.to_string()
+                .contains("unsupported heartbeat.target channel")
+        );
     }
 
     #[test]
@@ -739,9 +744,10 @@ mod tests {
         config.heartbeat.target = Some("telegram".into());
         config.heartbeat.to = Some("123456".into());
         let err = resolve_heartbeat_delivery(&config).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("channels_config.telegram is not configured"));
+        assert!(
+            err.to_string()
+                .contains("channels_config.telegram is not configured")
+        );
     }
 
     #[test]
@@ -796,7 +802,7 @@ mod tests {
     #[tokio::test]
     async fn sighup_does_not_shut_down_daemon() {
         use libc;
-        use tokio::time::{timeout, Duration};
+        use tokio::time::{Duration, timeout};
 
         let handle = tokio::spawn(wait_for_shutdown_signal());
 

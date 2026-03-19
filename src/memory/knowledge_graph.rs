@@ -8,7 +8,7 @@
 use anyhow::Context;
 use chrono::{DateTime, Utc};
 use parking_lot::Mutex;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -455,11 +455,10 @@ impl KnowledgeGraph {
 
         let mut results: Vec<SearchResult> = Vec::new();
         for (eid, score) in expert_scores {
-            if let Some(node) = self.get_node(&eid)? {
-                if node.node_type == NodeType::Expert {
+            if let Some(node) = self.get_node(&eid)?
+                && node.node_type == NodeType::Expert {
                     results.push(SearchResult { node, score });
                 }
-            }
         }
 
         results.sort_by(|a, b| {

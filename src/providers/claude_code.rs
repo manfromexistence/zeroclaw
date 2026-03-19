@@ -36,7 +36,7 @@ use async_trait::async_trait;
 use std::path::PathBuf;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use tokio::time::{timeout, Duration};
+use tokio::time::{Duration, timeout};
 
 /// Environment variable for overriding the path to the `claude` binary.
 pub const CLAUDE_CODE_PATH_ENV: &str = "CLAUDE_CODE_PATH";
@@ -238,11 +238,10 @@ impl Provider for ClaudeCodeProvider {
 
         // Format multi-turn conversation into a single prompt.
         let mut parts = Vec::new();
-        if let Some(s) = system {
-            if !s.is_empty() {
+        if let Some(s) = system
+            && !s.is_empty() {
                 parts.push(format!("[system]\n{s}"));
             }
-        }
         for msg in &turns {
             let label = match msg.role.as_str() {
                 "user" => "[user]",
@@ -292,12 +291,12 @@ mod tests {
     fn new_uses_env_override() {
         let _guard = env_lock();
         let orig = std::env::var(CLAUDE_CODE_PATH_ENV).ok();
-        std::env::set_var(CLAUDE_CODE_PATH_ENV, "/usr/local/bin/claude");
+        unsafe { std::env::set_var(CLAUDE_CODE_PATH_ENV, "/usr/local/bin/claude") };
         let provider = ClaudeCodeProvider::new();
         assert_eq!(provider.binary_path, PathBuf::from("/usr/local/bin/claude"));
         match orig {
-            Some(v) => std::env::set_var(CLAUDE_CODE_PATH_ENV, v),
-            None => std::env::remove_var(CLAUDE_CODE_PATH_ENV),
+            Some(v) => unsafe { std::env::set_var(CLAUDE_CODE_PATH_ENV, v) },
+            None => unsafe { std::env::remove_var(CLAUDE_CODE_PATH_ENV) },
         }
     }
 
@@ -305,11 +304,11 @@ mod tests {
     fn new_defaults_to_claude() {
         let _guard = env_lock();
         let orig = std::env::var(CLAUDE_CODE_PATH_ENV).ok();
-        std::env::remove_var(CLAUDE_CODE_PATH_ENV);
+        unsafe { std::env::remove_var(CLAUDE_CODE_PATH_ENV) };
         let provider = ClaudeCodeProvider::new();
         assert_eq!(provider.binary_path, PathBuf::from("claude"));
         if let Some(v) = orig {
-            std::env::set_var(CLAUDE_CODE_PATH_ENV, v);
+            unsafe { std::env::set_var(CLAUDE_CODE_PATH_ENV, v) };
         }
     }
 
@@ -317,12 +316,12 @@ mod tests {
     fn new_ignores_blank_env_override() {
         let _guard = env_lock();
         let orig = std::env::var(CLAUDE_CODE_PATH_ENV).ok();
-        std::env::set_var(CLAUDE_CODE_PATH_ENV, "   ");
+        unsafe { std::env::set_var(CLAUDE_CODE_PATH_ENV, "   ") };
         let provider = ClaudeCodeProvider::new();
         assert_eq!(provider.binary_path, PathBuf::from("claude"));
         match orig {
-            Some(v) => std::env::set_var(CLAUDE_CODE_PATH_ENV, v),
-            None => std::env::remove_var(CLAUDE_CODE_PATH_ENV),
+            Some(v) => unsafe { std::env::set_var(CLAUDE_CODE_PATH_ENV, v) },
+            None => unsafe { std::env::remove_var(CLAUDE_CODE_PATH_ENV) },
         }
     }
 
@@ -354,9 +353,10 @@ mod tests {
     #[test]
     fn validate_temperature_rejects_custom_value() {
         let err = ClaudeCodeProvider::validate_temperature(0.2).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("temperature unsupported by Claude Code CLI"));
+        assert!(
+            err.to_string()
+                .contains("temperature unsupported by Claude Code CLI")
+        );
     }
 
     #[tokio::test]

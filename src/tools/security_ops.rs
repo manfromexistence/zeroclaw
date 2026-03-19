@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use super::traits::{Tool, ToolResult};
 use crate::config::SecurityOpsConfig;
 use crate::security::playbook::{
-    evaluate_step, load_playbooks, severity_level, Playbook, StepStatus,
+    Playbook, StepStatus, evaluate_step, load_playbooks, severity_level,
 };
 use crate::security::vulnerability::{generate_summary, parse_vulnerability_json};
 
@@ -334,11 +334,10 @@ fn format_duration_secs(secs: u64) -> String {
 
 /// Expand ~ to home directory.
 fn expand_tilde(path: &str) -> PathBuf {
-    if let Some(rest) = path.strip_prefix("~/") {
-        if let Some(user_dirs) = directories::UserDirs::new() {
+    if let Some(rest) = path.strip_prefix("~/")
+        && let Some(user_dirs) = directories::UserDirs::new() {
             return user_dirs.home_dir().join(rest);
         }
-    }
     PathBuf::from(path)
 }
 
@@ -459,10 +458,12 @@ mod tests {
         assert_eq!(tool.name(), "security_ops");
         let schema = tool.parameters_schema();
         assert!(schema["properties"]["action"].is_object());
-        assert!(schema["required"]
-            .as_array()
-            .unwrap()
-            .contains(&json!("action")));
+        assert!(
+            schema["required"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("action"))
+        );
     }
 
     #[tokio::test]

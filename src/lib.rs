@@ -70,11 +70,11 @@ pub mod runtime;
 pub(crate) mod security;
 pub(crate) mod service;
 pub(crate) mod skills;
+pub mod theme;
 pub mod tools;
 pub(crate) mod tunnel;
-pub(crate) mod util;
-pub mod theme;
 pub mod ui;
+pub(crate) mod util;
 
 #[cfg(feature = "plugins-wasm")]
 pub mod plugins;

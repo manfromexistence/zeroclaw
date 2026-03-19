@@ -527,11 +527,10 @@ impl TelegramChannel {
         if normalized.is_empty() {
             return;
         }
-        if let Ok(mut users) = self.allowed_users.write() {
-            if !users.iter().any(|u| u == &normalized) {
+        if let Ok(mut users) = self.allowed_users.write()
+            && !users.iter().any(|u| u == &normalized) {
                 users.push(normalized);
             }
-        }
     }
 
     fn extract_bind_code(text: &str) -> Option<&str> {
@@ -966,15 +965,14 @@ Allowlist Telegram username (without '@') or numeric user ID.",
         let attachment = Self::parse_attachment_metadata(message)?;
 
         // Check file size limit
-        if let Some(size) = attachment.file_size {
-            if size > TELEGRAM_MAX_FILE_DOWNLOAD_BYTES {
+        if let Some(size) = attachment.file_size
+            && size > TELEGRAM_MAX_FILE_DOWNLOAD_BYTES {
                 tracing::info!(
                     "Skipping attachment: file size {size} bytes exceeds {} MB limit",
                     TELEGRAM_MAX_FILE_DOWNLOAD_BYTES / (1024 * 1024)
                 );
                 return None;
             }
-        }
 
         let (username, sender_id, sender_identity) = Self::extract_sender_info(message);
 
@@ -1059,12 +1057,11 @@ Allowlist Telegram username (without '@') or numeric user ID.",
         // pipeline validates vision capability. Non-image files always get
         // [Document:] format regardless of Telegram's classification.
         let mut content = format_attachment_content(attachment.kind, &local_filename, &local_path);
-        if let Some(caption) = &attachment.caption {
-            if !caption.is_empty() {
+        if let Some(caption) = &attachment.caption
+            && !caption.is_empty() {
                 use std::fmt::Write;
                 let _ = write!(content, "\n\n{caption}");
             }
-        }
 
         // Prepend reply context if replying to another message
         if let Some(quote) = self.extract_reply_context(message) {
@@ -1438,49 +1435,44 @@ Allowlist Telegram username (without '@') or numeric user ID.",
             let len = bytes.len();
             while i < len {
                 // Bold: **text** or __text__
-                if i + 1 < len && bytes[i] == b'*' && bytes[i + 1] == b'*' {
-                    if let Some(end) = line[i + 2..].find("**") {
+                if i + 1 < len && bytes[i] == b'*' && bytes[i + 1] == b'*'
+                    && let Some(end) = line[i + 2..].find("**") {
                         let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
                         let _ = write!(line_out, "<b>{inner}</b>");
                         i += 4 + end;
                         continue;
                     }
-                }
-                if i + 1 < len && bytes[i] == b'_' && bytes[i + 1] == b'_' {
-                    if let Some(end) = line[i + 2..].find("__") {
+                if i + 1 < len && bytes[i] == b'_' && bytes[i + 1] == b'_'
+                    && let Some(end) = line[i + 2..].find("__") {
                         let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
                         let _ = write!(line_out, "<b>{inner}</b>");
                         i += 4 + end;
                         continue;
                     }
-                }
                 // Italic: *text* or _text_ (single)
-                if bytes[i] == b'*' && (i == 0 || bytes[i - 1] != b'*') {
-                    if let Some(end) = line[i + 1..].find('*') {
-                        if end > 0 {
+                if bytes[i] == b'*' && (i == 0 || bytes[i - 1] != b'*')
+                    && let Some(end) = line[i + 1..].find('*')
+                        && end > 0 {
                             let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
                             let _ = write!(line_out, "<i>{inner}</i>");
                             i += 2 + end;
                             continue;
                         }
-                    }
-                }
                 // Inline code: `code`
-                if bytes[i] == b'`' && (i == 0 || bytes[i - 1] != b'`') {
-                    if let Some(end) = line[i + 1..].find('`') {
+                if bytes[i] == b'`' && (i == 0 || bytes[i - 1] != b'`')
+                    && let Some(end) = line[i + 1..].find('`') {
                         let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
                         let _ = write!(line_out, "<code>{inner}</code>");
                         i += 2 + end;
                         continue;
                     }
-                }
                 // Markdown link: [text](url)
-                if bytes[i] == b'[' {
-                    if let Some(bracket_end) = line[i + 1..].find(']') {
+                if bytes[i] == b'['
+                    && let Some(bracket_end) = line[i + 1..].find(']') {
                         let text_part = &line[i + 1..i + 1 + bracket_end];
                         let after_bracket = i + 1 + bracket_end + 1; // position after ']'
-                        if after_bracket < len && bytes[after_bracket] == b'(' {
-                            if let Some(paren_end) = line[after_bracket + 1..].find(')') {
+                        if after_bracket < len && bytes[after_bracket] == b'('
+                            && let Some(paren_end) = line[after_bracket + 1..].find(')') {
                                 let url = &line[after_bracket + 1..after_bracket + 1 + paren_end];
                                 if url.starts_with("http://") || url.starts_with("https://") {
                                     let text_html = Self::escape_html(text_part);
@@ -1491,18 +1483,15 @@ Allowlist Telegram username (without '@') or numeric user ID.",
                                     continue;
                                 }
                             }
-                        }
                     }
-                }
                 // Strikethrough: ~~text~~
-                if i + 1 < len && bytes[i] == b'~' && bytes[i + 1] == b'~' {
-                    if let Some(end) = line[i + 2..].find("~~") {
+                if i + 1 < len && bytes[i] == b'~' && bytes[i + 1] == b'~'
+                    && let Some(end) = line[i + 2..].find("~~") {
                         let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
                         let _ = write!(line_out, "<s>{inner}</s>");
                         i += 4 + end;
                         continue;
                     }
-                }
                 // Default: escape HTML entities
                 let ch = line[i..].chars().next().unwrap();
                 match ch {
@@ -2697,8 +2686,8 @@ Ensure only one `zeroclaw` process is using this bot token."
                         continue;
                     };
 
-                    if self.ack_reactions {
-                        if let Some((reaction_chat_id, reaction_message_id)) =
+                    if self.ack_reactions
+                        && let Some((reaction_chat_id, reaction_message_id)) =
                             Self::extract_update_message_target(update)
                         {
                             self.try_add_ack_reaction_nonblocking(
@@ -2706,7 +2695,6 @@ Ensure only one `zeroclaw` process is using this bot token."
                                 reaction_message_id,
                             );
                         }
-                    }
 
                     // Send "typing" indicator immediately when we receive a message
                     let typing_body = serde_json::json!({
@@ -4664,8 +4652,8 @@ mod tests {
     /// guard in `agent/loop_.rs` will reject photo messages.
     #[test]
     fn groq_provider_rejects_photo_with_vision_error() {
-        use crate::providers::compatible::{AuthStyle, OpenAiCompatibleProvider};
         use crate::providers::Provider;
+        use crate::providers::compatible::{AuthStyle, OpenAiCompatibleProvider};
 
         let groq = OpenAiCompatibleProvider::new(
             "Groq",

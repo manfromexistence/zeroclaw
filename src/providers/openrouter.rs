@@ -176,10 +176,10 @@ impl OpenRouterProvider {
         messages
             .iter()
             .map(|m| {
-                if m.role == "assistant" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&m.content) {
-                        if let Some(tool_calls_value) = value.get("tool_calls") {
-                            if let Ok(parsed_calls) =
+                if m.role == "assistant"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&m.content)
+                        && let Some(tool_calls_value) = value.get("tool_calls")
+                            && let Ok(parsed_calls) =
                                 serde_json::from_value::<Vec<ProviderToolCall>>(
                                     tool_calls_value.clone(),
                                 )
@@ -211,12 +211,9 @@ impl OpenRouterProvider {
                                     reasoning_content,
                                 };
                             }
-                        }
-                    }
-                }
 
-                if m.role == "tool" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&m.content) {
+                if m.role == "tool"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&m.content) {
                         let tool_call_id = value
                             .get("tool_call_id")
                             .and_then(serde_json::Value::as_str)
@@ -234,7 +231,6 @@ impl OpenRouterProvider {
                             reasoning_content: None,
                         };
                     }
-                }
 
                 NativeMessage {
                     role: m.role.clone(),
@@ -519,11 +515,7 @@ impl Provider for OpenRouterProvider {
                     })
                 })
                 .collect();
-            if specs.is_empty() {
-                None
-            } else {
-                Some(specs)
-            }
+            if specs.is_empty() { None } else { Some(specs) }
         };
 
         // Convert ChatMessage to NativeMessage, preserving structured assistant/tool entries

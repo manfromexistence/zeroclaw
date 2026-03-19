@@ -51,7 +51,7 @@
 //! // }
 //! ```
 //!
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 use std::collections::{HashMap, HashSet};
 
 /// Keywords that Gemini rejects for tool schemas.
@@ -161,11 +161,10 @@ impl SchemaCleanr {
         }
 
         // If type is 'object', should have 'properties'
-        if let Some(Value::String(t)) = obj.get("type") {
-            if t == "object" && !obj.contains_key("properties") {
+        if let Some(Value::String(t)) = obj.get("type")
+            && t == "object" && !obj.contains_key("properties") {
                 tracing::warn!("Object schema without 'properties' field may cause issues");
             }
-        }
 
         Ok(())
     }
@@ -226,11 +225,10 @@ impl SchemaCleanr {
         }
 
         // Handle anyOf/oneOf simplification
-        if obj.contains_key("anyOf") || obj.contains_key("oneOf") {
-            if let Some(simplified) = Self::try_simplify_union(&obj, defs, strategy, ref_stack) {
+        if (obj.contains_key("anyOf") || obj.contains_key("oneOf"))
+            && let Some(simplified) = Self::try_simplify_union(&obj, defs, strategy, ref_stack) {
                 return simplified;
             }
-        }
 
         // Build cleaned object
         let mut cleaned = Map::new();
@@ -302,14 +300,13 @@ impl SchemaCleanr {
         }
 
         // Try to resolve local ref (#/$defs/Name or #/definitions/Name)
-        if let Some(def_name) = Self::parse_local_ref(ref_value) {
-            if let Some(definition) = defs.get(def_name.as_str()) {
+        if let Some(def_name) = Self::parse_local_ref(ref_value)
+            && let Some(definition) = defs.get(def_name.as_str()) {
                 ref_stack.insert(ref_value.to_string());
                 let cleaned = Self::clean_with_defs(definition.clone(), defs, strategy, ref_stack);
                 ref_stack.remove(ref_value);
                 return Self::preserve_meta(obj, cleaned);
             }
-        }
 
         // Can't resolve: return empty object with metadata
         tracing::warn!("Cannot resolve $ref: {}", ref_value);
@@ -404,17 +401,15 @@ impl SchemaCleanr {
                 return true;
             }
             // { enum: [null] }
-            if let Some(Value::Array(arr)) = obj.get("enum") {
-                if arr.len() == 1 && matches!(arr[0], Value::Null) {
+            if let Some(Value::Array(arr)) = obj.get("enum")
+                && arr.len() == 1 && matches!(arr[0], Value::Null) {
                     return true;
                 }
-            }
             // { type: "null" }
-            if let Some(Value::String(t)) = obj.get("type") {
-                if t == "null" {
+            if let Some(Value::String(t)) = obj.get("type")
+                && t == "null" {
                     return true;
                 }
-            }
         }
         false
     }
@@ -743,12 +738,16 @@ mod tests {
 
         let cleaned = SchemaCleanr::clean_for_gemini(schema);
 
-        assert!(cleaned["properties"]["user"]["properties"]["name"]
-            .get("minLength")
-            .is_none());
-        assert!(cleaned["properties"]["user"]
-            .get("additionalProperties")
-            .is_none());
+        assert!(
+            cleaned["properties"]["user"]["properties"]["name"]
+                .get("minLength")
+                .is_none()
+        );
+        assert!(
+            cleaned["properties"]["user"]
+                .get("additionalProperties")
+                .is_none()
+        );
     }
 
     #[test]

@@ -25,7 +25,7 @@ enum Handle {
 
 impl RangeSlider {
     pub fn new(message: impl Into<String>, min: i64, max: i64) -> Self {
-        let mid = (min + max) / 2;
+        let mid = i64::midpoint(min, max);
         Self {
             message: message.into(),
             min_value: min,

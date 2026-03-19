@@ -3,7 +3,7 @@ use crate::config::Config;
 use crate::i18n::ToolDescriptions;
 use crate::memory::{self, Memory, MemoryCategory};
 use crate::multimodal;
-use crate::observability::{self, runtime_trace, Observer, ObserverEvent};
+use crate::observability::{self, Observer, ObserverEvent, runtime_trace};
 use crate::providers::{
     self, ChatMessage, ChatRequest, Provider, ProviderCapabilityError, ToolCall,
 };
@@ -786,11 +786,7 @@ fn parse_xml_tool_calls(xml_content: &str) -> Option<Vec<ParsedToolCall>> {
         });
     }
 
-    if calls.is_empty() {
-        None
-    } else {
-        Some(calls)
-    }
+    if calls.is_empty() { None } else { Some(calls) }
 }
 
 /// Parse MiniMax-style XML tool calls with attributed invoke/parameter tags.
@@ -1315,11 +1311,10 @@ fn parse_glm_style_tool_calls(text: &str) -> Vec<(String, serde_json::Value, Opt
                     continue;
                 }
 
-                if rest.starts_with('{') {
-                    if let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest) {
+                if rest.starts_with('{')
+                    && let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest) {
                         calls.push((tool_name.to_string(), json_args, Some(line.to_string())));
                     }
-                }
             }
         }
     }
@@ -1547,20 +1542,18 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
         calls = parse_tool_calls_from_json_value(&json_value);
         if !calls.is_empty() {
             // If we found tool_calls, extract any content field as text
-            if let Some(content) = json_value.get("content").and_then(|v| v.as_str()) {
-                if !content.trim().is_empty() {
+            if let Some(content) = json_value.get("content").and_then(|v| v.as_str())
+                && !content.trim().is_empty() {
                     text_parts.push(content.trim().to_string());
                 }
-            }
             return (text_parts.join("\n"), calls);
         }
     }
 
-    if let Some((minimax_text, minimax_calls)) = parse_minimax_invoke_calls(response) {
-        if !minimax_calls.is_empty() {
+    if let Some((minimax_text, minimax_calls)) = parse_minimax_invoke_calls(response)
+        && !minimax_calls.is_empty() {
             return (minimax_text, minimax_calls);
         }
-    }
 
     // Fall back to XML-style tool-call tag parsing.
     while let Some((start, open_tag)) = find_first_tag(remaining, &TOOL_CALL_OPEN_TAGS) {
@@ -1590,12 +1583,11 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             }
 
             // If JSON parsing failed, try XML format (DeepSeek/GLM style)
-            if !parsed_any {
-                if let Some(xml_calls) = parse_xml_tool_calls(inner) {
+            if !parsed_any
+                && let Some(xml_calls) = parse_xml_tool_calls(inner) {
                     calls.extend(xml_calls);
                     parsed_any = true;
                 }
-            }
 
             if !parsed_any {
                 // GLM-style shortened body: `shell>uname -a` or `shell\ncommand: date`
@@ -1632,20 +1624,18 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
                 }
 
                 // Try XML
-                if !parsed_any {
-                    if let Some(xml_calls) = parse_xml_tool_calls(inner) {
+                if !parsed_any
+                    && let Some(xml_calls) = parse_xml_tool_calls(inner) {
                         calls.extend(xml_calls);
                         parsed_any = true;
                     }
-                }
 
                 // Try GLM shortened body
-                if !parsed_any {
-                    if let Some(glm_call) = parse_glm_shortened_body(inner) {
+                if !parsed_any
+                    && let Some(glm_call) = parse_glm_shortened_body(inner) {
                         calls.push(glm_call);
                         parsed_any = true;
                     }
-                }
 
                 if parsed_any {
                     remaining = &after_open[cross_idx + cross_tag.len()..];
@@ -1659,8 +1649,8 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
 
             // No cross-alias close tag resolved — fall back to JSON recovery
             // from unclosed tags (brace-balancing).
-            if let Some(json_end) = find_json_end(after_open) {
-                if let Ok(value) =
+            if let Some(json_end) = find_json_end(after_open)
+                && let Ok(value) =
                     serde_json::from_str::<serde_json::Value>(&after_open[..json_end])
                 {
                     let parsed_calls = parse_tool_calls_from_json_value(&value);
@@ -1670,7 +1660,6 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
                         continue;
                     }
                 }
-            }
 
             if let Some((value, consumed_end)) = extract_first_json_value_with_end(after_open) {
                 let parsed_calls = parse_tool_calls_from_json_value(&value);
@@ -1799,15 +1788,14 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             for call in xml_calls {
                 calls.push(call);
                 // Try to remove the XML from text
-                if let Some(start) = cleaned_text.find("<minimax:toolcall>") {
-                    if let Some(end) = cleaned_text.find("</minimax:toolcall>") {
+                if let Some(start) = cleaned_text.find("<minimax:toolcall>")
+                    && let Some(end) = cleaned_text.find("</minimax:toolcall>") {
                         let end_pos = end + "</minimax:toolcall>".len();
                         if end_pos <= cleaned_text.len() {
                             cleaned_text =
                                 format!("{}{}", &cleaned_text[..start], &cleaned_text[end_pos..]);
                         }
                     }
-                }
             }
             if !cleaned_text.trim().is_empty() {
                 text_parts.push(cleaned_text.trim().to_string());
@@ -2317,13 +2305,12 @@ fn should_execute_tools_in_parallel(
         return false;
     }
 
-    if let Some(mgr) = approval {
-        if tool_calls.iter().any(|call| mgr.needs_approval(&call.name)) {
+    if let Some(mgr) = approval
+        && tool_calls.iter().any(|call| mgr.needs_approval(&call.name)) {
             // Approval-gated calls must keep sequential handling so the caller can
             // enforce CLI prompt/deny policy consistently.
             return false;
         }
-    }
 
     true
 }
@@ -2434,10 +2421,10 @@ pub(crate) async fn run_tool_call_loop(
         }
 
         // Check if model switch was requested via model_switch tool
-        if let Some(ref callback) = model_switch_callback {
-            if let Ok(guard) = callback.lock() {
-                if let Some((new_provider, new_model)) = guard.as_ref() {
-                    if new_provider != provider_name || new_model != model {
+        if let Some(ref callback) = model_switch_callback
+            && let Ok(guard) = callback.lock()
+                && let Some((new_provider, new_model)) = guard.as_ref()
+                    && (new_provider != provider_name || new_model != model) {
                         tracing::info!(
                             "Model switch detected: {} {} -> {} {}",
                             provider_name,
@@ -2451,9 +2438,6 @@ pub(crate) async fn run_tool_call_loop(
                         }
                         .into());
                     }
-                }
-            }
-        }
 
         // Rebuild tool_specs each iteration so newly activated deferred tools appear.
         let mut tool_specs: Vec<crate::tools::ToolSpec> = tools_registry
@@ -2816,8 +2800,8 @@ pub(crate) async fn run_tool_call_loop(
             }
 
             // ── Approval hook ────────────────────────────────
-            if let Some(mgr) = approval {
-                if mgr.needs_approval(&tool_name) {
+            if let Some(mgr) = approval
+                && mgr.needs_approval(&tool_name) {
                     let request = ApprovalRequest {
                         tool_name: tool_name.clone(),
                         arguments: tool_args.clone(),
@@ -2868,7 +2852,6 @@ pub(crate) async fn run_tool_call_loop(
                         continue;
                     }
                 }
-            }
 
             let signature = tool_call_signature(&tool_name, &tool_args);
             let dedup_exempt = dedup_exempt_tools.iter().any(|e| e == &tool_name);
@@ -3852,11 +3835,9 @@ pub async fn run(
                 config.agent.max_context_tokens,
             )
             .await
-            {
-                if compacted {
+                && compacted {
                     println!("🧹 Auto-compaction complete");
                 }
-            }
 
             // Hard cap as a safety net.
             trim_history(&mut history, config.agent.max_history_messages);
@@ -4159,8 +4140,8 @@ pub async fn process_message(
 #[cfg(test)]
 mod tests {
     use super::{
-        apply_compaction_summary, build_compaction_transcript, load_interactive_session_history,
-        save_interactive_session_history, InteractiveSessionState,
+        InteractiveSessionState, apply_compaction_summary, build_compaction_transcript,
+        load_interactive_session_history, save_interactive_session_history,
     };
     use crate::providers::ChatMessage;
     use tempfile::tempdir;
@@ -4204,7 +4185,7 @@ mod tests {
 
     use super::*;
     use async_trait::async_trait;
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
     use std::collections::VecDeque;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
@@ -4281,8 +4262,8 @@ mod tests {
 
     use crate::memory::{Memory, MemoryCategory, SqliteMemory};
     use crate::observability::NoopObserver;
-    use crate::providers::traits::ProviderCapabilities;
     use crate::providers::ChatResponse;
+    use crate::providers::traits::ProviderCapabilities;
     use tempfile::TempDir;
 
     struct NonVisionProvider {
@@ -4663,9 +4644,10 @@ mod tests {
         .await
         .expect_err("oversized payload must fail");
 
-        assert!(err
-            .to_string()
-            .contains("multimodal image size limit exceeded"));
+        assert!(
+            err.to_string()
+                .contains("multimodal image size limit exceeded")
+        );
         assert_eq!(calls.load(Ordering::SeqCst), 0);
     }
 
@@ -5863,7 +5845,7 @@ Tail"#;
         assert_eq!(history[0].content, "system prompt");
         // Trimmed to limit
         assert_eq!(history.len(), DEFAULT_MAX_HISTORY_MESSAGES + 1); // +1 for system
-                                                                     // Most recent messages preserved
+        // Most recent messages preserved
         let last = &history[history.len() - 1];
         assert_eq!(
             last.content,
@@ -6363,10 +6345,12 @@ Final answer."#;
         assert_eq!(calls.len(), 1);
         assert_eq!(calls[0].0, "shell");
         assert!(calls[0].1["command"].as_str().unwrap().contains("curl"));
-        assert!(calls[0].1["command"]
-            .as_str()
-            .unwrap()
-            .contains("example.com"));
+        assert!(
+            calls[0].1["command"]
+                .as_str()
+                .unwrap()
+                .contains("example.com")
+        );
     }
 
     #[test]

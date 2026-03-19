@@ -80,7 +80,7 @@ impl PromptInteraction for PhoneInput {
         match event {
             Event::Key(key) => match key {
                 console::Key::Enter => match self.validate_phone() {
-                    Ok(_) => self.state = State::Submit,
+                    Ok(()) => self.state = State::Submit,
                     Err(msg) => self.error_message = Some(msg),
                 },
                 console::Key::Escape => self.state = State::Cancel,

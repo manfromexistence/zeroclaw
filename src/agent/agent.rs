@@ -294,12 +294,11 @@ impl Agent {
     /// non-system messages from the seed. System messages in the seed are skipped
     /// to avoid duplicating the system prompt.
     pub fn seed_history(&mut self, messages: &[ChatMessage]) {
-        if self.history.is_empty() {
-            if let Ok(sys) = self.build_system_prompt() {
+        if self.history.is_empty()
+            && let Ok(sys) = self.build_system_prompt() {
                 self.history
                     .push(ConversationMessage::Chat(ChatMessage::system(sys)));
             }
-        }
         for msg in messages {
             if msg.role != "system" {
                 self.history.push(ConversationMessage::Chat(msg.clone()));
@@ -528,8 +527,7 @@ impl Agent {
     fn classify_model(&self, user_message: &str) -> String {
         if let Some(decision) =
             super::classifier::classify_with_decision(&self.classification_config, user_message)
-        {
-            if self.available_hints.contains(&decision.hint) {
+            && self.available_hints.contains(&decision.hint) {
                 let resolved_model = self
                     .route_model_by_hint
                     .get(&decision.hint)
@@ -545,7 +543,6 @@ impl Agent {
                 );
                 return format!("hint:{}", decision.hint);
             }
-        }
         self.model_name.clone()
     }
 
@@ -979,10 +976,12 @@ mod tests {
 
         let response = agent.turn("hi").await.unwrap();
         assert_eq!(response, "done");
-        assert!(agent
-            .history()
-            .iter()
-            .any(|msg| matches!(msg, ConversationMessage::ToolResults(_))));
+        assert!(
+            agent
+                .history()
+                .iter()
+                .any(|msg| matches!(msg, ConversationMessage::ToolResults(_)))
+        );
     }
 
     #[tokio::test]
@@ -1041,7 +1040,7 @@ mod tests {
 
     #[tokio::test]
     async fn from_config_passes_extra_headers_to_custom_provider() {
-        use axum::{http::HeaderMap, routing::post, Json, Router};
+        use axum::{Json, Router, http::HeaderMap, routing::post};
         use tempfile::TempDir;
         use tokio::net::TcpListener;
 

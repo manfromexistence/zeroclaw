@@ -140,10 +140,10 @@ impl<T: Clone> PromptInteraction for TreeSelect<T> {
                     if let Some(node) = self.get_current_node_mut()
                         && !node.children.is_empty()
                     {
-                        if !node.expanded {
-                            node.expanded = true;
-                        } else {
+                        if node.expanded {
                             self.cursor.push(0);
+                        } else {
+                            node.expanded = true;
                         }
                     }
                 }

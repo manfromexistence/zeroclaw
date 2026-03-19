@@ -125,11 +125,10 @@ fn normalize_locale(raw: &str) -> String {
 pub fn default_search_dirs(workspace_dir: &Path) -> Vec<PathBuf> {
     let mut dirs = vec![workspace_dir.to_path_buf()];
 
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(parent) = exe.parent() {
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(parent) = exe.parent() {
             dirs.push(parent.to_path_buf());
         }
-    }
 
     // During development, also check the project root (where Cargo.toml lives).
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
@@ -262,21 +261,21 @@ shell = "Execute a shell command"
         let saved = std::env::var("ZEROCLAW_LOCALE").ok();
         let saved_lang = std::env::var("LANG").ok();
 
-        std::env::set_var("ZEROCLAW_LOCALE", "ja-JP");
+        unsafe { std::env::set_var("ZEROCLAW_LOCALE", "ja-JP") };
         assert_eq!(detect_locale(), "ja-JP");
 
-        std::env::remove_var("ZEROCLAW_LOCALE");
-        std::env::set_var("LANG", "zh_CN.UTF-8");
+        unsafe { std::env::remove_var("ZEROCLAW_LOCALE") };
+        unsafe { std::env::set_var("LANG", "zh_CN.UTF-8") };
         assert_eq!(detect_locale(), "zh-CN");
 
         // Restore.
         match saved {
-            Some(v) => std::env::set_var("ZEROCLAW_LOCALE", v),
-            None => std::env::remove_var("ZEROCLAW_LOCALE"),
+            Some(v) => unsafe { std::env::set_var("ZEROCLAW_LOCALE", v) },
+            None => unsafe { std::env::remove_var("ZEROCLAW_LOCALE") },
         }
         match saved_lang {
-            Some(v) => std::env::set_var("LANG", v),
-            None => std::env::remove_var("LANG"),
+            Some(v) => unsafe { std::env::set_var("LANG", v) },
+            None => unsafe { std::env::remove_var("LANG") },
         }
     }
 

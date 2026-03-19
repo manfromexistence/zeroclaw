@@ -56,11 +56,10 @@ impl MemoryLoader for DefaultMemoryLoader {
             if memory::should_skip_autosave_content(&entry.content) {
                 continue;
             }
-            if let Some(score) = entry.score {
-                if score < self.min_relevance_score {
+            if let Some(score) = entry.score
+                && score < self.min_relevance_score {
                     continue;
                 }
-            }
             let _ = writeln!(context, "- {}: {}", entry.key, entry.content);
         }
 

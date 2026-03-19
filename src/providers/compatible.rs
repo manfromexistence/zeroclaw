@@ -9,10 +9,10 @@ use crate::providers::traits::{
     ToolCall as ProviderToolCall,
 };
 use async_trait::async_trait;
-use futures_util::{stream, StreamExt};
+use futures_util::{StreamExt, stream};
 use reqwest::{
-    header::{HeaderMap, HeaderValue, USER_AGENT},
     Client,
+    header::{HeaderMap, HeaderValue, USER_AGENT},
 };
 use serde::{Deserialize, Serialize};
 
@@ -252,11 +252,10 @@ impl OpenAiCompatibleProvider {
 
         if has_user_agent || has_extra_headers {
             let mut headers = HeaderMap::new();
-            if let Some(ua) = self.user_agent.as_deref() {
-                if let Ok(value) = HeaderValue::from_str(ua) {
+            if let Some(ua) = self.user_agent.as_deref()
+                && let Ok(value) = HeaderValue::from_str(ua) {
                     headers.insert(USER_AGENT, value);
                 }
-            }
             for (key, value) in &self.extra_headers {
                 match (
                     reqwest::header::HeaderName::from_bytes(key.as_bytes()),
@@ -543,11 +542,10 @@ impl ToolCall {
     /// Extract function name with fallback logic for various provider formats
     fn function_name(&self) -> Option<String> {
         // Standard OpenAI format: tool_calls[].function.name
-        if let Some(ref func) = self.function {
-            if let Some(ref name) = func.name {
+        if let Some(ref func) = self.function
+            && let Some(ref name) = func.name {
                 return Some(name.clone());
             }
-        }
         // Fallback: direct name field
         self.name.clone()
     }
@@ -555,11 +553,10 @@ impl ToolCall {
     /// Extract arguments with fallback logic and type conversion
     fn function_arguments(&self) -> Option<String> {
         // Standard OpenAI format: tool_calls[].function.arguments (string)
-        if let Some(ref func) = self.function {
-            if let Some(ref args) = func.arguments {
+        if let Some(ref func) = self.function
+            && let Some(ref args) = func.arguments {
                 return Some(args.clone());
             }
-        }
         // Fallback: direct arguments field
         if let Some(ref args) = self.arguments {
             return Some(args.clone());
@@ -733,11 +730,10 @@ fn parse_sse_line(line: &str) -> StreamResult<Option<String>> {
 
         // Extract content from delta
         if let Some(choice) = chunk.choices.first() {
-            if let Some(content) = &choice.delta.content {
-                if !content.is_empty() {
+            if let Some(content) = &choice.delta.content
+                && !content.is_empty() {
                     return Ok(Some(content.clone()));
                 }
-            }
             // Fallback to reasoning_content for thinking models
             if let Some(reasoning) = &choice.delta.reasoning_content {
                 return Ok(Some(reasoning.clone()));
@@ -881,11 +877,10 @@ fn extract_responses_text(response: ResponsesResponse) -> Option<String> {
 
     for item in &response.output {
         for content in &item.content {
-            if content.kind.as_deref() == Some("output_text") {
-                if let Some(text) = first_nonempty(content.text.as_deref()) {
+            if content.kind.as_deref() == Some("output_text")
+                && let Some(text) = first_nonempty(content.text.as_deref()) {
                     return Some(text);
                 }
-            }
         }
     }
 
@@ -1039,11 +1034,10 @@ impl OpenAiCompatibleProvider {
         messages
             .iter()
             .map(|message| {
-                if message.role == "assistant" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content)
-                    {
-                        if let Some(tool_calls_value) = value.get("tool_calls") {
-                            if let Ok(parsed_calls) =
+                if message.role == "assistant"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content)
+                        && let Some(tool_calls_value) = value.get("tool_calls")
+                            && let Ok(parsed_calls) =
                                 serde_json::from_value::<Vec<ProviderToolCall>>(
                                     tool_calls_value.clone(),
                                 )
@@ -1081,12 +1075,9 @@ impl OpenAiCompatibleProvider {
                                     reasoning_content,
                                 };
                             }
-                        }
-                    }
-                }
 
-                if message.role == "tool" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
+                if message.role == "tool"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
                         let tool_call_id = value
                             .get("tool_call_id")
                             .and_then(serde_json::Value::as_str)
@@ -1105,7 +1096,6 @@ impl OpenAiCompatibleProvider {
                             reasoning_content: None,
                         };
                     }
-                }
 
                 NativeMessage {
                     role: message.role.clone(),
@@ -1867,10 +1857,12 @@ mod tests {
             .chat_with_system(None, "hello", "llama-3.3-70b", 0.7)
             .await;
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("Venice API key not set"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Venice API key not set")
+        );
     }
 
     #[test]
@@ -2085,9 +2077,10 @@ mod tests {
             .await
             .expect_err("system-only fallback payload should fail");
 
-        assert!(err
-            .to_string()
-            .contains("requires at least one non-system message"));
+        assert!(
+            err.to_string()
+                .contains("requires at least one non-system message")
+        );
     }
 
     #[test]
@@ -2776,10 +2769,12 @@ mod tests {
 
         let result = p.chat_with_tools(&messages, &tools, "model", 0.7).await;
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("TestProvider API key not set"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("TestProvider API key not set")
+        );
     }
 
     #[test]

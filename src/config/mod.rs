@@ -4,8 +4,6 @@ pub mod workspace;
 
 #[allow(unused_imports)]
 pub use schema::{
-    apply_runtime_proxy_to_builder, build_runtime_proxy_client,
-    build_runtime_proxy_client_with_timeouts, runtime_proxy_config, set_runtime_proxy_config,
     AgentConfig, AssemblyAiSttConfig, AuditConfig, AutonomyConfig, BackupConfig,
     BrowserComputerUseConfig, BrowserConfig, BuiltinHooksConfig, ChannelsConfig,
     ClassificationRule, CloudOpsConfig, ComposioConfig, Config, ConversationalAiConfig, CostConfig,
@@ -27,6 +25,8 @@ pub use schema::{
     StorageProviderSection, StreamMode, SwarmConfig, SwarmStrategy, TelegramConfig,
     ToolFilterGroup, ToolFilterGroupMode, TranscriptionConfig, TtsConfig, TunnelConfig,
     WebFetchConfig, WebSearchConfig, WebhookConfig, WorkspaceConfig,
+    apply_runtime_proxy_to_builder, build_runtime_proxy_client,
+    build_runtime_proxy_client_with_timeouts, runtime_proxy_config, set_runtime_proxy_config,
 };
 
 pub fn name_and_presence<T: traits::ChannelConfig>(channel: Option<&T>) -> (&'static str, bool) {

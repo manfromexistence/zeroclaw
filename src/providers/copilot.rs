@@ -249,10 +249,10 @@ impl CopilotProvider {
         messages
             .iter()
             .map(|message| {
-                if message.role == "assistant" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
-                        if let Some(tool_calls_value) = value.get("tool_calls") {
-                            if let Ok(parsed_calls) =
+                if message.role == "assistant"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content)
+                        && let Some(tool_calls_value) = value.get("tool_calls")
+                            && let Ok(parsed_calls) =
                                 serde_json::from_value::<Vec<ProviderToolCall>>(tool_calls_value.clone())
                             {
                                 let tool_calls = parsed_calls
@@ -279,12 +279,9 @@ impl CopilotProvider {
                                     tool_calls: Some(tool_calls),
                                 };
                             }
-                        }
-                    }
-                }
 
-                if message.role == "tool" {
-                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
+                if message.role == "tool"
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
                         let tool_call_id = value
                             .get("tool_call_id")
                             .and_then(serde_json::Value::as_str)
@@ -301,7 +298,6 @@ impl CopilotProvider {
                             tool_calls: None,
                         };
                     }
-                }
 
                 ApiMessage {
                     role: message.role.clone(),
@@ -388,14 +384,13 @@ impl CopilotProvider {
     async fn get_api_key(&self) -> anyhow::Result<(String, String)> {
         let mut cached = self.refresh_lock.lock().await;
 
-        if let Some(cached_key) = cached.as_ref() {
-            if chrono::Utc::now().timestamp() + 120 < cached_key.expires_at {
+        if let Some(cached_key) = cached.as_ref()
+            && chrono::Utc::now().timestamp() + 120 < cached_key.expires_at {
                 return Ok((cached_key.token.clone(), cached_key.api_endpoint.clone()));
             }
-        }
 
-        if let Some(info) = self.load_api_key_from_disk().await {
-            if chrono::Utc::now().timestamp() + 120 < info.expires_at {
+        if let Some(info) = self.load_api_key_from_disk().await
+            && chrono::Utc::now().timestamp() + 120 < info.expires_at {
                 let endpoint = info
                     .endpoints
                     .as_ref()
@@ -410,7 +405,6 @@ impl CopilotProvider {
                 });
                 return Ok((token, endpoint));
             }
-        }
 
         let access_token = self.get_github_access_token().await?;
         let api_key_info = self.exchange_for_api_key(&access_token).await?;
@@ -697,12 +691,16 @@ mod tests {
     #[test]
     fn copilot_headers_include_required_fields() {
         let headers = CopilotProvider::COPILOT_HEADERS;
-        assert!(headers
-            .iter()
-            .any(|(header, _)| *header == "Editor-Version"));
-        assert!(headers
-            .iter()
-            .any(|(header, _)| *header == "Editor-Plugin-Version"));
+        assert!(
+            headers
+                .iter()
+                .any(|(header, _)| *header == "Editor-Version")
+        );
+        assert!(
+            headers
+                .iter()
+                .any(|(header, _)| *header == "Editor-Plugin-Version")
+        );
         assert!(headers.iter().any(|(header, _)| *header == "User-Agent"));
     }
 

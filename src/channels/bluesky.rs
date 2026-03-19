@@ -1,5 +1,5 @@
 use super::traits::{Channel, ChannelMessage, SendMessage};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use async_trait::async_trait;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
@@ -405,11 +405,10 @@ impl Channel for BlueskyChannel {
             }
 
             // Mark as seen
-            if let Some(ref seen_at) = latest_indexed_at {
-                if let Err(e) = self.update_seen(seen_at).await {
+            if let Some(ref seen_at) = latest_indexed_at
+                && let Err(e) = self.update_seen(seen_at).await {
                     tracing::warn!("Bluesky updateSeen error: {e}");
                 }
-            }
 
             let _ = &listing.cursor; // cursor available for pagination if needed
         }

@@ -570,8 +570,7 @@ fn check_config_semantics(config: &Config, items: &mut Vec<DiagItem>) {
         .strip_prefix("hint:")
         .map(str::trim)
         .filter(|value| !value.is_empty())
-    {
-        if !config
+        && !config
             .embedding_routes
             .iter()
             .any(|route| route.hint.trim() == hint)
@@ -583,7 +582,6 @@ fn check_config_semantics(config: &Config, items: &mut Vec<DiagItem>) {
                 ),
             ));
         }
-    }
 
     // Channel: at least one configured
     let cc = &config.channels_config;
@@ -1260,10 +1258,12 @@ mod tests {
         let second = workspace_probe_path(tmp.path());
 
         assert_ne!(first, second);
-        assert!(first
-            .file_name()
-            .and_then(|name| name.to_str())
-            .is_some_and(|name| name.starts_with(".zeroclaw_doctor_probe_")));
+        assert!(
+            first
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.starts_with(".zeroclaw_doctor_probe_"))
+        );
     }
 
     #[test]

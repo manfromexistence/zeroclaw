@@ -3,7 +3,7 @@ use crate::config::{ClassificationRule, Config, DelegateAgentConfig, ModelRouteC
 use crate::security::SecurityPolicy;
 use crate::util::MaybeSet;
 use async_trait::async_trait;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::BTreeMap;
 use std::fs;
 use std::sync::Arc;
@@ -425,8 +425,7 @@ impl ModelRoutingConfigTool {
         // before the channel hot-reload picks up the change.
         if let (Some(provider_name), Some(model_name)) =
             (cfg.default_provider.clone(), cfg.default_model.clone())
-        {
-            if let Err(probe_err) = self.probe_model(&provider_name, &model_name).await {
+            && let Err(probe_err) = self.probe_model(&provider_name, &model_name).await {
                 if crate::providers::reliable::is_non_retryable(&probe_err) {
                     let reverted_model = previous_model.as_deref().unwrap_or("(none)").to_string();
 
@@ -451,7 +450,6 @@ impl ModelRoutingConfigTool {
                     "Model probe returned retryable error (keeping new config): {probe_err}"
                 );
             }
-        }
 
         Ok(ToolResult {
             success: true,
@@ -932,10 +930,7 @@ impl Tool for ModelRoutingConfigTool {
         let result = match action.as_str() {
             "get" => self.handle_get(),
             "list_hints" => self.handle_list_hints(),
-            "set_default"
-            | "upsert_scenario"
-            | "remove_scenario"
-            | "upsert_agent"
+            "set_default" | "upsert_scenario" | "remove_scenario" | "upsert_agent"
             | "remove_agent" => {
                 if let Some(blocked) = self.require_write_access() {
                     return Ok(blocked);

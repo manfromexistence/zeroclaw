@@ -1,8 +1,8 @@
-use crate::auth::openai_oauth::extract_account_id_from_jwt;
 use crate::auth::AuthService;
+use crate::auth::openai_oauth::extract_account_id_from_jwt;
 use crate::multimodal;
-use crate::providers::traits::{ChatMessage, Provider, ProviderCapabilities};
 use crate::providers::ProviderRuntimeOptions;
+use crate::providers::traits::{ChatMessage, Provider, ProviderCapabilities};
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use reqwest::Client;
@@ -333,11 +333,10 @@ fn extract_responses_text(response: &ResponsesResponse) -> Option<String> {
 
     for item in &response.output {
         for content in &item.content {
-            if content.kind.as_deref() == Some("output_text") {
-                if let Some(text) = first_nonempty(content.text.as_deref()) {
+            if content.kind.as_deref() == Some("output_text")
+                && let Some(text) = first_nonempty(content.text.as_deref()) {
                     return Some(text);
                 }
-            }
         }
     }
 
@@ -481,12 +480,11 @@ fn append_utf8_stream_chunk(
     pending: &mut Vec<u8>,
     chunk: &[u8],
 ) -> anyhow::Result<()> {
-    if pending.is_empty() {
-        if let Ok(text) = std::str::from_utf8(chunk) {
+    if pending.is_empty()
+        && let Ok(text) = std::str::from_utf8(chunk) {
             body.push_str(text);
             return Ok(());
         }
-    }
 
     if !chunk.is_empty() {
         pending.extend_from_slice(chunk);
@@ -777,8 +775,8 @@ mod tests {
         fn set(key: &'static str, value: Option<&str>) -> Self {
             let original = std::env::var(key).ok();
             match value {
-                Some(next) => std::env::set_var(key, next),
-                None => std::env::remove_var(key),
+                Some(next) => unsafe { std::env::set_var(key, next) },
+                None => unsafe { std::env::remove_var(key) },
             }
             Self { key, original }
         }
@@ -787,9 +785,9 @@ mod tests {
     impl Drop for EnvGuard {
         fn drop(&mut self) {
             if let Some(original) = self.original.as_deref() {
-                std::env::set_var(self.key, original);
+                unsafe { std::env::set_var(self.key, original) };
             } else {
-                std::env::remove_var(self.key);
+                unsafe { std::env::remove_var(self.key) };
             }
         }
     }
@@ -1002,8 +1000,7 @@ data: [DONE]
 
     #[test]
     fn decode_utf8_stream_chunks_handles_multibyte_split_across_chunks() {
-        let payload =
-            "data: {\"type\":\"response.output_text.delta\",\"delta\":\"Hello 世\"}\n\ndata: [DONE]\n";
+        let payload = "data: {\"type\":\"response.output_text.delta\",\"delta\":\"Hello 世\"}\n\ndata: [DONE]\n";
         let bytes = payload.as_bytes();
         let split_at = payload.find('世').unwrap() + 1;
 

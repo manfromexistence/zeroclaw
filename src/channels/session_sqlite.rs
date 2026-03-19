@@ -9,7 +9,7 @@ use crate::providers::traits::ChatMessage;
 use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use parking_lot::Mutex;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 use std::path::{Path, PathBuf};
 
 /// SQLite-backed session store with FTS5 and WAL mode.
@@ -111,11 +111,10 @@ impl SqliteSessionBackend {
                 if trimmed.is_empty() {
                     continue;
                 }
-                if let Ok(msg) = serde_json::from_str::<ChatMessage>(trimmed) {
-                    if self.append(key, &msg).is_ok() {
+                if let Ok(msg) = serde_json::from_str::<ChatMessage>(trimmed)
+                    && self.append(key, &msg).is_ok() {
                         count += 1;
                     }
-                }
             }
 
             if count > 0 {

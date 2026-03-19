@@ -69,11 +69,10 @@ impl WebSearchTool {
     /// absent.
     fn resolve_brave_api_key(&self) -> anyhow::Result<String> {
         // Fast path: boot-time key is present and usable (not an encrypted blob).
-        if let Some(ref key) = self.boot_brave_api_key {
-            if !key.is_empty() && !crate::security::SecretStore::is_encrypted(key) {
+        if let Some(ref key) = self.boot_brave_api_key
+            && !key.is_empty() && !crate::security::SecretStore::is_encrypted(key) {
                 return Ok(key.clone());
             }
-        }
 
         // Slow path: re-read config.toml to pick up keys set/rotated after boot.
         self.reload_brave_api_key()

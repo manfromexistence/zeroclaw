@@ -33,15 +33,15 @@
     dead_code
 )]
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
 use serde::{Deserialize, Serialize};
 use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use tracing::{info, warn};
-use tracing_subscriber::{fmt, EnvFilter};
-use zeroclaw::ui::{effects::RainbowEffect, splash};
+use tracing_subscriber::{EnvFilter, fmt};
 use zeroclaw::ui::prompts::PromptInteraction;
+use zeroclaw::ui::{effects::RainbowEffect, splash};
 
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
@@ -830,7 +830,7 @@ async fn main() -> Result<()> {
         let is_tty = std::io::stdin().is_terminal() && std::io::stdout().is_terminal();
         let has_provider_flags =
             api_key.is_some() || provider.is_some() || model.is_some() || memory.is_some();
-        
+
         if is_tty && !has_provider_flags {
             ctrlc::set_handler(move || {
                 let rainbow = RainbowEffect::new();
@@ -1047,8 +1047,12 @@ async fn main() -> Result<()> {
                         }
                         Ok(None) => {
                             if config.gateway.require_pairing {
-                                println!("🔐 Gateway pairing is enabled, but no active pairing code available.");
-                                println!("   The gateway may already be paired, or the code has been used.");
+                                println!(
+                                    "🔐 Gateway pairing is enabled, but no active pairing code available."
+                                );
+                                println!(
+                                    "   The gateway may already be paired, or the code has been used."
+                                );
                                 println!("   Restart the gateway to generate a new pairing code.");
                             } else {
                                 println!("⚠️  Gateway pairing is disabled in config.");
@@ -1249,22 +1253,27 @@ async fn main() -> Result<()> {
 
         Commands::Providers => {
             use crate::providers::model_metadata;
-            
+
             let providers = providers::list_providers();
             let model_counts = model_metadata::get_provider_model_counts();
             let total_models: usize = model_counts.values().sum();
-            
+            let litellm_providers = model_metadata::get_all_providers();
+
             let current = config
                 .default_provider
                 .as_deref()
                 .unwrap_or("openrouter")
                 .trim()
                 .to_ascii_lowercase();
-            
-            println!("Supported providers ({} total, {} models):\n", providers.len(), total_models);
+
+            println!(
+                "ZeroClaw supports 140+ AI providers with {} models!\n",
+                total_models
+            );
+            println!("Native providers ({} implemented):\n", providers.len());
             println!("  ID (use in config)  DESCRIPTION                           MODELS");
             println!("  ─────────────────── ───────────────────────────────────── ──────");
-            
+
             for p in &providers {
                 let is_active = p.name.eq_ignore_ascii_case(&current)
                     || p.aliases
@@ -1272,34 +1281,39 @@ async fn main() -> Result<()> {
                         .any(|alias| alias.eq_ignore_ascii_case(&current));
                 let marker = if is_active { " (active)" } else { "" };
                 let local_tag = if p.local { " [local]" } else { "" };
-                
+
                 // Try to find model count from LiteLLM database
-                let model_count = model_counts.get(p.name.to_lowercase().as_str())
+                let model_count = model_counts
+                    .get(p.name.to_lowercase().as_str())
                     .or_else(|| model_counts.get(p.name))
                     .copied()
                     .unwrap_or(0);
-                
+
                 let model_info = if model_count > 0 {
                     format!("{:>6}", model_count)
                 } else {
                     "     -".to_string()
                 };
-                
+
                 let display = format!("{}{}{}", p.display_name, local_tag, marker);
-                
-                println!(
-                    "  {:<19} {:<41} {}",
-                    p.name, display, model_info
-                );
-                
+
+                println!("  {:<19} {:<41} {}", p.name, display, model_info);
+
                 if !p.aliases.is_empty() {
                     println!("                      (aliases: {})", p.aliases.join(", "));
                 }
             }
-            
+
             println!("\n  custom:<URL>        Any OpenAI-compatible endpoint");
             println!("  anthropic-custom:<URL>  Any Anthropic-compatible endpoint");
-            println!("\n💡 Tip: Use `zeroclaw models list --provider <name>` to see available models");
+            println!(
+                "\nTotal providers in database: {} (including {} with metadata)",
+                litellm_providers.len(),
+                model_counts.len()
+            );
+            println!(
+                "Tip: Use `zeroclaw models list --provider <name>` to see available models"
+            );
             Ok(())
         }
 
@@ -1500,7 +1514,8 @@ fn handle_estop_command(
                     );
                 }
                 if otp_code.is_none() {
-                    let entered = zeroclaw::ui::prompts::password::password("Enter OTP code").interact()?;
+                    let entered =
+                        zeroclaw::ui::prompts::password::password("Enter OTP code").interact()?;
                     otp_code = Some(entered.to_string());
                 }
 

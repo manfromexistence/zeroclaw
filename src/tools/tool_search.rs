@@ -105,12 +105,11 @@ impl Tool for ToolSearchTool {
 
         for stub in &results {
             if let Some(spec) = self.deferred.tool_spec(&stub.prefixed_name) {
-                if !guard.is_activated(&stub.prefixed_name) {
-                    if let Some(tool) = self.deferred.activate(&stub.prefixed_name) {
+                if !guard.is_activated(&stub.prefixed_name)
+                    && let Some(tool) = self.deferred.activate(&stub.prefixed_name) {
                         guard.activate(stub.prefixed_name.clone(), Arc::from(tool));
                         activated_count += 1;
                     }
-                }
                 let _ = writeln!(
                     output,
                     "<function>{{\"name\": \"{}\", \"description\": \"{}\", \"parameters\": {}}}</function>",
@@ -150,12 +149,11 @@ impl ToolSearchTool {
             }
             match self.deferred.tool_spec(name) {
                 Some(spec) => {
-                    if !guard.is_activated(name) {
-                        if let Some(tool) = self.deferred.activate(name) {
+                    if !guard.is_activated(name)
+                        && let Some(tool) = self.deferred.activate(name) {
                             guard.activate(name.to_string(), Arc::from(tool));
                             activated_count += 1;
                         }
-                    }
                     let _ = writeln!(
                         output,
                         "<function>{{\"name\": \"{}\", \"description\": \"{}\", \"parameters\": {}}}</function>",

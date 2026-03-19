@@ -5,11 +5,11 @@ use anyhow::Context;
 use async_trait::async_trait;
 use chrono::Local;
 use parking_lot::Mutex;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc;
 use std::sync::Arc;
+use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 use uuid::Uuid;
@@ -577,11 +577,10 @@ impl Memory for SqliteMemory {
                             session_id: sid,
                             score: Some(f64::from(scored.final_score)),
                         };
-                        if let Some(filter_sid) = session_ref {
-                            if entry.session_id.as_deref() != Some(filter_sid) {
+                        if let Some(filter_sid) = session_ref
+                            && entry.session_id.as_deref() != Some(filter_sid) {
                                 continue;
                             }
-                        }
                         results.push(entry);
                     }
                 }
@@ -636,11 +635,10 @@ impl Memory for SqliteMemory {
                     })?;
                     for row in rows {
                         let entry = row?;
-                        if let Some(sid) = session_ref {
-                            if entry.session_id.as_deref() != Some(sid) {
+                        if let Some(sid) = session_ref
+                            && entry.session_id.as_deref() != Some(sid) {
                                 continue;
                             }
-                        }
                         results.push(entry);
                     }
                 }
@@ -719,11 +717,10 @@ impl Memory for SqliteMemory {
                 let rows = stmt.query_map(params![cat_str, DEFAULT_LIST_LIMIT], row_mapper)?;
                 for row in rows {
                     let entry = row?;
-                    if let Some(sid) = session_ref {
-                        if entry.session_id.as_deref() != Some(sid) {
+                    if let Some(sid) = session_ref
+                        && entry.session_id.as_deref() != Some(sid) {
                             continue;
                         }
-                    }
                     results.push(entry);
                 }
             } else {
@@ -734,11 +731,10 @@ impl Memory for SqliteMemory {
                 let rows = stmt.query_map(params![DEFAULT_LIST_LIMIT], row_mapper)?;
                 for row in rows {
                     let entry = row?;
-                    if let Some(sid) = session_ref {
-                        if entry.session_id.as_deref() != Some(sid) {
+                    if let Some(sid) = session_ref
+                        && entry.session_id.as_deref() != Some(sid) {
                             continue;
                         }
-                    }
                     results.push(entry);
                 }
             }
@@ -854,9 +850,11 @@ mod tests {
 
         let results = mem.recall("Rust", 10, None).await.unwrap();
         assert_eq!(results.len(), 2);
-        assert!(results
-            .iter()
-            .all(|r| r.content.to_lowercase().contains("rust")));
+        assert!(
+            results
+                .iter()
+                .all(|r| r.content.to_lowercase().contains("rust"))
+        );
     }
 
     #[tokio::test]
@@ -1581,7 +1579,7 @@ mod tests {
         mem.reindex().await.unwrap();
         let count = mem.reindex().await.unwrap();
         assert_eq!(count, 0); // Noop embedder → nothing to re-embed
-                              // Data should still be intact
+        // Data should still be intact
         let results = mem.recall("reindex", 10, None).await.unwrap();
         assert_eq!(results.len(), 1);
     }
@@ -1750,9 +1748,11 @@ mod tests {
         // List with session-a filter
         let results = mem.list(None, Some("sess-a")).await.unwrap();
         assert_eq!(results.len(), 2);
-        assert!(results
-            .iter()
-            .all(|e| e.session_id.as_deref() == Some("sess-a")));
+        assert!(
+            results
+                .iter()
+                .all(|e| e.session_id.as_deref() == Some("sess-a"))
+        );
 
         // List with session-a + category filter
         let results = mem

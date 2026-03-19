@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::theme;
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -512,7 +512,9 @@ fn check_zeroclaw_user() -> Result<()> {
                     bail!(
                         "User 'zeroclaw' exists but has unexpected UID {} (expected system UID < 1000).\n\
                          Recreate with: sudo {} && sudo {}",
-                        uid, del_cmd, add_cmd
+                        uid,
+                        del_cmd,
+                        add_cmd
                     );
                 }
 
@@ -543,11 +545,10 @@ fn check_zeroclaw_user() -> Result<()> {
 
 fn ensure_zeroclaw_user() -> Result<()> {
     let output = Command::new("getent").args(["passwd", "zeroclaw"]).output();
-    if let Ok(output) = output {
-        if output.status.success() {
+    if let Ok(output) = output
+        && output.status.success() {
             return check_zeroclaw_user();
         }
-    }
 
     let is_alpine = Path::new("/etc/alpine-release").exists();
 
@@ -689,17 +690,15 @@ fn resolve_invoking_user_config_dir() -> Option<PathBuf> {
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty() && value != "root");
 
-    if let Some(user) = sudo_user {
-        if let Ok(output) = Command::new("getent").args(["passwd", &user]).output() {
-            if output.status.success() {
+    if let Some(user) = sudo_user
+        && let Ok(output) = Command::new("getent").args(["passwd", &user]).output()
+            && output.status.success() {
                 let entry = String::from_utf8_lossy(&output.stdout);
                 let fields: Vec<&str> = entry.trim().split(':').collect();
                 if fields.len() >= 6 {
                     return Some(PathBuf::from(fields[5]).join(".zeroclaw"));
                 }
             }
-        }
-    }
 
     std::env::var("HOME")
         .ok()

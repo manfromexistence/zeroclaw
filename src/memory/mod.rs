@@ -19,8 +19,8 @@ pub mod vector;
 
 #[allow(unused_imports)]
 pub use backend::{
-    classify_memory_backend, default_memory_backend_key, memory_backend_profile,
-    selectable_memory_backends, MemoryBackendKind, MemoryBackendProfile,
+    MemoryBackendKind, MemoryBackendProfile, classify_memory_backend, default_memory_backend_key,
+    memory_backend_profile, selectable_memory_backends,
 };
 pub use lucid::LucidMemory;
 pub use markdown::MarkdownMemory;
@@ -249,11 +249,9 @@ pub fn create_memory_with_storage_and_routes(
             backend_kind,
             MemoryBackendKind::Sqlite | MemoryBackendKind::Lucid
         )
-    {
-        if let Err(e) = snapshot::export_snapshot(workspace_dir) {
+        && let Err(e) = snapshot::export_snapshot(workspace_dir) {
             tracing::warn!("memory snapshot skipped: {e}");
         }
-    }
 
     // Auto-hydration: if brain.db is missing but MEMORY_SNAPSHOT.md exists,
     // restore the "soul" from the snapshot before creating the backend.
@@ -682,7 +680,7 @@ mod tests {
     fn resolve_embedding_config_uses_embedding_provider_env_key_not_default_provider_key() {
         // COHERE_API_KEY is almost certainly unset in normal dev environments.
         let prev = std::env::var("COHERE_API_KEY").ok();
-        std::env::set_var("COHERE_API_KEY", "cohere-from-env");
+        unsafe { std::env::set_var("COHERE_API_KEY", "cohere-from-env") };
 
         let cfg = MemoryConfig {
             embedding_provider: "cohere".into(),
@@ -696,8 +694,8 @@ mod tests {
 
         // Restore env.
         match prev {
-            Some(v) => std::env::set_var("COHERE_API_KEY", v),
-            None => std::env::remove_var("COHERE_API_KEY"),
+            Some(v) => unsafe { std::env::set_var("COHERE_API_KEY", v) },
+            None => unsafe { std::env::remove_var("COHERE_API_KEY") },
         }
 
         assert_eq!(

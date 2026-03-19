@@ -6,7 +6,7 @@ pub mod profiles;
 
 use crate::auth::openai_oauth::refresh_access_token;
 use crate::auth::profiles::{
-    profile_id, AuthProfile, AuthProfileKind, AuthProfilesData, AuthProfilesStore, TokenSet,
+    AuthProfile, AuthProfileKind, AuthProfilesData, AuthProfilesStore, TokenSet, profile_id,
 };
 use crate::config::Config;
 use anyhow::Result;
@@ -390,11 +390,10 @@ pub fn select_profile_id(
         return None;
     }
 
-    if let Some(active) = data.active_profiles.get(provider) {
-        if data.profiles.contains_key(active) {
+    if let Some(active) = data.active_profiles.get(provider)
+        && data.profiles.contains_key(active) {
             return Some(active.clone());
         }
-    }
 
     let default = default_profile_id(provider);
     if data.profiles.contains_key(&default) {

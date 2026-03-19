@@ -94,8 +94,8 @@ impl Tool for CronRunTool {
             }
         };
 
-        if matches!(job.job_type, JobType::Shell) {
-            if let Err(reason) = self
+        if matches!(job.job_type, JobType::Shell)
+            && let Err(reason) = self
                 .security
                 .validate_command_execution(&job.command, approved)
             {
@@ -105,7 +105,6 @@ impl Tool for CronRunTool {
                     error: Some(reason),
                 });
             }
-        }
 
         if !self.security.record_action() {
             return Ok(ToolResult {
@@ -252,10 +251,12 @@ mod tests {
         // Without approval, the tool-level policy check blocks medium-risk commands.
         let denied = tool.execute(json!({ "job_id": job.id })).await.unwrap();
         assert!(!denied.success);
-        assert!(denied
-            .error
-            .unwrap_or_default()
-            .contains("explicit approval"));
+        assert!(
+            denied
+                .error
+                .unwrap_or_default()
+                .contains("explicit approval")
+        );
     }
 
     #[tokio::test]
@@ -275,10 +276,12 @@ mod tests {
 
         let result = tool.execute(json!({ "job_id": job.id })).await.unwrap();
         assert!(!result.success);
-        assert!(result
-            .error
-            .unwrap_or_default()
-            .contains("Rate limit exceeded"));
+        assert!(
+            result
+                .error
+                .unwrap_or_default()
+                .contains("Rate limit exceeded")
+        );
         assert!(cron::list_runs(&cfg, &job.id, 10).unwrap().is_empty());
     }
 }

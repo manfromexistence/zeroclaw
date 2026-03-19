@@ -3,8 +3,8 @@
 //! This module handles fetching, caching, and managing AI model catalogs
 //! from various providers.
 
-use anyhow::{bail, Context, Result};
 use crate::ui::prompts;
+use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -16,9 +16,9 @@ use crate::config::Config;
 
 // Import provider helpers from wizard
 use super::wizard::{
+    MODEL_CACHE_FILE, MODEL_CACHE_TTL_SECS, MODEL_PREVIEW_LIMIT,
     allows_unauthenticated_model_fetch, canonical_provider_name, models_endpoint_for_provider,
-    provider_env_var, supports_live_model_fetch, MODEL_CACHE_FILE, MODEL_CACHE_TTL_SECS,
-    MODEL_PREVIEW_LIMIT,
+    provider_env_var, supports_live_model_fetch,
 };
 
 // ── Model Cache Structures ───────────────────────────────────────
@@ -333,8 +333,8 @@ fn resolve_live_models_endpoint(
     if matches!(
         canonical_provider_name(provider_name),
         "llamacpp" | "sglang" | "vllm" | "osaurus"
-    ) {
-        if let Some(url) = provider_api_url
+    )
+        && let Some(url) = provider_api_url
             .map(str::trim)
             .filter(|url| !url.is_empty())
         {
@@ -344,10 +344,9 @@ fn resolve_live_models_endpoint(
             }
             return Some(format!("{normalized}/models"));
         }
-    }
 
-    if canonical_provider_name(provider_name) == "openai-codex" {
-        if let Some(url) = provider_api_url
+    if canonical_provider_name(provider_name) == "openai-codex"
+        && let Some(url) = provider_api_url
             .map(str::trim)
             .filter(|url| !url.is_empty())
         {
@@ -357,7 +356,6 @@ fn resolve_live_models_endpoint(
             }
             return Some(format!("{normalized}/models"));
         }
-    }
 
     models_endpoint_for_provider(provider_name).map(str::to_string)
 }
@@ -574,8 +572,8 @@ pub async fn run_models_refresh(
         anyhow::bail!("Provider '{provider_name}' does not support live model discovery yet");
     }
 
-    if !force {
-        if let Some(cached) = load_cached_models_for_provider(
+    if !force
+        && let Some(cached) = load_cached_models_for_provider(
             &config.workspace_dir,
             &provider_name,
             MODEL_CACHE_TTL_SECS,
@@ -594,7 +592,6 @@ pub async fn run_models_refresh(
             ))?;
             return Ok(());
         }
-    }
 
     let api_key = config.api_key.clone().unwrap_or_default();
 

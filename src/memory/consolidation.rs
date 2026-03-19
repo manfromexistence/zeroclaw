@@ -75,14 +75,13 @@ pub async fn consolidate_turn(
         .await?;
 
     // Phase 2: Write memory update to Core category (if present).
-    if let Some(ref update) = result.memory_update {
-        if !update.trim().is_empty() {
+    if let Some(ref update) = result.memory_update
+        && !update.trim().is_empty() {
             let mem_key = format!("core_{}", uuid::Uuid::new_v4());
             memory
                 .store(&mem_key, update, MemoryCategory::Core, None)
                 .await?;
         }
-    }
 
     Ok(())
 }
@@ -171,9 +170,11 @@ mod tests {
         // inside a character. This must not panic.
         let cjk_text = "二手书项目".repeat(50); // 250 chars = 750 bytes
         let result = parse_consolidation_response("invalid", &cjk_text);
-        assert!(result
-            .history_entry
-            .is_char_boundary(result.history_entry.len()));
+        assert!(
+            result
+                .history_entry
+                .is_char_boundary(result.history_entry.len())
+        );
         assert!(result.history_entry.ends_with('…'));
     }
 }

@@ -8,10 +8,10 @@
 #![allow(clippy::too_many_lines)]
 #![allow(clippy::unnecessary_map_or)]
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
+use async_imap::Session;
 use async_imap::extensions::idle::IdleResponse;
 use async_imap::types::Fetch;
-use async_imap::Session;
 use async_trait::async_trait;
 use futures_util::TryStreamExt;
 use lettre::message::SinglePart;
@@ -26,10 +26,10 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::net::TcpStream;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{Mutex, mpsc};
 use tokio::time::{sleep, timeout};
-use tokio_rustls::client::TlsStream;
 use tokio_rustls::TlsConnector;
+use tokio_rustls::client::TlsStream;
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
@@ -200,14 +200,12 @@ impl EmailChannel {
         }
         for part in parsed.attachments() {
             let part: &mail_parser::MessagePart = part;
-            if let Some(ct) = MimeHeaders::content_type(part) {
-                if ct.ctype() == "text" {
-                    if let Ok(text) = std::str::from_utf8(part.contents()) {
+            if let Some(ct) = MimeHeaders::content_type(part)
+                && ct.ctype() == "text"
+                    && let Ok(text) = std::str::from_utf8(part.contents()) {
                         let name = MimeHeaders::attachment_name(part).unwrap_or("file");
                         return format!("[Attachment: {}]\n{}", name, text);
                     }
-                }
-            }
         }
         "(no readable content)".to_string()
     }
@@ -267,8 +265,8 @@ impl EmailChannel {
 
         for msg in messages {
             let uid = msg.uid.unwrap_or(0);
-            if let Some(body) = msg.body() {
-                if let Some(parsed) = MessageParser::default().parse(body) {
+            if let Some(body) = msg.body()
+                && let Some(parsed) = MessageParser::default().parse(body) {
                     let sender = Self::extract_sender(&parsed);
                     let subject = parsed.subject().unwrap_or("(no subject)").to_string();
                     let body_text = Self::extract_text(&parsed);
@@ -311,7 +309,6 @@ impl EmailChannel {
                         timestamp: ts,
                     });
                 }
-            }
         }
 
         // Mark fetched messages as seen

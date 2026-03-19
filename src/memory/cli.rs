@@ -1,13 +1,13 @@
 use super::traits::{Memory, MemoryCategory};
 use super::{
-    classify_memory_backend, create_memory_for_migration, effective_memory_backend_name,
-    MemoryBackendKind,
+    MemoryBackendKind, classify_memory_backend, create_memory_for_migration,
+    effective_memory_backend_name,
 };
 use crate::config::Config;
 use crate::ui::prompts::PromptInteraction;
 #[cfg(feature = "memory-postgres")]
 use anyhow::Context;
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 
 /// Handle `zeroclaw memory <subcommand>` CLI commands.
 pub async fn handle_command(command: crate::MemoryCommands, config: &Config) -> Result<()> {
@@ -64,7 +64,9 @@ fn create_cli_memory(config: &Config) -> Result<Box<dyn Memory>> {
             }
             #[cfg(not(feature = "memory-postgres"))]
             {
-                bail!("Memory backend 'postgres' requires the 'memory-postgres' feature to be enabled at compile time.");
+                bail!(
+                    "Memory backend 'postgres' requires the 'memory-postgres' feature to be enabled at compile time."
+                );
             }
         }
         #[cfg(not(feature = "memory-postgres"))]
@@ -83,7 +85,7 @@ async fn handle_list(
     offset: usize,
 ) -> Result<()> {
     use crate::theme::print_info;
-    
+
     let mem = create_cli_memory(config)?;
     let cat = category.as_deref().map(parse_category);
     let entries = mem.list(cat.as_ref(), session.as_deref()).await?;
@@ -164,7 +166,10 @@ async fn handle_stats(config: &Config) -> Result<()> {
 
     println!("Memory Statistics:\n");
     println!("  Backend:  {}", mem.name());
-    println!("  Health:   {}", if healthy { "healthy" } else { "unhealthy" });
+    println!(
+        "  Health:   {}",
+        if healthy { "healthy" } else { "unhealthy" }
+    );
     println!("  Total:    {total}");
 
     let all = mem.list(None, None).await.unwrap_or_default();
@@ -192,7 +197,7 @@ async fn handle_clear(
     yes: bool,
 ) -> Result<()> {
     use crate::theme::print_success;
-    
+
     let mem = create_cli_memory(config)?;
 
     // Single-key deletion (exact or prefix match).
@@ -213,9 +218,10 @@ async fn handle_clear(
     println!("Found {} entries in '{scope}'.", entries.len());
 
     if !yes {
-        let confirmed = crate::ui::prompts::confirm(&format!("  Delete {} entries?", entries.len()))
-            .initial_value(false)
-            .interact()?;
+        let confirmed =
+            crate::ui::prompts::confirm(format!("  Delete {} entries?", entries.len()))
+                .initial_value(false)
+                .interact()?;
         if !confirmed {
             println!("Aborted.");
             return Ok(());
@@ -237,7 +243,7 @@ async fn handle_clear(
 /// Delete a single entry by exact key or prefix match.
 async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> {
     use crate::theme::print_success;
-    
+
     // Resolve the target key (exact match or unique prefix).
     let target = if mem.get(key).await?.is_some() {
         key.to_string()
@@ -262,7 +268,7 @@ async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> 
     };
 
     if !yes {
-        let confirmed = crate::ui::prompts::confirm(&format!("  Delete '{target}'?"))
+        let confirmed = crate::ui::prompts::confirm(format!("  Delete '{target}'?"))
             .initial_value(false)
             .interact()?;
         if !confirmed {

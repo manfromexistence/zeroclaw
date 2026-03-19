@@ -112,8 +112,8 @@ impl PairingGuard {
             }
 
             // Check brute force lockout for this specific client
-            if let Some(state) = map.get(&client_id) {
-                if let Some(until) = state.lockout_until {
+            if let Some(state) = map.get(&client_id)
+                && let Some(until) = state.lockout_until {
                     if now < until {
                         let remaining = (until - now).as_secs();
                         return Err(remaining.max(1));
@@ -121,13 +121,12 @@ impl PairingGuard {
                     // Lockout expired — reset inline
                     map.remove(&client_id);
                 }
-            }
         }
 
         {
             let mut pairing_code = self.pairing_code.lock();
-            if let Some(ref expected) = *pairing_code {
-                if constant_time_eq(code.trim(), expected.trim()) {
+            if let Some(ref expected) = *pairing_code
+                && constant_time_eq(code.trim(), expected.trim()) {
                     // Reset failed attempts for this client on success
                     {
                         let mut guard = self.failed_attempts.lock();
@@ -142,7 +141,6 @@ impl PairingGuard {
 
                     return Ok(Some(token));
                 }
-            }
         }
 
         // Increment failed attempts for this client

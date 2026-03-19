@@ -84,7 +84,7 @@ fn show_integration_info(config: &Config, name: &str) -> Result<()> {
     };
 
     use crate::theme::print_info;
-    
+
     let status = (entry.status_fn)(config);
     let (icon, label) = match status {
         IntegrationStatus::Active => ("✅", "Active"),

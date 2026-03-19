@@ -1,5 +1,5 @@
 use super::traits::{Channel, ChannelMessage, SendMessage};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use async_trait::async_trait;
 use parking_lot::Mutex;
 use serde::Deserialize;
@@ -195,13 +195,11 @@ impl RedditChannel {
         }
 
         // If a subreddit filter is set, skip items from other subreddits
-        if let Some(ref sub) = self.subreddit {
-            if let Some(ref item_sub) = item.subreddit {
-                if !item_sub.eq_ignore_ascii_case(sub) {
+        if let Some(ref sub) = self.subreddit
+            && let Some(ref item_sub) = item.subreddit
+                && !item_sub.eq_ignore_ascii_case(sub) {
                     return None;
                 }
-            }
-        }
 
         // Determine reply target: for comment replies use the parent thing name,
         // for DMs reply to the author.
@@ -325,11 +323,10 @@ impl Channel for RedditChannel {
                 if let Some(ref name) = child.data.name {
                     read_ids.push(name.clone());
                 }
-                if let Some(msg) = self.parse_item(&child.data) {
-                    if tx.send(msg).await.is_err() {
+                if let Some(msg) = self.parse_item(&child.data)
+                    && tx.send(msg).await.is_err() {
                         return Ok(());
                     }
-                }
             }
 
             if let Err(e) = self.mark_read(&read_ids).await {

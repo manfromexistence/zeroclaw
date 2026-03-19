@@ -1,5 +1,5 @@
-use super::{kill_shared, new_shared_process, SharedProcess, Tunnel, TunnelProcess};
-use anyhow::{bail, Result};
+use super::{SharedProcess, Tunnel, TunnelProcess, kill_shared, new_shared_process};
+use anyhow::{Result, bail};
 use tokio::io::AsyncBufReadExt;
 use tokio::process::Command;
 
@@ -62,8 +62,8 @@ impl Tunnel for CustomTunnel {
         let mut public_url = format!("http://{local_host}:{local_port}");
 
         // If a URL pattern is provided, try to extract the public URL from stdout
-        if let Some(ref pattern) = self.url_pattern {
-            if let Some(stdout) = child.stdout.take() {
+        if let Some(ref pattern) = self.url_pattern
+            && let Some(stdout) = child.stdout.take() {
                 let mut reader = tokio::io::BufReader::new(stdout).lines();
                 let deadline = tokio::time::Instant::now() + tokio::time::Duration::from_secs(15);
 
@@ -105,7 +105,6 @@ impl Tunnel for CustomTunnel {
                     }
                 }
             }
-        }
 
         let mut guard = self.proc.lock().await;
         *guard = Some(TunnelProcess {
@@ -154,10 +153,12 @@ mod tests {
         let result = tunnel.start("127.0.0.1", 8080).await;
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("start_command is empty"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("start_command is empty")
+        );
     }
 
     #[tokio::test]
