@@ -16,6 +16,14 @@ default-run = "onboard"
 name = "onboard"
 path = "src/main.rs"
 
+# ──────────────────────────────────────────────
+#  Library
+# ──────────────────────────────────────────────
+
+[lib]
+name = "onboard"
+path = "src/lib.rs"
+
 # [[bin]]
 # name = "tui"
 # path = "src/tui.rs"

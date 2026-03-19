@@ -823,13 +823,8 @@ async fn main() -> Result<()> {
             api_key.is_some() || provider.is_some() || model.is_some() || memory.is_some();
         
         if is_tty && !has_provider_flags {
-            ctrlc::set_handler(|| {
-                use onboard::effects::RainbowEffect;
-                use onboard::splash::render_train_animation;
-                use std::thread;
-                use std::time::Duration;
-                
-                let rainbow = RainbowEffect::new();
+            ctrlc::set_handler(move || {
+                let rainbow = onboard::RainbowEffect::new();
                 println!();
                 println!("🚂 Exiting ZeroClaw... Here's a farewell train!");
                 println!();
@@ -837,8 +832,8 @@ async fn main() -> Result<()> {
                 print!("\x1B[2J\x1B[H"); // Clear screen
                 for frame in 0..15 {
                     print!("\x1B[H"); // Move cursor to top
-                    let _ = render_train_animation(&rainbow, frame);
-                    thread::sleep(Duration::from_millis(200));
+                    let _ = onboard::splash::render_train_animation(&rainbow, frame);
+                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
 
                 std::process::exit(0);

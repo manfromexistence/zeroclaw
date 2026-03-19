@@ -9356,6 +9356,7 @@ dependencies = [
  "console 0.16.3",
  "criterion",
  "cron",
+ "ctrlc",
  "dialoguer",
  "directories",
  "extism",
