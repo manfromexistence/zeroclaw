@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::theme;
 use anyhow::{bail, Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -122,7 +123,7 @@ fn start(config: &Config, init_system: InitSystem) -> Result<()> {
         let plist = macos_service_file()?;
         run_checked(Command::new("launchctl").arg("load").arg("-w").arg(&plist))?;
         run_checked(Command::new("launchctl").arg("start").arg(SERVICE_LABEL))?;
-        println!("✅ Service started");
+        theme::print_success("Service started");
         Ok(())
     } else if cfg!(target_os = "linux") {
         let resolved = init_system.resolve()?;
@@ -130,7 +131,7 @@ fn start(config: &Config, init_system: InitSystem) -> Result<()> {
     } else if cfg!(target_os = "windows") {
         let _ = config;
         run_checked(Command::new("schtasks").args(["/Run", "/TN", windows_task_name()]))?;
-        println!("✅ Service started");
+        theme::print_success("Service started");
         Ok(())
     } else {
         let _ = config;
@@ -149,7 +150,7 @@ fn start_linux(init_system: InitSystem) -> Result<()> {
         }
         InitSystem::Auto => unreachable!("Auto should be resolved before this point"),
     }
-    println!("✅ Service started");
+    theme::print_success("Service started");
     Ok(())
 }
 
@@ -163,7 +164,7 @@ fn stop(config: &Config, init_system: InitSystem) -> Result<()> {
                 .arg("-w")
                 .arg(&plist),
         );
-        println!("✅ Service stopped");
+        theme::print_success("Service stopped");
         Ok(())
     } else if cfg!(target_os = "linux") {
         let resolved = init_system.resolve()?;
@@ -172,7 +173,7 @@ fn stop(config: &Config, init_system: InitSystem) -> Result<()> {
         let _ = config;
         let task_name = windows_task_name();
         let _ = run_checked(Command::new("schtasks").args(["/End", "/TN", task_name]));
-        println!("✅ Service stopped");
+        theme::print_success("Service stopped");
         Ok(())
     } else {
         let _ = config;

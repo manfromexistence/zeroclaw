@@ -35,7 +35,8 @@
 
 use anyhow::{bail, Context, Result};
 use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
-use dialoguer::{Input, Password};
+use onboard::prompts::PromptInteraction;
+use onboard::{effects::RainbowEffect, splash};
 use serde::{Deserialize, Serialize};
 use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
@@ -824,7 +825,7 @@ async fn main() -> Result<()> {
         
         if is_tty && !has_provider_flags {
             ctrlc::set_handler(move || {
-                let rainbow = onboard::RainbowEffect::new();
+                let rainbow = RainbowEffect::new();
                 println!();
                 println!("🚂 Exiting ZeroClaw... Here's a farewell train!");
                 println!();
@@ -832,7 +833,7 @@ async fn main() -> Result<()> {
                 print!("\x1B[2J\x1B[H"); // Clear screen
                 for frame in 0..15 {
                     print!("\x1B[H"); // Move cursor to top
-                    let _ = onboard::splash::render_train_animation(&rainbow, frame);
+                    let _ = splash::render_train_animation(&rainbow, frame);
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 }
 
@@ -1468,10 +1469,7 @@ fn handle_estop_command(
                     );
                 }
                 if otp_code.is_none() {
-                    let entered = Password::new()
-                        .with_prompt("Enter OTP code")
-                        .allow_empty_password(false)
-                        .interact()?;
+                    let entered = onboard::prompts::password::password("Enter OTP code").interact()?;
                     otp_code = Some(entered);
                 }
 
@@ -1817,15 +1815,12 @@ fn clear_pending_oauth_login(config: &Config, provider: &str) {
 }
 
 fn read_auth_input(prompt: &str) -> Result<String> {
-    let input = Password::new()
-        .with_prompt(prompt)
-        .allow_empty_password(false)
-        .interact()?;
+    let input = onboard::prompts::password::password(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 
 fn read_plain_input(prompt: &str) -> Result<String> {
-    let input: String = Input::new().with_prompt(prompt).interact_text()?;
+    let input = onboard::prompts::input::input(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 

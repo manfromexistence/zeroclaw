@@ -8,6 +8,7 @@ use crate::config::Config;
 use anyhow::Context;
 use anyhow::{bail, Result};
 use console::style;
+use onboard::prompts::PromptInteraction;
 
 /// Handle `zeroclaw memory <subcommand>` CLI commands.
 pub async fn handle_command(command: crate::MemoryCommands, config: &Config) -> Result<()> {
@@ -224,9 +225,8 @@ async fn handle_clear(
     println!("Found {} entries in '{scope}'.", entries.len());
 
     if !yes {
-        let confirmed = dialoguer::Confirm::new()
-            .with_prompt(format!("  Delete {} entries?", entries.len()))
-            .default(false)
+        let confirmed = onboard::prompts::confirm(&format!("  Delete {} entries?", entries.len()))
+            .initial_value(false)
             .interact()?;
         if !confirmed {
             println!("Aborted.");
@@ -280,9 +280,8 @@ async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> 
     };
 
     if !yes {
-        let confirmed = dialoguer::Confirm::new()
-            .with_prompt(format!("  Delete '{target}'?"))
-            .default(false)
+        let confirmed = onboard::prompts::confirm(&format!("  Delete '{target}'?"))
+            .initial_value(false)
             .interact()?;
         if !confirmed {
             println!("Aborted.");

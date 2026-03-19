@@ -9379,6 +9379,7 @@ dependencies = [
  "nostr-sdk",
  "nusb",
  "onboard",
+ "once_cell",
  "opentelemetry",
  "opentelemetry-otlp",
  "opentelemetry_sdk",
