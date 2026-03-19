@@ -227,3 +227,4 @@ project_id_env = "GCP_PROJECT"
 **Total accessible models: 2600+.**
 
 That's the less work, more benefit path. 🎯
+

@@ -15,6 +15,6 @@ Now as we split the monster wizard.rs files into smaller files, check the root o
 
 Now look for our main SRC folder and check for any other places that we are using bad UI so that we have to update it with our on-board UI framework And also in the root you can find the theme.ts file. Please create theme.css file and use hard.css to create a theme system throughout our whole main src folder, zero-claw project, so that all CLI tui can be themeable by just that theme.toml file.
 
-Please do a website about open code and its models.dev ABI and 
+Now in the root there is the providers.md file and there I have created a markdown plan about adding more relation providers into our product. Now tell me, by searching the whole codebase, is it possible to do this and is it easy to do this? Give me full details.
 
 Now please rename zeroclawlabs to dx-agent and zeroclaw to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.

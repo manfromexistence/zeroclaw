@@ -158,8 +158,6 @@ fn print_entry(entry: &super::traits::MemoryEntry) {
 }
 
 async fn handle_stats(config: &Config) -> Result<()> {
-    use crate::theme::print_success;
-    
     let mem = create_cli_memory(config)?;
     let healthy = mem.health_check().await;
     let total = mem.count().await.unwrap_or(0);
