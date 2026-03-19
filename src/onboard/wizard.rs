@@ -64,7 +64,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
 
     // Welcome with onboard UI
     prompts::intro("ZeroClaw Setup Wizard")?;
-    prompts::section_with_width("Welcome to ZeroClaw", 80, |lines| {
+    prompts::section_with_width("Welcome to ZeroClaw", 80, |lines: &mut Vec<String>| {
         lines.push("The fastest, smallest AI assistant.".to_string());
         lines.push("100% Rust. 100% Agnostic. Zero compromise.".to_string());
         lines.push("".to_string());
@@ -204,7 +204,9 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         if launch {
             prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
-            std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            unsafe {
+                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            }
         }
     }
 
@@ -236,7 +238,7 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
     std::thread::sleep(std::time::Duration::from_millis(800));
 
     prompts::intro("Channels Repair Wizard")?;
-    prompts::section_with_width("Channel Configuration", 80, |lines| {
+    prompts::section_with_width("Channel Configuration", 80, |lines: &mut Vec<String>| {
         lines.push("Update channel tokens and allowlists only.".to_string());
         lines.push("Your existing configuration will be preserved.".to_string());
     })?;
@@ -263,7 +265,9 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
         if launch {
             prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
-            std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            unsafe {
+                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            }
         }
     }
 
@@ -325,7 +329,9 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
 
         if launch {
             prompts::log::info("Starting channel server...")?;
-            std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            unsafe {
+                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+            }
         }
     }
 
@@ -471,7 +477,7 @@ async fn run_quick_setup_with_home(
     std::thread::sleep(std::time::Duration::from_millis(800));
 
     prompts::intro("ZeroClaw Quick Setup")?;
-    prompts::section_with_width("Quick Configuration", 80, |lines| {
+    prompts::section_with_width("Quick Configuration", 80, |lines: &mut Vec<String>| {
         lines.push("Generating config with sensible defaults...".to_string());
         lines.push("You can customize later with 'zeroclaw onboard'.".to_string());
     })?;
@@ -1328,7 +1334,7 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
         .initial_value(true)
         .interact()?;
 
-    let (config_dir, workspace_dir) = if use_default {
+    let (config_dir, workspace_dir): (PathBuf, PathBuf) = if use_default {
         (default_config_dir, default_workspace_dir)
     } else {
         let custom = prompts::input::input("Enter workspace path")
@@ -1337,7 +1343,7 @@ async fn setup_workspace() -> Result<(PathBuf, PathBuf)> {
         crate::config::schema::resolve_config_dir_for_workspace(&PathBuf::from(expanded))
     };
 
-    let config_path = config_dir.join("config.toml");
+    let config_path: PathBuf = config_dir.join("config.toml");
 
     fs::create_dir_all(&workspace_dir)
         .await

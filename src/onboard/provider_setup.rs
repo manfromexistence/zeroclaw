@@ -91,7 +91,7 @@ pub async fn setup_provider(workspace_dir: &Path) -> Result<(String, String, Str
 
     // ── Custom / BYOP flow ──
     if providers.is_empty() {
-        prompts::section_with_width("Custom Provider Setup — any OpenAI-compatible API", 70, |lines| {
+        prompts::section_with_width("Custom Provider Setup — any OpenAI-compatible API", 70, |lines: &mut Vec<String>| {
             lines.push("ZeroClaw works with ANY API that speaks the OpenAI chat completions format.".to_string());
             lines.push("Examples: LiteLLM, LocalAI, vLLM, text-generation-webui, LM Studio, etc.".to_string());
         })?;

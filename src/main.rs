@@ -107,8 +107,14 @@ mod security;
 mod service;
 mod skillforge;
 mod skills;
+mod theme {
+    pub use zeroclaw::theme::*;
+}
 mod tools;
 mod tunnel;
+mod ui {
+    pub use zeroclaw::ui::*;
+}
 mod util;
 
 use config::Config;
@@ -783,7 +789,9 @@ async fn main() -> Result<()> {
         if config_dir.trim().is_empty() {
             bail!("--config-dir cannot be empty");
         }
-        std::env::set_var("ZEROCLAW_CONFIG_DIR", config_dir);
+        unsafe {
+            std::env::set_var("ZEROCLAW_CONFIG_DIR", config_dir);
+        }
     }
 
     // Completions must remain stdout-only and should not load config or initialize logging.
@@ -1470,7 +1478,7 @@ fn handle_estop_command(
                 }
                 if otp_code.is_none() {
                     let entered = zeroclaw::ui::prompts::password::password("Enter OTP code").interact()?;
-                    otp_code = Some(entered);
+                    otp_code = Some(entered.to_string());
                 }
 
                 let store = security::SecretStore::new(config_dir, config.secrets.encrypt);
