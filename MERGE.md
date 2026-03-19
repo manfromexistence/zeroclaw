@@ -710,3 +710,5 @@ To https://github.com/manfromexistence/zeroclaw
    92940a3d..e5a20779  master -> master
 ```
 Please make this "https://github.com/manfromexistence/zeroclaw" the remote branch and merge local and remote changes correctly!!!
+
+please pull and sync our git with remote

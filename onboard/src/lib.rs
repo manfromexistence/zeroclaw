@@ -1,10 +1,64 @@
-//! DX Onboarding - Interactive Setup Experience
+//! # DX Onboard - Interactive TUI Onboarding Library
+//!
+//! A comprehensive terminal user interface library providing 24 different interactive prompt types
+//! for building beautiful onboarding experiences in Rust applications.
+//!
+//! ## Quick Start
+//!
+//! ```rust,no_run
+//! use onboard::prompts::*;
+//!
+//! fn main() -> anyhow::Result<()> {
+//!     // Text input
+//!     let name = input::input("What's your name?")
+//!         .placeholder("John Doe")
+//!         .interact()?;
+//!     
+//!     // Email with validation
+//!     let email = email::email("Your email?")
+//!         .interact()?;
+//!     
+//!     // Single selection
+//!     let theme = select("Choose theme")
+//!         .item("dark", "Dark Theme", "For night coding")
+//!         .item("light", "Light Theme", "For daytime")
+//!         .interact()?;
+//!     
+//!     println!("Name: {}, Email: {}, Theme: {}", name, email, theme);
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ## Available Modules
+//!
+//! - [`prompts`] - All 24 interactive prompt types
+//! - [`effects`] - Visual effects (rainbow colors)
+//! - [`splash`] - ASCII art and animations
+//!
+//! ## Complete Onboarding Flow
+//!
+//! ```rust,no_run
+//! use onboard::run_onboarding;
+//!
+//! fn main() -> anyhow::Result<()> {
+//!     // Run the complete demo onboarding flow
+//!     let config = run_onboarding()?;
+//!     println!("Welcome, {}!", config.name);
+//!     Ok(())
+//! }
+//! ```
+
 #![allow(dead_code)]
 
-mod effects;
-mod prompts;
-mod splash;
+// Re-export main modules
+pub mod effects;
+pub mod prompts;
+pub mod splash;
 
+// Re-export commonly used types
+pub use effects::RainbowEffect;
+
+// Re-export the main onboarding function and result type
 use anyhow::Result;
 use argon2::Argon2;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier};
@@ -17,20 +71,25 @@ use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::Duration;
 
-use effects::RainbowEffect;
 use prompts::PromptInteraction;
-use splash::{render_dx_logo, render_train_animation};
+use splash::render_dx_logo;
 
+/// Runtime environment detection
 #[derive(Debug, Clone, Copy)]
-enum RuntimeEnvironment {
+pub enum RuntimeEnvironment {
+    /// Real OS workstation (desktop/laptop)
     RealOs,
+    /// VPS or cloud virtual machine
     Vps,
+    /// Docker or container environment
     Container,
+    /// Restricted environment (CI/CD)
     Restricted,
 }
 
 impl RuntimeEnvironment {
-    fn as_str(self) -> &'static str {
+    /// Get string representation
+    pub fn as_str(self) -> &'static str {
         match self {
             RuntimeEnvironment::RealOs => "real_os",
             RuntimeEnvironment::Vps => "vps",
@@ -39,7 +98,8 @@ impl RuntimeEnvironment {
         }
     }
 
-    fn label(self) -> &'static str {
+    /// Get human-readable label
+    pub fn label(self) -> &'static str {
         match self {
             RuntimeEnvironment::RealOs => "Real OS workstation",
             RuntimeEnvironment::Vps => "VPS / Cloud VM",
@@ -48,7 +108,8 @@ impl RuntimeEnvironment {
         }
     }
 
-    fn hint(self) -> &'static str {
+    /// Get usage hint
+    pub fn hint(self) -> &'static str {
         match self {
             RuntimeEnvironment::RealOs => "Best for desktop app + extension onboarding",
             RuntimeEnvironment::Vps => "Best for remote gateway + channel bridge",
@@ -58,52 +119,55 @@ impl RuntimeEnvironment {
     }
 }
 
+/// Complete onboarding result with all collected data
 #[derive(Debug, Clone, Serialize)]
-struct OnboardingResult {
+pub struct OnboardingResult {
     // Basic Info
-    name: String,
-    email: String,
-    website: String,
-    phone: String,
-    bio: String,
+    pub name: String,
+    pub email: String,
+    pub website: String,
+    pub phone: String,
+    pub bio: String,
 
     // Experience & Skills
-    experience_years: i64,
-    satisfaction_rating: usize,
-    productivity_level: i64,
-    work_hours: (i64, i64),
-    programming_languages: Vec<String>,
-    favorite_language: String,
-    framework: String,
-    project_type: String,
-    selected_skills: Vec<String>,
+    pub experience_years: i64,
+    pub satisfaction_rating: usize,
+    pub productivity_level: i64,
+    pub work_hours: (i64, i64),
+    pub programming_languages: Vec<String>,
+    pub favorite_language: String,
+    pub framework: String,
+    pub project_type: String,
+    pub selected_skills: Vec<String>,
 
     // System & Environment
-    runtime_environment: String,
-    selected_components: Vec<String>,
-    selected_providers: Vec<String>,
+    pub runtime_environment: String,
+    pub selected_components: Vec<String>,
+    pub selected_providers: Vec<String>,
 
     // Preferences
-    preferences: OnboardingPreferences,
+    pub preferences: OnboardingPreferences,
 
     // Workflow Data
-    wizard_completed_steps: usize,
+    pub wizard_completed_steps: usize,
 
     // Metadata
-    timestamp: String,
+    pub timestamp: String,
 }
 
+/// User preference settings
 #[derive(Debug, Clone, Serialize)]
-struct OnboardingPreferences {
-    theme: String,
-    editor: String,
-    shell: String,
-    notifications: bool,
-    auto_updates: bool,
-    telemetry: bool,
+pub struct OnboardingPreferences {
+    pub theme: String,
+    pub editor: String,
+    pub shell: String,
+    pub notifications: bool,
+    pub auto_updates: bool,
+    pub telemetry: bool,
 }
 
-fn detect_runtime_environment() -> RuntimeEnvironment {
+/// Detect the current runtime environment
+pub fn detect_runtime_environment() -> RuntimeEnvironment {
     let ci = env::var("CI")
         .map(|value| {
             let normalized = value.to_ascii_lowercase();
@@ -153,11 +217,12 @@ fn find_workspace_root() -> PathBuf {
     let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     for ancestor in cwd.ancestors() {
         let cargo_toml = ancestor.join("Cargo.toml");
-        if cargo_toml.exists()
-            && let Ok(content) = fs::read_to_string(&cargo_toml)
-            && content.contains("[workspace]")
-        {
-            return ancestor.to_path_buf();
+        if cargo_toml.exists() {
+            if let Ok(content) = fs::read_to_string(&cargo_toml) {
+                if content.contains("[workspace]") {
+                    return ancestor.to_path_buf();
+                }
+            }
         }
     }
     cwd
@@ -198,7 +263,35 @@ fn verify_password(password: &str, password_hash: &str) -> bool {
         .is_ok()
 }
 
-fn run_onboarding() -> Result<OnboardingResult> {
+/// Run the complete onboarding flow
+///
+/// This function runs through all 24 prompt types and collects user data.
+/// The configuration is automatically saved to `dx.json` in the workspace root.
+///
+/// # Returns
+///
+/// Returns `OnboardingResult` containing all collected data.
+///
+/// # Errors
+///
+/// Returns an error if:
+/// - User cancels the onboarding (Ctrl+C)
+/// - Terminal is not interactive
+/// - Configuration save fails
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use onboard::run_onboarding;
+///
+/// fn main() -> anyhow::Result<()> {
+///     let config = run_onboarding()?;
+///     println!("Welcome, {}!", config.name);
+///     println!("Email: {}", config.email);
+///     Ok(())
+/// }
+/// ```
+pub fn run_onboarding() -> Result<OnboardingResult> {
     // Initialize rainbow effect
     let rainbow = RainbowEffect::new();
 
@@ -578,7 +671,7 @@ fn run_onboarding() -> Result<OnboardingResult> {
         lines.push(format!("Shell: {}", result.preferences.shell));
         lines.push(format!("Favorite Language: {}", favorite_language));
         lines.push(format!("Framework: {}", framework));
-        lines.push(format!("Project Type: {}", project_type));
+        lines.push(format!("Project type: {}", project_type));
         lines.push(format!("Components: {}", result.selected_components.len()));
         lines.push(format!("Providers: {}", result.selected_providers.len()));
         lines.push(format!("Languages: {}", languages.join(", ")));
@@ -596,67 +689,4 @@ fn run_onboarding() -> Result<OnboardingResult> {
     prompts::outro("🎉 Complete onboarding with ALL prompts finished!")?;
 
     Ok(result)
-}
-
-fn async_main() -> Result<()> {
-    // Set up Ctrl+C handler to show train animation on exit
-    ctrlc::set_handler(|| {
-        let rainbow = RainbowEffect::new();
-        println!();
-        println!("🚂 Exiting DX... Here's a farewell train!");
-        println!();
-
-        print!("\x1B[2J\x1B[H"); // Clear screen
-        for frame in 0..15 {
-            print!("\x1B[H"); // Move cursor to top
-            let _ = render_train_animation(&rainbow, frame);
-            thread::sleep(Duration::from_millis(200));
-        }
-
-        std::process::exit(0);
-    })
-    .expect("Error setting Ctrl-C handler");
-
-    match run_onboarding() {
-        Ok(result) => {
-            println!("\n✨ Setup completed successfully!");
-            println!("Welcome to DX, {}! 🚀", result.name);
-
-            // Show outro train animation
-            let rainbow = RainbowEffect::new();
-            println!();
-            println!("🚂 Thanks for using DX! Here's a celebration train!");
-            println!();
-
-            print!("\x1B[2J\x1B[H"); // Clear screen
-            for frame in 0..15 {
-                print!("\x1B[H"); // Move cursor to top
-                let _ = render_train_animation(&rainbow, frame);
-                thread::sleep(Duration::from_millis(200));
-            }
-        }
-        Err(e) => {
-            eprintln!("❌ Setup failed: {}", e);
-
-            // Show train animation on error exit too
-            let rainbow = RainbowEffect::new();
-            println!();
-            println!("🚂 Exiting DX...");
-            println!();
-
-            print!("\x1B[2J\x1B[H"); // Clear screen
-            for frame in 0..15 {
-                print!("\x1B[H"); // Move cursor to top
-                let _ = render_train_animation(&rainbow, frame);
-                thread::sleep(Duration::from_millis(200));
-            }
-
-            std::process::exit(1);
-        }
-    }
-    Ok(())
-}
-
-fn main() -> Result<()> {
-    async_main()
 }

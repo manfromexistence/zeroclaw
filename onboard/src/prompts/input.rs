@@ -189,7 +189,7 @@ where
 
         match self.state {
             State::Active => {
-                let curved_bar = theme.dim.apply_to("╰");  // Use curved symbol for active input
+                let curved_bar = theme.dim.apply_to("╰"); // Use curved symbol for active input
                 let value = self.cursor.value();
                 let display = if value.is_empty() {
                     format!("█{}", theme.dim.apply_to(&self.placeholder))
@@ -204,7 +204,11 @@ where
 
                 // Error line if present
                 if let Some(ref error) = self.error {
-                    term.write_line(&format!("{} {}", theme.dim.apply_to(symbols.bar.as_str()), theme.error.apply_to(error)))?;
+                    term.write_line(&format!(
+                        "{} {}",
+                        theme.dim.apply_to(symbols.bar.as_str()),
+                        theme.error.apply_to(error)
+                    ))?;
                     lines += 1;
                 }
             }

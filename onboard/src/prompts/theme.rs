@@ -1,25 +1,25 @@
 //! Theme system for all prompts
-//! 
+//!
 //! This module provides a unified theming system that all prompts use for consistent
 //! visual appearance across the onboarding experience.
-//! 
+//!
 //! Themes can be customized via a `theme.toml` file in the project root.
 
+use crate::effects::RainbowEffect;
 use console::Style;
 use once_cell::sync::Lazy;
-use std::sync::RwLock;
-use std::path::Path;
-use std::fs;
 use owo_colors::OwoColorize;
 use serde::{Deserialize, Serialize};
-use crate::effects::RainbowEffect;
+use std::fs;
+use std::path::Path;
+use std::sync::RwLock;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOML Configuration Structures
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Complete theme configuration loaded from TOML
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct ThemeConfig {
     #[serde(default)]
     pub colors: ColorConfig,
@@ -27,16 +27,6 @@ pub struct ThemeConfig {
     pub symbols: SymbolConfig,
     #[serde(default)]
     pub rainbow: RainbowConfig,
-}
-
-impl Default for ThemeConfig {
-    fn default() -> Self {
-        Self {
-            colors: ColorConfig::default(),
-            symbols: SymbolConfig::default(),
-            rainbow: RainbowConfig::default(),
-        }
-    }
 }
 
 /// Color configuration from TOML
@@ -66,11 +56,21 @@ impl Default for ColorConfig {
     }
 }
 
-fn default_primary() -> String { "#FFFFFF".to_string() }
-fn default_success() -> String { "#00FF00".to_string() }
-fn default_warning() -> String { "#FFFF00".to_string() }
-fn default_error() -> String { "#FF0000".to_string() }
-fn default_dim() -> String { "#808080".to_string() }
+fn default_primary() -> String {
+    "#FFFFFF".to_string()
+}
+fn default_success() -> String {
+    "#00FF00".to_string()
+}
+fn default_warning() -> String {
+    "#FFFF00".to_string()
+}
+fn default_error() -> String {
+    "#FF0000".to_string()
+}
+fn default_dim() -> String {
+    "#808080".to_string()
+}
 
 /// Symbol configuration from TOML
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -177,37 +177,99 @@ impl Default for SymbolConfig {
     }
 }
 
-fn default_step_active() -> String { ">".to_string() }
-fn default_step_cancel() -> String { "x".to_string() }
-fn default_step_error() -> String { "!".to_string() }
-fn default_step_submit() -> String { ">".to_string() }
-fn default_bar_start() -> String { "╭".to_string() }
-fn default_bar() -> String { "│".to_string() }
-fn default_bar_end() -> String { "╰".to_string() }
-fn default_radio_active() -> String { "(*)".to_string() }
-fn default_radio_inactive() -> String { "( )".to_string() }
-fn default_checkbox_active() -> String { "[ ]".to_string() }
-fn default_checkbox_selected() -> String { "[x]".to_string() }
-fn default_checkbox_inactive() -> String { "[ ]".to_string() }
-fn default_password_mask() -> String { "*".to_string() }
-fn default_bar_h() -> String { "─".to_string() }
-fn default_corner_top_right() -> String { "╮".to_string() }
-fn default_connect_left() -> String { "├".to_string() }
-fn default_corner_bottom_right() -> String { "╯".to_string() }
-fn default_box_top_left() -> String { "╭".to_string() }
-fn default_box_top_right() -> String { "╮".to_string() }
-fn default_box_bottom_left() -> String { "╰".to_string() }
-fn default_box_bottom_right() -> String { "╯".to_string() }
-fn default_box_horizontal() -> String { "─".to_string() }
-fn default_box_vertical() -> String { "│".to_string() }
-fn default_box_left_t() -> String { "├".to_string() }
-fn default_box_right_t() -> String { "╯".to_string() }
-fn default_checkmark() -> String { "√".to_string() }
-fn default_info() -> String { "i".to_string() }
-fn default_arrow_right() -> String { ">".to_string() }
-fn default_slider_filled() -> String { "=".to_string() }
-fn default_slider_empty() -> String { "-".to_string() }
-fn default_slider_handle() -> String { "O".to_string() }
+fn default_step_active() -> String {
+    ">".to_string()
+}
+fn default_step_cancel() -> String {
+    "x".to_string()
+}
+fn default_step_error() -> String {
+    "!".to_string()
+}
+fn default_step_submit() -> String {
+    ">".to_string()
+}
+fn default_bar_start() -> String {
+    "╭".to_string()
+}
+fn default_bar() -> String {
+    "│".to_string()
+}
+fn default_bar_end() -> String {
+    "╰".to_string()
+}
+fn default_radio_active() -> String {
+    "(*)".to_string()
+}
+fn default_radio_inactive() -> String {
+    "( )".to_string()
+}
+fn default_checkbox_active() -> String {
+    "[ ]".to_string()
+}
+fn default_checkbox_selected() -> String {
+    "[x]".to_string()
+}
+fn default_checkbox_inactive() -> String {
+    "[ ]".to_string()
+}
+fn default_password_mask() -> String {
+    "*".to_string()
+}
+fn default_bar_h() -> String {
+    "─".to_string()
+}
+fn default_corner_top_right() -> String {
+    "╮".to_string()
+}
+fn default_connect_left() -> String {
+    "├".to_string()
+}
+fn default_corner_bottom_right() -> String {
+    "╯".to_string()
+}
+fn default_box_top_left() -> String {
+    "╭".to_string()
+}
+fn default_box_top_right() -> String {
+    "╮".to_string()
+}
+fn default_box_bottom_left() -> String {
+    "╰".to_string()
+}
+fn default_box_bottom_right() -> String {
+    "╯".to_string()
+}
+fn default_box_horizontal() -> String {
+    "─".to_string()
+}
+fn default_box_vertical() -> String {
+    "│".to_string()
+}
+fn default_box_left_t() -> String {
+    "├".to_string()
+}
+fn default_box_right_t() -> String {
+    "╯".to_string()
+}
+fn default_checkmark() -> String {
+    "√".to_string()
+}
+fn default_info() -> String {
+    "i".to_string()
+}
+fn default_arrow_right() -> String {
+    ">".to_string()
+}
+fn default_slider_filled() -> String {
+    "=".to_string()
+}
+fn default_slider_empty() -> String {
+    "-".to_string()
+}
+fn default_slider_handle() -> String {
+    "O".to_string()
+}
 
 /// Rainbow effect configuration
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -227,15 +289,21 @@ impl Default for RainbowConfig {
     }
 }
 
-fn default_rainbow_enabled() -> bool { true }
-fn default_rainbow_speed() -> f32 { 1.0 }
+fn default_rainbow_enabled() -> bool {
+    true
+}
+fn default_rainbow_speed() -> f32 {
+    1.0
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme Loading
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Load theme configuration from TOML file
-pub fn load_theme_config<P: AsRef<Path>>(path: P) -> Result<ThemeConfig, Box<dyn std::error::Error>> {
+pub fn load_theme_config<P: AsRef<Path>>(
+    path: P,
+) -> Result<ThemeConfig, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(path)?;
     let config: ThemeConfig = toml::from_str(&content)?;
     Ok(config)
@@ -243,8 +311,7 @@ pub fn load_theme_config<P: AsRef<Path>>(path: P) -> Result<ThemeConfig, Box<dyn
 
 /// Load theme from default location (theme.toml) or use defaults
 pub fn load_theme_or_default() -> ThemeConfig {
-    load_theme_config("theme.toml")
-        .unwrap_or_else(|_| ThemeConfig::default())
+    load_theme_config("theme.toml").unwrap_or_else(|_| ThemeConfig::default())
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -380,7 +447,7 @@ impl Symbols {
             slider_handle: config.slider_handle.clone(),
         }
     }
-    
+
     /// Get a reference to a symbol field as &str
     pub fn get(&self, field: &str) -> &str {
         match field {
@@ -417,12 +484,12 @@ pub static SYMBOLS: Lazy<Symbols> = Lazy::new(|| {
 /// Initialize theme system from configuration
 pub fn init_theme() {
     let _config = load_theme_or_default();
-    
+
     // Update global theme
     if let Ok(mut theme) = THEME.write() {
         *theme = DxTheme::default(); // Colors are applied via console::Style
     }
-    
+
     // Symbols are loaded via SYMBOLS lazy static
     // Rainbow is loaded via RAINBOW lazy static
 }

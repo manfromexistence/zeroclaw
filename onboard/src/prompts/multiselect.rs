@@ -293,9 +293,15 @@ impl<T: Clone> PromptInteraction for MultiSelect<T> {
                                 .to_string()
                         }
                     } else if is_cursor {
-                        theme.primary.apply_to(symbols.checkbox_active.as_str()).to_string()
+                        theme
+                            .primary
+                            .apply_to(symbols.checkbox_active.as_str())
+                            .to_string()
                     } else {
-                        theme.dim.apply_to(symbols.checkbox_inactive.as_str()).to_string()
+                        theme
+                            .dim
+                            .apply_to(symbols.checkbox_inactive.as_str())
+                            .to_string()
                     };
 
                     let label = if is_cursor {

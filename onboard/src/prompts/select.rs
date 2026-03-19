@@ -199,9 +199,15 @@ impl<T: Clone> PromptInteraction for Select<T> {
                     let is_selected = display_idx == self.cursor;
 
                     let radio = if is_selected {
-                        theme.primary.apply_to(symbols.radio_active.as_str()).to_string()
+                        theme
+                            .primary
+                            .apply_to(symbols.radio_active.as_str())
+                            .to_string()
                     } else {
-                        theme.dim.apply_to(symbols.radio_inactive.as_str()).to_string()
+                        theme
+                            .dim
+                            .apply_to(symbols.radio_inactive.as_str())
+                            .to_string()
                     };
 
                     let label = if is_selected {

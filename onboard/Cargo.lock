@@ -189,10 +189,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dx-font"
-version = "0.1.0"
-
-[[package]]
 name = "encode_unicode"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -213,12 +209,6 @@ dependencies = [
  "libc",
  "windows-sys 0.61.2",
 ]
-
-[[package]]
-name = "figlet-rs"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4742a071cd9694fc86f9fa1a08fa3e53d40cc899d7ee532295da2d085639fbc5"
 
 [[package]]
 name = "find-msvc-tools"
@@ -395,8 +385,6 @@ dependencies = [
  "chrono",
  "console",
  "ctrlc",
- "dx-font",
- "figlet-rs",
  "once_cell",
  "owo-colors",
  "rand",

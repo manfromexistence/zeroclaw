@@ -30,12 +30,14 @@ pub mod url;
 pub mod wizard;
 
 use console::Term;
+use owo_colors::OwoColorize;
 use std::fmt::Display;
 use std::io;
-use owo_colors::OwoColorize;
 
 // Re-export theme system
-pub use theme::{DxTheme, THEME, RAINBOW, SYMBOLS, rainbow_symbol, rainbow_step_submit, rainbow_step_active};
+pub use theme::{
+    DxTheme, RAINBOW, SYMBOLS, THEME, rainbow_step_active, rainbow_step_submit, rainbow_symbol,
+};
 
 // Re-export essential prompts
 pub use autocomplete::{Autocomplete, AutocompleteItem, autocomplete};
@@ -62,7 +64,6 @@ pub use tree_select::{TreeNode, TreeSelect, tree_select};
 pub use url::{UrlInput, url};
 pub use wizard::{Wizard, WizardStep, wizard};
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Public API Functions
 // ─────────────────────────────────────────────────────────────────────────────
@@ -88,7 +89,7 @@ pub fn outro(message: impl Display) -> io::Result<()> {
     let theme = THEME.read().unwrap();
     let symbols = &*SYMBOLS;
     let rainbow_step_submit = rainbow_symbol(&symbols.step_submit, 1);
-    
+
     term_write(format!(
         "{}{} {}\n",
         theme.dim.apply_to(symbols.bar.as_str()),
@@ -101,22 +102,24 @@ fn render_box_section(title: &str, lines: &[&str], min_content_width: usize) -> 
     let theme = THEME.read().unwrap();
     let symbols = &*SYMBOLS;
 
-    let max_line_width = lines.iter().map(|line| line.chars().count()).max().unwrap_or(0);
+    let max_line_width = lines
+        .iter()
+        .map(|line| line.chars().count())
+        .max()
+        .unwrap_or(0);
     let content_width = max_line_width.max(min_content_width);
-    
+
     let title_with_spaces = format!(" {} ", title);
     let title_total_len = title_with_spaces.chars().count();
-    let remaining_horizontal = if content_width + 2 > title_total_len {
-        content_width + 2 - title_total_len
-    } else {
-        0
-    };
-    
+    let remaining_horizontal = (content_width + 2).saturating_sub(title_total_len);
+
     term_write(format!(
         "{}{}{}{}",
         theme.dim.apply_to(symbols.connect_left.as_str()),
         title_with_spaces,
-        theme.dim.apply_to(symbols.box_horizontal.repeat(remaining_horizontal)),
+        theme
+            .dim
+            .apply_to(symbols.box_horizontal.repeat(remaining_horizontal)),
         theme.dim.apply_to(symbols.corner_top_right.as_str())
     ))?;
     term_write("\n")?;
@@ -137,7 +140,9 @@ fn render_box_section(title: &str, lines: &[&str], min_content_width: usize) -> 
     term_write(format!(
         "{}{}{}",
         theme.dim.apply_to(symbols.connect_left.as_str()),
-        theme.dim.apply_to(symbols.box_horizontal.repeat(total_bottom_width)),
+        theme
+            .dim
+            .apply_to(symbols.box_horizontal.repeat(total_bottom_width)),
         theme.dim.apply_to(symbols.corner_bottom_right.as_str())
     ))?;
     term_write("\n")?;
@@ -187,7 +192,11 @@ pub mod log {
     pub fn success(text: impl Display) -> io::Result<()> {
         let theme = THEME.read().unwrap();
         let symbols = &*SYMBOLS;
-        eprintln!("{} {}", theme.success.apply_to(symbols.checkmark.as_str()).bold(), text);
+        eprintln!(
+            "{} {}",
+            theme.success.apply_to(symbols.checkmark.as_str()).bold(),
+            text
+        );
         eprintln!("{}", theme.dim.apply_to(symbols.bar.as_str()));
         Ok(())
     }
@@ -195,7 +204,11 @@ pub mod log {
     pub fn warning(text: impl Display) -> io::Result<()> {
         let theme = THEME.read().unwrap();
         let symbols = &*SYMBOLS;
-        eprintln!("{} {}", theme.warning.apply_to(symbols.step_error.as_str()).bold(), text);
+        eprintln!(
+            "{} {}",
+            theme.warning.apply_to(symbols.step_error.as_str()).bold(),
+            text
+        );
         eprintln!("{}", theme.dim.apply_to(symbols.bar.as_str()));
         Ok(())
     }

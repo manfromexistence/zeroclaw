@@ -1,40 +1,129 @@
-//! ASCII art splash screen with rainbow colors
+//! ASCII art splash screen with rainbow colors and train animations
 
 use crate::effects::RainbowEffect;
-use figlet_rs::FIGfont;
 use owo_colors::OwoColorize;
-use terminal_size::{Width, Height, terminal_size};
-use rand;
+use rand::seq::SliceRandom;
 use std::io::{self, Write};
+use terminal_size::{Height, Width, terminal_size};
+
+// 10 hardcoded DX logos selected by user
+const DX_LOGOS: [&str; 10] = [
+    // Bloody
+    r#"▓█████▄ ▒██   ██▒
+▒██▀ ██▌▒▒ █ █ ▒░
+░██   █▌░░  █   ░
+░▓█▄   ▌ ░ █ █ ▒ 
+░▒████▓ ▒██▒ ▒██▒
+ ▒▒▓  ▒ ▒▒ ░ ░▓ ░
+ ░ ▒  ▒ ░░   ░▒ ░
+ ░ ░  ░  ░    ░  
+   ░     ░    ░  
+ ░               "#,
+    // 3d
+    r#" ███████   ██     ██
+░██░░░░██ ░░██   ██ 
+░██    ░██ ░░██ ██  
+░██    ░██  ░░███   
+░██    ░██   ██░██  
+░██    ██   ██ ░░██ 
+░███████   ██   ░░██
+░░░░░░░   ░░     ░░ "#,
+    // Doh
+    r#"                                          
+DDDDDDDDDDDDD        XXXXXXX       XXXXXXX
+D::::::::::::DDD     X:::::X       X:::::X
+D:::::::::::::::DD   X:::::X       X:::::X
+DDD:::::DDDDD:::::D  X::::::X     X::::::X
+  D:::::D    D:::::D XXX:::::X   X:::::XXX
+  D:::::D     D:::::D   X:::::X X:::::X   
+  D:::::D     D:::::D    X:::::X:::::X    
+  D:::::D     D:::::D     X:::::::::X     
+  D:::::D     D:::::D     X:::::::::X     
+  D:::::D     D:::::D    X:::::X:::::X    
+  D:::::D     D:::::D   X:::::X X:::::X   
+  D:::::D    D:::::D XXX:::::X   X:::::XXX
+DDD:::::DDDDD:::::D  X::::::X     X::::::X
+D:::::::::::::::DD   X:::::X       X:::::X
+D::::::::::::DDD     X:::::X       X:::::X
+DDDDDDDDDDDDD        XXXXXXX       XXXXXXX"#,
+    // Diamond
+    r#"/\\\\\    /\\      /\\
+/\\   /\\  /\\   /\\  
+/\\    /\\  /\\ /\\   
+/\\    /\\    /\\     
+/\\    /\\  /\\ /\\   
+/\\   /\\  /\\   /\\  
+/\\\\\    /\\      /\\"#,
+    // Electronic
+    r#" ▄▄▄▄▄▄▄▄▄▄   ▄       ▄ 
+▐░░░░░░░░░░▌ ▐░▌     ▐░▌
+▐░█▀▀▀▀▀▀▀█░▌ ▐░▌   ▐░▌ 
+▐░▌       ▐░▌  ▐░▌ ▐░▌  
+▐░▌       ▐░▌   ▐░▐░▌   
+▐░▌       ▐░▌    ▐░▌    
+▐░▌       ▐░▌   ▐░▌░▌   
+▐░▌       ▐░▌  ▐░▌ ▐░▌  
+▐░█▄▄▄▄▄▄▄█░▌ ▐░▌   ▐░▌ 
+▐░░░░░░░░░░▌ ▐░▌     ▐░▌
+ ▀▀▀▀▀▀▀▀▀▀   ▀       ▀ "#,
+    // Fraktur
+    r#"       ....                       ..   
+   .xH888888Hx.         .H88x.  :~)88: 
+ .H8888888888888:      x888888X ~:8888 
+ 888*"""?""*88888X    ~   "8888X  %88" 
+'f     d8x.   ^%88k        X8888       
+'>    <88888X   '?8     .xxX8888xxxd>  
+ `:..:`888888>    8>   :88888888888"   
+        `"*88     X    ~   '8888       
+   .xHHhx.."      !   xx.  X8888:    . 
+  X88888888hx. ..!   X888  X88888x.x"  
+ !   "*888888888"    X88% : '%8888"    
+        ^"***"`       "*=~    `""      "#,
+    // Marquee
+    r#".:::::    .::      .::
+.::   .::  .::   .::  
+.::    .::  .:: .::   
+.::    .::    .::     
+.::    .::  .:: .::   
+.::   .::  .::   .::  
+.:::::    .::      .::"#,
+    // Reverse
+    r#"====================
+=       ===   ==   =
+=  ====  ===  ==  ==
+=  ====  ===  ==  ==
+=  ====  ====    ===
+=  ====  =====  ====
+=  ====  ====    ===
+=  ====  ===  ==  ==
+=  ====  ===  ==  ==
+=       ===  ====  =
+===================="#,
+    // Stellar
+    r#"`.....    `..      `..
+`..   `..  `..   `..  
+`..    `..  `.. `..   
+`..    `..    `..     
+`..    `..  `.. `..   
+`..   `..  `..   `..  
+`.....    `..      `.."#,
+    // Tubular
+    r#"O~~~~~    O~~      O~~
+O~~   O~~  O~~   O~~  
+O~~    O~~  O~~ O~~   
+O~~    O~~    O~~     
+O~~    O~~  O~~ O~~   
+O~~   O~~  O~~   O~~  
+O~~~~~    O~~      O~~"#,
+];
 
 pub fn render_dx_logo(rainbow: &RainbowEffect) -> io::Result<()> {
-    // Pick a random font for DX title each time
-    let all_fonts = get_valid_fonts();
-    use rand::seq::SliceRandom;
+    // Pick a random logo from the 10 hardcoded options
     let mut rng = rand::thread_rng();
-    let selected_font = all_fonts.choose(&mut rng).unwrap_or(&"Block");
+    let logo = DX_LOGOS.choose(&mut rng).unwrap_or(&DX_LOGOS[0]);
 
-    // Render DX with the randomly selected font
-    let dx_figlet_lines = if let Ok(font_data) = dx_font::figlet::read_font(selected_font)
-        && let Ok(font_str) = String::from_utf8(font_data)
-        && let Ok(font) = FIGfont::from_content(&font_str)
-        && let Some(figure) = font.convert("DX")
-    {
-        figure.to_string().lines().map(|s| s.to_string()).collect()
-    } else {
-        // Fallback ASCII art
-        vec![
-            "██████╗ ██╗  ██╗".to_string(),
-            "██╔══██╗╚██╗██╔╝".to_string(),
-            "██║  ██║ ╚███╔╝ ".to_string(),
-            "██║  ██║ ██╔██╗ ".to_string(),
-            "██████╔╝██╔╝ ██╗".to_string(),
-            "╚═════╝ ╚═╝  ╚═╝".to_string(),
-        ]
-    };
-
-    // Render DX title with rainbow colors
-    for (line_idx, line) in dx_figlet_lines.iter().enumerate() {
+    // Render with rainbow colors
+    for (line_idx, line) in logo.lines().enumerate() {
         for (char_idx, ch) in line.chars().enumerate() {
             let color_idx = char_idx + line_idx * 5;
             let color = rainbow.color_at(color_idx);
@@ -45,10 +134,10 @@ pub fn render_dx_logo(rainbow: &RainbowEffect) -> io::Result<()> {
 
     println!();
 
-    // Description text at the bottom with rainbow colors
+    // Description text with rainbow colors
     let description = "Enhanced Development Experience";
     for (char_idx, ch) in description.chars().enumerate() {
-        let color_idx = char_idx + 50; // Different offset for description
+        let color_idx = char_idx + 50;
         let color = rainbow.color_at(color_idx);
         print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
     }
@@ -66,7 +155,7 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
     } else {
         120 // fallback
     };
-    
+
     let elapsed_ms = frame * 200;
     let train_width = 55;
 
@@ -95,7 +184,7 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
         &["   (   )", "  (     )", " (       )"],
         &["  (    )", " (      )", "(        )"],
     ];
-    let smoke_frame_idx = ((elapsed_ms / 300) as usize) % smoke_frames.len();
+    let smoke_frame_idx = (elapsed_ms / 300) % smoke_frames.len();
     let smoke = smoke_frames[smoke_frame_idx];
 
     // Render smoke above the train - positioned relative to train
@@ -104,13 +193,13 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
         // Clear the line first
         print!("{}", " ".repeat(terminal_width));
         print!("\r");
-        
+
         if smoke_x_offset >= -(smoke_line.len() as i32) && smoke_x_offset < terminal_width as i32 {
             if smoke_x_offset >= 0 {
                 print!("{}", " ".repeat(smoke_x_offset as usize));
                 for (ci, ch) in smoke_line.chars().enumerate() {
                     if smoke_x_offset as usize + ci < terminal_width {
-                        let color_idx = (ci + (elapsed_ms / 200) as usize) % 50;
+                        let color_idx = (ci + (elapsed_ms / 200)) % 50;
                         let color = rainbow.color_at(color_idx);
                         print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
                     }
@@ -120,7 +209,7 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
                 if visible_start < smoke_line.len() {
                     for (ci, ch) in smoke_line[visible_start..].chars().enumerate() {
                         if ci < terminal_width {
-                            let color_idx = (ci + visible_start + (elapsed_ms / 200) as usize) % 50;
+                            let color_idx = (ci + visible_start + (elapsed_ms / 200)) % 50;
                             let color = rainbow.color_at(color_idx);
                             print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
                         }
@@ -136,14 +225,14 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
         // Clear the line first
         print!("{}", " ".repeat(terminal_width));
         print!("\r");
-        
+
         if x_pos >= -(train_width as i32) && x_pos < terminal_width as i32 {
             if x_pos >= 0 {
                 // Train is fully or partially visible from the left
                 print!("{}", " ".repeat(x_pos as usize));
                 for (char_idx, ch) in line.chars().enumerate() {
                     if x_pos as usize + char_idx < terminal_width {
-                        let color_idx = (char_idx + line_idx * 3 + (elapsed_ms / 150) as usize) % 50;
+                        let color_idx = (char_idx + line_idx * 3 + (elapsed_ms / 150)) % 50;
                         let color = rainbow.color_at(color_idx);
                         print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
                     }
@@ -154,7 +243,8 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
                 if visible_start < line.len() {
                     for (char_idx, ch) in line[visible_start..].chars().enumerate() {
                         if char_idx < terminal_width {
-                            let color_idx = (char_idx + visible_start + line_idx * 3 + (elapsed_ms / 150) as usize) % 50;
+                            let color_idx =
+                                (char_idx + visible_start + line_idx * 3 + (elapsed_ms / 150)) % 50;
                             let color = rainbow.color_at(color_idx);
                             print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
                         }
@@ -169,8 +259,12 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
     print!("{}", " ".repeat(terminal_width));
     print!("\r");
     for x in 0..terminal_width {
-        let ch = if (x + (elapsed_ms / 300) as usize) % 4 == 0 { '╫' } else { '═' };
-        let color_idx = (x + (elapsed_ms / 300) as usize) % 50;
+        let ch = if (x + (elapsed_ms / 300)).is_multiple_of(4) {
+            '╫'
+        } else {
+            '═'
+        };
+        let color_idx = (x + (elapsed_ms / 300)) % 50;
         let color = rainbow.color_at(color_idx);
         print!("{}", ch.to_string().truecolor(color.r, color.g, color.b));
     }
@@ -178,123 +272,4 @@ pub fn render_train_animation(rainbow: &RainbowEffect, frame: usize) -> io::Resu
 
     io::stdout().flush()?;
     Ok(())
-}
-
-fn get_valid_fonts() -> Vec<&'static str> {
-    vec![
-        // Fonts verified to work with figlet-rs
-        "Block",
-        "Colossal", 
-        "Banner3",
-        "Doom",
-        "Epic",
-        "Graffiti",
-        "Isometric1",
-        "Isometric2",
-        "Ogre",
-        "Slant",
-        "Shadow",
-        "3d",
-        "Broadway",
-        "Chunky",
-        "Cyberlarge",
-        "Doh",
-        "Gothic",
-        "Graceful",
-        "Gradient",
-        "Hollywood",
-        "Lean",
-        "Mini",
-        "Rounded",
-        "Small",
-        "Speed",
-        "Stellar",
-        "Thick",
-        "Thin",
-        "ansi_shadow",
-        "big_chief",
-        "banner3_d",
-        "Bloody",
-        "Bolger",
-        "Braced",
-        "Bright",
-        "Bulbhead",
-        "Caligraphy",
-        "Cards",
-        "Catwalk",
-        "Computer",
-        "Contrast",
-        "Crawford",
-        "Cricket",
-        "Cursive",
-        "Cybersmall",
-        "Cygnet",
-        "DANC4",
-        "Decimal",
-        "Diamond",
-        "Double",
-        "Electronic",
-        "Elite",
-        "Fender",
-        "Fraktur",
-        "Fuzzy",
-        "Goofy",
-        "Hex",
-        "Invita",
-        "Italic",
-        "Jazmine",
-        "Jerusalem",
-        "Katakana",
-        "Keyboard",
-        "LCD",
-        "Letters",
-        "Linux",
-        "Madrid",
-        "Marquee",
-        "Mike",
-        "Mirror",
-        "Mnemonic",
-        "Moscow1",
-        "NScript",
-        "Nancyj",
-        "O8",
-        "OS2",
-        "Octal",
-        "Pawp",
-        "Peaks",
-        "Pebbles",
-        "Pepper",
-        "Poison",
-        "Puffy",
-        "Puzzle",
-        "Rectangles",
-        "Relief",
-        "Relief2",
-        "Reverse",
-        "Roman",
-        "Rozzo",
-        "Runic",
-        "Script",
-        "Serifcap",
-        "Shimrod",
-        "Short",
-        "Slide",
-        "Stacey",
-        "Stampate",
-        "Stop",
-        "Straight",
-        "Swan",
-        "THIS",
-        "Tanja",
-        "Tengwar",
-        "Test1",
-        "Ticks",
-        "Tiles",
-        "Tombstone",
-        "Trek",
-        "Tubular",
-        "Univers",
-        "Weird",
-        "Whimsy",
-    ]
 }
