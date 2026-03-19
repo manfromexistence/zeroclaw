@@ -1,7 +1,7 @@
 Cli Onboard -> Ui
-Token -> Saving
-Tool, Metasearch -> Ability
 Providers -> Diversity
-Serializer, Local Model -> Speed
 Message fixed(Whatsapp), Linking/Device -> Pairing
+Serializer, Local Model -> Speed
+Tool, Metasearch -> Ability
+Token -> Saving
 N8N -> Connectivity

@@ -14,3 +14,7 @@ Now, now what do you think? Should we first split the whole file into smaller fi
 Now as we split the monster wizard.rs files into smaller files, check the root onboarding folder; that is our UI framework. Use that in our main onboarding at the src folder and update the current dialog with our beautiful onboarding components from our root onboarding project. Instead of the zero claw logo and other useless UI, use our onboarding UI throughout the whole onboarding.
 
 Now look for our main SRC folder and check for any other places that we are using bad UI so that we have to update it with our on-board UI framework And also in the root you can find the theme.ts file. Please create theme.css file and use hard.css to create a theme system throughout our whole main src folder, zero-claw project, so that all CLI tui can be themeable by just that theme.toml file.
+
+
+
+Now please rename zeroclawlabs to dx-agent and zeroclaw to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.
