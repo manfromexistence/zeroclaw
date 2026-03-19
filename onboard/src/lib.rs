@@ -302,7 +302,7 @@ pub fn run_onboarding() -> Result<OnboardingResult> {
     thread::sleep(Duration::from_millis(1000));
 
     // Welcome
-    prompts::intro("🚀 DX Onboarding - Complete Prompts Showcase")?;
+    prompts::intro("DX Onboarding - Complete your dx onboardoing")?;
     prompts::section_with_width("Welcome to DX", 80, |lines| {
         lines.push("This onboarding showcases ALL available prompt types!".to_string());
         lines.push(format!(
