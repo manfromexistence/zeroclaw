@@ -962,29 +962,31 @@ fn install_git_skill_source(source: &str, skills_path: &Path) -> Result<(PathBuf
 /// Handle the `skills` CLI command
 #[allow(clippy::too_many_lines)]
 pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Config) -> Result<()> {
+    use crate::theme::{print_error, print_info, print_success};
+    
     let workspace_dir = &config.workspace_dir;
     match command {
         crate::SkillCommands::List => {
             let skills = load_skills_with_config(workspace_dir, config);
             if skills.is_empty() {
-                println!("No skills installed.");
-                println!();
-                println!("  Create one: mkdir -p ~/.zeroclaw/workspace/skills/my-skill");
-                println!("              echo '# My Skill' > ~/.zeroclaw/workspace/skills/my-skill/SKILL.md");
-                println!();
-                println!("  Or install: zeroclaw skills install <source>");
+                print_info("No skills installed.");
+                print_info("");
+                print_info("  Create one: mkdir -p ~/.zeroclaw/workspace/skills/my-skill");
+                print_info("              echo '# My Skill' > ~/.zeroclaw/workspace/skills/my-skill/SKILL.md");
+                print_info("");
+                print_info("  Or install: zeroclaw skills install <source>");
             } else {
-                println!("Installed skills ({}):", skills.len());
-                println!();
+                print_info(format!("Installed skills ({}):", skills.len()));
+                print_info("");
                 for skill in &skills {
-                    println!(
-                        "  {} {} — {}",
-                        console::style(&skill.name).white().bold(),
-                        console::style(format!("v{}", skill.version)).dim(),
+                    print_info(format!(
+                        "  {} v{} — {}",
+                        skill.name,
+                        skill.version,
                         skill.description
-                    );
+                    ));
                     if !skill.tools.is_empty() {
-                        println!(
+                        print_info(format!(
                             "    Tools: {}",
                             skill
                                 .tools
@@ -992,14 +994,14 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
                                 .map(|t| t.name.as_str())
                                 .collect::<Vec<_>>()
                                 .join(", ")
-                        );
+                        ));
                     }
                     if !skill.tags.is_empty() {
-                        println!("    Tags:  {}", skill.tags.join(", "));
+                        print_info(format!("    Tags:  {}", skill.tags.join(", ")));
                     }
                 }
             }
-            println!();
+            print_info("");
             Ok(())
         }
         crate::SkillCommands::Audit { source } => {
@@ -1016,27 +1018,22 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
 
             let report = audit::audit_skill_directory(&target)?;
             if report.is_clean() {
-                println!(
-                    "  {} Skill audit passed for {} ({} files scanned).",
-                    console::style("✓").green().bold(),
+                print_success(format!(
+                    "Skill audit passed for {} ({} files scanned).",
                     target.display(),
                     report.files_scanned
-                );
+                ));
                 return Ok(());
             }
 
-            println!(
-                "  {} Skill audit failed for {}",
-                console::style("✗").red().bold(),
-                target.display()
-            );
+            print_error(format!("Skill audit failed for {}", target.display()));
             for finding in report.findings {
-                println!("    - {finding}");
+                print_error(format!("  - {finding}"));
             }
             anyhow::bail!("Skill audit failed.");
         }
         crate::SkillCommands::Install { source } => {
-            println!("Installing skill from: {source}");
+            print_info(format!("Installing skill from: {source}"));
 
             let skills_path = skills_dir(workspace_dir);
             std::fs::create_dir_all(&skills_path)?;
@@ -1045,24 +1042,22 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
                 let (installed_dir, files_scanned) =
                     install_git_skill_source(&source, &skills_path)
                         .with_context(|| format!("failed to install git skill source: {source}"))?;
-                println!(
-                    "  {} Skill installed and audited: {} ({} files scanned)",
-                    console::style("✓").green().bold(),
+                print_success(format!(
+                    "Skill installed and audited: {} ({} files scanned)",
                     installed_dir.display(),
                     files_scanned
-                );
+                ));
             } else {
                 let (dest, files_scanned) = install_local_skill_source(&source, &skills_path)
                     .with_context(|| format!("failed to install local skill source: {source}"))?;
-                println!(
-                    "  {} Skill installed and audited: {} ({} files scanned)",
-                    console::style("✓").green().bold(),
+                print_success(format!(
+                    "Skill installed and audited: {} ({} files scanned)",
                     dest.display(),
                     files_scanned
-                );
+                ));
             }
 
-            println!("  Security audit completed successfully.");
+            print_success("Security audit completed successfully.");
             Ok(())
         }
         crate::SkillCommands::Remove { name } => {
@@ -1088,11 +1083,7 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
             }
 
             std::fs::remove_dir_all(&skill_path)?;
-            println!(
-                "  {} Skill '{}' removed.",
-                console::style("✓").green().bold(),
-                name
-            );
+            print_success(format!("Skill '{}' removed.", name));
             Ok(())
         }
     }

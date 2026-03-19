@@ -122,8 +122,7 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 chrono-tz = "0.10"
 cron = "0.15"
 
-# Interactive CLI prompts
-dialoguer = { version = "0.12", features = ["fuzzy-select"] }
+# Onboard UI framework (integrated into src/ui/)
 console = "0.16"
 owo-colors = { version = "4.0", features = ["supports-colors"] }
 terminal_size = "0.4.3"

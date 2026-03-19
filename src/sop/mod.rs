@@ -351,41 +351,44 @@ pub fn handle_command(command: crate::SopCommands, config: &crate::config::Confi
                 sops_dir_override,
                 config.sop.default_execution_mode,
             );
+            
+            use crate::theme::print_info;
+            
             if sops.is_empty() {
-                println!("No SOPs found.");
-                println!();
-                println!("  Create one: mkdir -p ~/.zeroclaw/workspace/sops/my-sop");
-                println!("              # Add SOP.toml and SOP.md");
-                println!();
-                println!(
+                print_info("No SOPs found.");
+                print_info("");
+                print_info("  Create one: mkdir -p ~/.zeroclaw/workspace/sops/my-sop");
+                print_info("              # Add SOP.toml and SOP.md");
+                print_info("");
+                print_info(format!(
                     "  SOPs directory: {}",
                     resolve_sops_dir(&config.workspace_dir, sops_dir_override).display()
-                );
+                ));
             } else {
-                println!("SOPs ({}):", sops.len());
-                println!();
+                print_info(format!("SOPs ({}):", sops.len()));
+                print_info("");
                 for sop in &sops {
                     let triggers: Vec<String> =
                         sop.triggers.iter().map(ToString::to_string).collect();
-                    println!(
-                        "  {} {} [{}] — {}",
-                        console::style(&sop.name).white().bold(),
-                        console::style(format!("v{}", sop.version)).dim(),
-                        console::style(&sop.priority).cyan(),
+                    print_info(format!(
+                        "  {} v{} [{}] — {}",
+                        sop.name,
+                        sop.version,
+                        sop.priority,
                         sop.description
-                    );
-                    println!(
+                    ));
+                    print_info(format!(
                         "    Mode: {}  Steps: {}  Triggers: {}",
                         sop.execution_mode,
                         sop.steps.len(),
                         triggers.join(", ")
-                    );
+                    ));
                     if sop.cooldown_secs > 0 {
-                        println!("    Cooldown: {}s", sop.cooldown_secs);
+                        print_info(format!("    Cooldown: {}s", sop.cooldown_secs));
                     }
                 }
             }
-            println!();
+            print_info("");
             Ok(())
         }
 
@@ -401,11 +404,13 @@ pub fn handle_command(command: crate::SopCommands, config: &crate::config::Confi
                 sops.iter().collect()
             };
 
+            use crate::theme::{print_info, print_success, print_warning};
+            
             if matching.is_empty() {
                 if let Some(name) = name {
                     anyhow::bail!("SOP not found: {name}");
                 }
-                println!("No SOPs to validate.");
+                print_info("No SOPs to validate.");
                 return Ok(());
             }
 
@@ -413,25 +418,16 @@ pub fn handle_command(command: crate::SopCommands, config: &crate::config::Confi
             for sop in &matching {
                 let warnings = validate_sop(sop);
                 if warnings.is_empty() {
-                    println!(
-                        "  {} {} — valid",
-                        console::style("✓").green().bold(),
-                        sop.name
-                    );
+                    print_success(format!("{} — valid", sop.name));
                 } else {
                     any_warnings = true;
-                    println!(
-                        "  {} {} — {} warning(s):",
-                        console::style("!").yellow().bold(),
-                        sop.name,
-                        warnings.len()
-                    );
+                    print_warning(format!("{} — {} warning(s):", sop.name, warnings.len()));
                     for w in &warnings {
-                        println!("      {w}");
+                        print_warning(format!("    {w}"));
                     }
                 }
             }
-            println!();
+            print_info("");
 
             if any_warnings {
                 anyhow::bail!("Validation completed with warnings");
@@ -445,57 +441,50 @@ pub fn handle_command(command: crate::SopCommands, config: &crate::config::Confi
                 sops_dir_override,
                 config.sop.default_execution_mode,
             );
+            use crate::theme::print_info;
+            
             let sop = sops
                 .iter()
                 .find(|s| s.name == name)
                 .ok_or_else(|| anyhow::anyhow!("SOP not found: {name}"))?;
 
-            println!(
-                "{} v{}",
-                console::style(&sop.name).white().bold(),
-                sop.version
-            );
-            println!("{}", sop.description);
-            println!();
-            println!("Priority:       {}", sop.priority);
-            println!("Execution mode: {}", sop.execution_mode);
-            println!("Cooldown:       {}s", sop.cooldown_secs);
-            println!("Max concurrent: {}", sop.max_concurrent);
-            println!();
+            print_info(format!("{} v{}", sop.name, sop.version));
+            print_info(&sop.description);
+            print_info("");
+            print_info(format!("Priority:       {}", sop.priority));
+            print_info(format!("Execution mode: {}", sop.execution_mode));
+            print_info(format!("Cooldown:       {}s", sop.cooldown_secs));
+            print_info(format!("Max concurrent: {}", sop.max_concurrent));
+            print_info("");
 
             if !sop.triggers.is_empty() {
-                println!("Triggers:");
+                print_info("Triggers:");
                 for trigger in &sop.triggers {
-                    println!("  - {trigger}");
+                    print_info(format!("  - {trigger}"));
                 }
-                println!();
+                print_info("");
             }
 
             if !sop.steps.is_empty() {
-                println!("Steps:");
+                print_info("Steps:");
                 for step in &sop.steps {
                     let confirm_tag = if step.requires_confirmation {
                         " [requires confirmation]"
                     } else {
                         ""
                     };
-                    println!(
-                        "  {}. {}{}",
-                        step.number,
-                        console::style(&step.title).bold(),
-                        confirm_tag
-                    );
+                    print_info(format!("  {}. {}{}", step.number, step.title, confirm_tag));
                     if !step.body.is_empty() {
                         for line in step.body.lines() {
-                            println!("     {line}");
+                            print_info(format!("     {line}"));
                         }
                     }
                     if !step.suggested_tools.is_empty() {
-                        println!("     Tools: {}", step.suggested_tools.join(", "));
+                        print_info(format!("     Tools: {}", step.suggested_tools.join(", ")));
                     }
                 }
             }
-            println!();
+            print_info("");
             Ok(())
         }
     }

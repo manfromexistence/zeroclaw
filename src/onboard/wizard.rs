@@ -12,7 +12,6 @@ use crate::memory::{
 };
 use crate::providers::{canonical_china_provider_name, is_qwen_oauth_alias};
 use anyhow::{bail, Context, Result};
-use console::style;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use tokio::fs;
@@ -1218,7 +1217,8 @@ pub fn print_step(current: u8, total: u8, title: &str) -> Result<()> {
 }
 
 pub fn print_bullet(text: &str) {
-    println!("  {} {}", style("›").cyan(), text);
+    use crate::theme::print_info;
+    print_info(format!("  › {text}"));
 }
 
 fn resolve_interactive_onboarding_mode(

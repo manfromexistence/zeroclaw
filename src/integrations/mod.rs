@@ -83,6 +83,8 @@ fn show_integration_info(config: &Config, name: &str) -> Result<()> {
         );
     };
 
+    use crate::theme::print_info;
+    
     let status = (entry.status_fn)(config);
     let (icon, label) = match status {
         IntegrationStatus::Active => ("✅", "Active"),
@@ -90,32 +92,27 @@ fn show_integration_info(config: &Config, name: &str) -> Result<()> {
         IntegrationStatus::ComingSoon => ("🔜", "Coming Soon"),
     };
 
-    println!();
-    println!(
-        "  {} {} — {}",
-        icon,
-        console::style(entry.name).white().bold(),
-        entry.description
-    );
-    println!("  Category: {}", entry.category.label());
-    println!("  Status:   {label}");
-    println!();
+    print_info("");
+    print_info(format!("  {} {} — {}", icon, entry.name, entry.description));
+    print_info(format!("  Category: {}", entry.category.label()));
+    print_info(format!("  Status:   {label}"));
+    print_info("");
 
     // Show setup hints based on integration
     match entry.name {
         "Telegram" => {
-            println!("  Setup:");
-            println!("    1. Message @BotFather on Telegram");
-            println!("    2. Create a bot and copy the token");
-            println!("    3. Run: zeroclaw onboard --channels-only");
-            println!("    4. Start: zeroclaw channel start");
+            print_info("  Setup:");
+            print_info("    1. Message @BotFather on Telegram");
+            print_info("    2. Create a bot and copy the token");
+            print_info("    3. Run: zeroclaw onboard --channels-only");
+            print_info("    4. Start: zeroclaw channel start");
         }
         "Discord" => {
-            println!("  Setup:");
-            println!("    1. Go to https://discord.com/developers/applications");
-            println!("    2. Create app → Bot → Copy token");
-            println!("    3. Enable MESSAGE CONTENT intent");
-            println!("    4. Run: zeroclaw onboard --channels-only");
+            print_info("  Setup:");
+            print_info("    1. Go to https://discord.com/developers/applications");
+            print_info("    2. Create app → Bot → Copy token");
+            print_info("    3. Enable MESSAGE CONTENT intent");
+            print_info("    4. Run: zeroclaw onboard --channels-only");
         }
         "Slack" => {
             println!("  Setup:");

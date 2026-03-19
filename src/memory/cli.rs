@@ -8,7 +8,6 @@ use crate::ui::prompts::PromptInteraction;
 #[cfg(feature = "memory-postgres")]
 use anyhow::Context;
 use anyhow::{bail, Result};
-use console::style;
 
 /// Handle `zeroclaw memory <subcommand>` CLI commands.
 pub async fn handle_command(command: crate::MemoryCommands, config: &Config) -> Result<()> {
@@ -83,12 +82,14 @@ async fn handle_list(
     limit: usize,
     offset: usize,
 ) -> Result<()> {
+    use crate::theme::print_info;
+    
     let mem = create_cli_memory(config)?;
     let cat = category.as_deref().map(parse_category);
     let entries = mem.list(cat.as_ref(), session.as_deref()).await?;
 
     if entries.is_empty() {
-        println!("No memory entries found.");
+        print_info("No memory entries found.");
         return Ok(());
     }
 
@@ -96,7 +97,7 @@ async fn handle_list(
     let page: Vec<_> = entries.into_iter().skip(offset).take(limit).collect();
 
     if page.is_empty() {
-        println!("No entries at offset {offset} (total: {total}).");
+        print_info(format!("No entries at offset {offset} (total: {total})."));
         return Ok(());
     }
 
@@ -107,11 +108,7 @@ async fn handle_list(
     );
 
     for entry in &page {
-        println!(
-            "- {} [{}]",
-            style(&entry.key).white().bold(),
-            entry.category,
-        );
+        println!("- {} [{}]", entry.key, entry.category);
         println!("    {}", truncate_content(&entry.content, 80));
     }
 
@@ -141,11 +138,7 @@ async fn handle_get(config: &Config, key: &str) -> Result<()> {
         n => {
             println!("Prefix '{key}' matched {n} entries:\n");
             for entry in matches {
-                println!(
-                    "- {} [{}]",
-                    style(&entry.key).white().bold(),
-                    entry.category
-                );
+                println!("- {} [{}]", entry.key, entry.category);
             }
             println!("\nSpecify a longer prefix to narrow the match.");
         }
@@ -155,7 +148,7 @@ async fn handle_get(config: &Config, key: &str) -> Result<()> {
 }
 
 fn print_entry(entry: &super::traits::MemoryEntry) {
-    println!("Key:       {}", style(&entry.key).white().bold());
+    println!("Key:       {}", entry.key);
     println!("Category:  {}", entry.category);
     println!("Timestamp: {}", entry.timestamp);
     if let Some(sid) = &entry.session_id {
@@ -165,20 +158,15 @@ fn print_entry(entry: &super::traits::MemoryEntry) {
 }
 
 async fn handle_stats(config: &Config) -> Result<()> {
+    use crate::theme::print_success;
+    
     let mem = create_cli_memory(config)?;
     let healthy = mem.health_check().await;
     let total = mem.count().await.unwrap_or(0);
 
     println!("Memory Statistics:\n");
-    println!("  Backend:  {}", style(mem.name()).white().bold());
-    println!(
-        "  Health:   {}",
-        if healthy {
-            style("healthy").green().bold().to_string()
-        } else {
-            style("unhealthy").yellow().bold().to_string()
-        }
-    );
+    println!("  Backend:  {}", mem.name());
+    println!("  Health:   {}", if healthy { "healthy" } else { "unhealthy" });
     println!("  Total:    {total}");
 
     let all = mem.list(None, None).await.unwrap_or_default();
@@ -205,6 +193,8 @@ async fn handle_clear(
     category: Option<String>,
     yes: bool,
 ) -> Result<()> {
+    use crate::theme::print_success;
+    
     let mem = create_cli_memory(config)?;
 
     // Single-key deletion (exact or prefix match).
@@ -241,17 +231,15 @@ async fn handle_clear(
         }
     }
 
-    println!(
-        "{} Cleared {deleted}/{} entries.",
-        style("✓").green().bold(),
-        entries.len(),
-    );
+    print_success(format!("Cleared {deleted}/{} entries.", entries.len()));
 
     Ok(())
 }
 
 /// Delete a single entry by exact key or prefix match.
 async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> {
+    use crate::theme::print_success;
+    
     // Resolve the target key (exact match or unique prefix).
     let target = if mem.get(key).await?.is_some() {
         key.to_string()
@@ -267,11 +255,7 @@ async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> 
             n => {
                 println!("Prefix '{key}' matched {n} entries:\n");
                 for entry in matches {
-                    println!(
-                        "- {} [{}]",
-                        style(&entry.key).white().bold(),
-                        entry.category
-                    );
+                    println!("- {} [{}]", entry.key, entry.category);
                 }
                 println!("\nSpecify a longer prefix to narrow the match.");
                 return Ok(());
@@ -290,7 +274,7 @@ async fn handle_clear_key(mem: &dyn Memory, key: &str, yes: bool) -> Result<()> 
     }
 
     if mem.forget(&target).await? {
-        println!("{} Deleted key: {target}", style("✓").green().bold());
+        print_success(format!("Deleted key: {target}"));
     }
 
     Ok(())
