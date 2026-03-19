@@ -1248,16 +1248,23 @@ async fn main() -> Result<()> {
         },
 
         Commands::Providers => {
+            use crate::providers::model_metadata;
+            
             let providers = providers::list_providers();
+            let model_counts = model_metadata::get_provider_model_counts();
+            let total_models: usize = model_counts.values().sum();
+            
             let current = config
                 .default_provider
                 .as_deref()
                 .unwrap_or("openrouter")
                 .trim()
                 .to_ascii_lowercase();
-            println!("Supported providers ({} total):\n", providers.len());
-            println!("  ID (use in config)  DESCRIPTION");
-            println!("  ─────────────────── ───────────");
+            
+            println!("Supported providers ({} total, {} models):\n", providers.len(), total_models);
+            println!("  ID (use in config)  DESCRIPTION                           MODELS");
+            println!("  ─────────────────── ───────────────────────────────────── ──────");
+            
             for p in &providers {
                 let is_active = p.name.eq_ignore_ascii_case(&current)
                     || p.aliases
@@ -1265,18 +1272,34 @@ async fn main() -> Result<()> {
                         .any(|alias| alias.eq_ignore_ascii_case(&current));
                 let marker = if is_active { " (active)" } else { "" };
                 let local_tag = if p.local { " [local]" } else { "" };
-                let aliases = if p.aliases.is_empty() {
-                    String::new()
+                
+                // Try to find model count from LiteLLM database
+                let model_count = model_counts.get(p.name.to_lowercase().as_str())
+                    .or_else(|| model_counts.get(p.name))
+                    .copied()
+                    .unwrap_or(0);
+                
+                let model_info = if model_count > 0 {
+                    format!("{:>6}", model_count)
                 } else {
-                    format!("  (aliases: {})", p.aliases.join(", "))
+                    "     -".to_string()
                 };
+                
+                let display = format!("{}{}{}", p.display_name, local_tag, marker);
+                
                 println!(
-                    "  {:<19} {}{}{}{}",
-                    p.name, p.display_name, local_tag, marker, aliases
+                    "  {:<19} {:<41} {}",
+                    p.name, display, model_info
                 );
+                
+                if !p.aliases.is_empty() {
+                    println!("                      (aliases: {})", p.aliases.join(", "));
+                }
             }
-            println!("\n  custom:<URL>   Any OpenAI-compatible endpoint");
+            
+            println!("\n  custom:<URL>        Any OpenAI-compatible endpoint");
             println!("  anthropic-custom:<URL>  Any Anthropic-compatible endpoint");
+            println!("\n💡 Tip: Use `zeroclaw models list --provider <name>` to see available models");
             Ok(())
         }
 

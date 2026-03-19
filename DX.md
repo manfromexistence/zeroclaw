@@ -17,4 +17,7 @@ Now look for our main SRC folder and check for any other places that we are usin
 
 Now in the root there is the providers.md file and there I have created a markdown plan about adding more relation providers into our product. Now tell me, by searching the whole codebase, is it possible to do this and is it easy to do this? Give me full details.
 
+Now zero claw has maybe WhatsApp but by default it may not use it so please search this codebase and tell me if we use that WhatsApp by default what will happen and how is it an easy or hard job
+I wanna put a way so that we can send the data to not only Chat messaging but also to different operating systems and show a QR code so that different operating systems have pairing with each other. Like, use REST terminal trait and show that QR code so that we can scan it and then we can connect to the waste directly instead of using any third-party messaging app. The messaging app still be there, just we will add QR code scanner so that we have a good ecosystem.
+
 Now please rename zeroclawlabs to dx-agent and zeroclaw to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.

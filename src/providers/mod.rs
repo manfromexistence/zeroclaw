@@ -25,6 +25,7 @@ pub mod copilot;
 pub mod gemini;
 pub mod gemini_cli;
 pub mod kilocli;
+pub mod model_metadata;
 pub mod ollama;
 pub mod openai;
 pub mod openai_codex;
@@ -1416,6 +1417,9 @@ fn create_provider_with_url_and_options(
         "hyperbolic" => Ok(compat(OpenAiCompatibleProvider::new(
             "Hyperbolic", "https://api.hyperbolic.xyz/v1", key, AuthStyle::Bearer,
         ))),
+        "inference-net" | "inferencenet" => Ok(compat(OpenAiCompatibleProvider::new(
+            "Inference.net", "https://api.inference.net/v1", key, AuthStyle::Bearer,
+        ))),
 
         // ── Model hosting platforms ──────────────────────────
         "deepinfra" | "deep-infra" => Ok(compat(OpenAiCompatibleProvider::new(
@@ -1471,11 +1475,29 @@ fn create_provider_with_url_and_options(
         "hunyuan" | "tencent" => Ok(compat(OpenAiCompatibleProvider::new(
             "Tencent Hunyuan", "https://api.hunyuan.cloud.tencent.com/v1", key, AuthStyle::Bearer,
         ))),
+        "302ai" | "302-ai" => Ok(compat(OpenAiCompatibleProvider::new(
+            "302.AI", "https://api.302.ai/v1", key, AuthStyle::Bearer,
+        ))),
+        "chutes" | "chutes-ai" => Ok(compat(OpenAiCompatibleProvider::new(
+            "Chutes AI", "https://api.chutes.ai/v1", key, AuthStyle::Bearer,
+        ))),
 
         // ── Cloud AI endpoints ───────────────────────────────
         "ovhcloud" | "ovh" => Ok(Box::new(openai::OpenAiProvider::with_base_url(
             Some("https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"),
             key,
+        ))),
+        "scaleway" => Ok(compat(OpenAiCompatibleProvider::new(
+            "Scaleway", "https://api.scaleway.ai/v1", key, AuthStyle::Bearer,
+        ))),
+        "cortecs" => Ok(compat(OpenAiCompatibleProvider::new(
+            "Cortecs", "https://api.cortecs.ai/v1", key, AuthStyle::Bearer,
+        ))),
+        "ionet" | "io-net" => Ok(compat(OpenAiCompatibleProvider::new(
+            "IO.NET", "https://api.io.net/v1", key, AuthStyle::Bearer,
+        ))),
+        "nlpcloud" | "nlp-cloud" => Ok(compat(OpenAiCompatibleProvider::new(
+            "NLP Cloud", "https://api.nlpcloud.io/v1", key, AuthStyle::Bearer,
         ))),
 
         // ── Bring Your Own Provider (custom URL) ───────────
