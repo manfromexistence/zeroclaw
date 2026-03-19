@@ -23,17 +23,6 @@ path = "src/main.rs"
 name = "zeroclaw"
 path = "src/lib.rs"
 
-include = [
-  "/src/**/*",
-  "/build.rs",
-  "/Cargo.toml",
-  "/Cargo.lock",
-  "/LICENSE*",
-  "/README.md",
-  "/web/dist/**/*",
-  "/tool_descriptions/**/*",
-]
-
 [dependencies]
 # CLI - minimal and fast
 clap = { version = "4.5", features = ["derive"] }

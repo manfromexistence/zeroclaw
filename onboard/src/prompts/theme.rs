@@ -256,7 +256,7 @@ fn default_checkmark() -> String {
     "√".to_string()
 }
 fn default_info() -> String {
-    "i".to_string()
+    "♠".to_string()
 }
 fn default_arrow_right() -> String {
     ">".to_string()

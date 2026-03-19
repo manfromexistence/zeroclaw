@@ -5,10 +5,12 @@ mod channel_setup;
 
 pub mod wizard;
 
-// Re-exported for CLI and external use
+// Re-exported for CLI and external use (currently unused but part of public API)
+#[allow(unused_imports)]
 pub use wizard::{run_channels_repair_wizard, run_quick_setup, run_wizard};
 
-// Re-export models functions
+// Re-export models functions (currently unused but part of public API)
+#[allow(unused_imports)]
 pub use models::{
     cached_model_catalog_stats, run_models_list, run_models_refresh, run_models_refresh_all,
     run_models_set, run_models_status,
