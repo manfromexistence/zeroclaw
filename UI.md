@@ -383,3 +383,8 @@ Options:
       --config-dir <CONFIG_DIR>
   -h, --help                     Print help
   -V, --version                  Print version
+
+Please look at our root onboard folder. It's a separate UI framework that I created to use on this big project.
+Now about our root src folder, big project, please look for all of the places that use a UI and use our onboarding theming logic, rainbow colors, and effects. Ask me where to put what so that for clarification questions so that we can make our whole project beautiful like the onboard project, tui UI.
+
+Now here's the thing: as you can see our one go to root folder UI framework is quiet professional, production-ready code so you don't have to recreate it on our main project. You just have to copy them and reconfigure them to be used on our main project. Please start working on it and ask me a clarification question about where to work first!!!
