@@ -4,6 +4,18 @@ use std::process::Command;
 use std::time::SystemTime;
 
 fn main() {
+    // Increase stack size on Windows to prevent stack overflow during initialization
+    // Default Windows stack is 1MB, we increase it to 8MB
+    #[cfg(target_os = "windows")]
+    {
+        println!("cargo:rustc-link-arg=/STACK:8388608");
+    }
+    
+    #[cfg(not(target_os = "windows"))]
+    {
+        // On Unix-like systems, set stack size via environment variable at runtime
+        // This is handled by RUST_MIN_STACK env var
+    }
     let dist_dir = Path::new("web/dist");
     let web_dir = Path::new("web");
 
