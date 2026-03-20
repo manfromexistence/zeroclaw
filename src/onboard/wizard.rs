@@ -207,12 +207,12 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         }
     }
 
-    prompts::outro("🎉 ZeroClaw setup complete!")?;
+    prompts::outro("🎉 Dx setup complete!")?;
 
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
     println!();
-    println!("🚂 Thanks for using ZeroClaw! Here's a celebration train!");
+    println!("Thanks for using Dx! Here's a celebration train!");
     println!();
 
     print!("\x1B[2J\x1B[H"); // Clear screen
@@ -273,7 +273,7 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
     println!();
-    println!("🚂 Thanks for using ZeroClaw! Here's a celebration train!");
+    println!("Thanks for using Dx! Here's a celebration train!");
     println!();
 
     print!("\x1B[2J\x1B[H"); // Clear screen
@@ -339,7 +339,7 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
     println!();
-    println!("🚂 Thanks for using ZeroClaw! Here's a celebration train!");
+    println!("Thanks for using Dx! Here's a celebration train!");
     println!();
 
     print!("\x1B[2J\x1B[H"); // Clear screen
@@ -2404,7 +2404,7 @@ fn print_summary(config: &Config) -> Result<()> {
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
     println!();
-    println!("🚂 Thanks for using ZeroClaw! Here's a celebration train!");
+    println!("Thanks for using Dx! Here's a celebration train!");
     println!();
 
     print!("\x1B[2J\x1B[H"); // Clear screen

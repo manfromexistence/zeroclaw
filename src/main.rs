@@ -306,14 +306,14 @@ Examples:
     /// Engage, inspect, and resume emergency-stop states.
     ///
     /// Examples:
-    /// - `zeroclaw estop`
-    /// - `zeroclaw estop --level network-kill`
-    /// - `zeroclaw estop --level domain-block --domain "*.chase.com"`
-    /// - `zeroclaw estop --level tool-freeze --tool shell --tool browser`
-    /// - `zeroclaw estop status`
-    /// - `zeroclaw estop resume --network`
-    /// - `zeroclaw estop resume --domain "*.chase.com"`
-    /// - `zeroclaw estop resume --tool shell`
+    /// - `dx estop`
+    /// - `dx estop --level network-kill`
+    /// - `dx estop --level domain-block --domain "*.chase.com"`
+    /// - `dx estop --level tool-freeze --tool shell --tool browser`
+    /// - `dx estop status`
+    /// - `dx estop resume --network`
+    /// - `dx estop resume --domain "*.chase.com"`
+    /// - `dx estop resume --tool shell`
     Estop {
         #[command(subcommand)]
         estop_command: Option<EstopSubcommands>,
@@ -343,15 +343,15 @@ Cron expressions use the standard 5-field format: \
 override with --tz and an IANA timezone name.
 
 Examples:
-  zeroclaw cron list
-  zeroclaw cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
-  zeroclaw cron add '*/30 * * * *' 'Check system health' --agent
-  zeroclaw cron add '*/5 * * * *' 'echo ok'
-  zeroclaw cron add-at 2025-01-15T14:00:00Z 'Send reminder' --agent
-  zeroclaw cron add-every 60000 'Ping heartbeat'
-  zeroclaw cron once 30m 'Run backup in 30 minutes' --agent
-  zeroclaw cron pause <task-id>
-  zeroclaw cron update <task-id> --expression '0 8 * * *' --tz Europe/London")]
+  dx cron list
+  dx cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
+  dx cron add '*/30 * * * *' 'Check system health' --agent
+  dx cron add '*/5 * * * *' 'echo ok'
+  dx cron add-at 2025-01-15T14:00:00Z 'Send reminder' --agent
+  dx cron add-every 60000 'Ping heartbeat'
+  dx cron once 30m 'Run backup in 30 minutes' --agent
+  dx cron pause <task-id>
+  dx cron update <task-id> --expression '0 8 * * *' --tz Europe/London")]
     Cron {
         #[command(subcommand)]
         cron_command: CronCommands,
@@ -370,17 +370,17 @@ Examples:
     #[command(long_about = "\
 Manage communication channels.
 
-Add, remove, list, send, and health-check channels that connect ZeroClaw \
+Add, remove, list, send, and health-check channels that connect Dx \
 to messaging platforms. Supported channel types: telegram, discord, \
 slack, whatsapp, matrix, imessage, email.
 
 Examples:
-  zeroclaw channel list
-  zeroclaw channel doctor
-  zeroclaw channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
-  zeroclaw channel remove my-bot
-  zeroclaw channel bind-telegram zeroclaw_user
-  zeroclaw channel send 'Alert!' --channel-id telegram --recipient 123456789")]
+  dx channel list
+  dx channel doctor
+  dx channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
+  dx channel remove my-bot
+  dx channel bind-telegram dx_user
+  dx channel send 'Alert!' --channel-id telegram --recipient 123456789")]
     Channel {
         #[command(subcommand)]
         channel_command: ChannelCommands,
@@ -884,7 +884,7 @@ async fn main() -> Result<()> {
             ctrlc::set_handler(move || {
                 let rainbow = RainbowEffect::new();
                 println!();
-                println!("🚂 Exiting ZeroClaw... Here's a farewell train!");
+                println!("Thanks for using Dx! Here's a farewell train!");
                 println!();
 
                 print!("\x1B[2J\x1B[H"); // Clear screen
