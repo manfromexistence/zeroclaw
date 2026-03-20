@@ -5,10 +5,11 @@ Connect -> Connectivity
 Tool, Metasearch -> Ability
 Token -> Saving
 Serializer, Local Model -> Speed
-
 Any Software - Any
 
-Now please look at the root onboard folder's local model running functionality and copy that functionality on our zeroclaw main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project. 
+Train animation on exit from the whole project and from all places!!!
+
+Now please look at the root onboard folder's local model running functionality and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project. 
 
 Please look at the root serializer create and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens.
 

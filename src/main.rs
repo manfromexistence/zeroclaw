@@ -1174,7 +1174,7 @@ async fn main() -> Result<()> {
                     }
                 }
             }
-            println!("◈ Agent Status");
+            println!("◆ Agent Status");
             println!();
             println!("Version:     {}", env!("CARGO_PKG_VERSION"));
             println!("Workspace:   {}", config.workspace_dir.display());

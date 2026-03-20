@@ -98,7 +98,6 @@ dependencies = [
  "directories",
  "extism",
  "fantoccini",
- "fast_image_resize",
  "futures",
  "futures-util",
  "glob",
@@ -118,7 +117,6 @@ dependencies = [
  "matrix-sdk",
  "memchr",
  "mime_guess",
- "moka",
  "nanohtml2text",
  "nostr-sdk",
  "nusb",
@@ -138,9 +136,7 @@ dependencies = [
  "qrcode",
  "rand 0.8.5",
  "rayon",
- "redb",
  "regex",
- "regex-lite",
  "reqwest",
  "rhai",
  "ring",
@@ -159,7 +155,6 @@ dependencies = [
  "serde_yaml",
  "sha2",
  "shellexpand",
- "similar",
  "smallvec",
  "sysinfo",
  "tempfile",
@@ -2574,18 +2569,6 @@ dependencies = [
  "tokio",
  "url",
  "webdriver",
-]
-
-[[package]]
-name = "fast_image_resize"
-version = "4.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43e5ce628b529e9bd2e2f378c1193215104b526fd494a572aa23414adc4e5553"
-dependencies = [
- "cfg-if",
- "document-features",
- "num-traits",
- "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -6225,15 +6208,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "redb"
-version = "2.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eca1e9d98d5a7e9002d0013e18d5a9b000aee942eb134883a82f06ebffb6c01"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6335,12 +6309,6 @@ dependencies = [
  "memchr",
  "regex-syntax",
 ]
-
-[[package]]
-name = "regex-lite"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cab834c73d247e67f4fae452806d17d3c7501756d98c8808d7c9c7aa7d18f973"
 
 [[package]]
 name = "regex-syntax"
@@ -7290,12 +7258,6 @@ name = "simdutf8"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
-
-[[package]]
-name = "similar"
-version = "2.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "siphasher"

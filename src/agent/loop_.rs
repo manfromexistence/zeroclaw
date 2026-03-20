@@ -3633,6 +3633,7 @@ pub async fn run(
         println!("{response}");
         observer.record_event(&ObserverEvent::TurnComplete);
     } else {
+        println!("◆ Agent");
         println!("\x1b[90mType /help for commands\x1b[0m\n");
 
         // Persistent conversation history across turns
