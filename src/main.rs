@@ -387,6 +387,11 @@ Examples:
         #[command(subcommand)]
         integration_command: IntegrationCommands,
     },
+    /// Manage OpenAPI-powered integrations
+    Openapi {
+        #[command(subcommand)]
+        openapi_command: OpenApiCommands,
+    },
 
     /// Manage skills (user-defined capabilities)
     Skills {
@@ -573,6 +578,35 @@ enum PluginCommands {
 enum ConfigCommands {
     /// Dump the full configuration JSON Schema to stdout
     Schema,
+}
+#[derive(Subcommand, Debug)]
+enum OpenApiCommands {
+    /// Harvest OpenAPI specifications and update the local registry
+    Harvest {
+        /// Path to APIs.guru-style specs directory
+        #[arg(long)]
+        source: Option<String>,
+    },
+    /// List all loaded OpenAPI specs
+    List,
+    /// List tools for a specific spec
+    Tools {
+        /// Spec ID to list tools for
+        spec_id: String,
+    },
+    /// Test a specific OpenAPI tool
+    Test {
+        /// Tool name to test
+        tool_name: String,
+        /// JSON arguments for the tool
+        #[arg(long, default_value = "{}")]
+        args: String,
+    },
+    /// Search for tools by keyword
+    Search {
+        /// Search query
+        query: String,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -1354,6 +1388,23 @@ async fn main() -> Result<()> {
         Commands::Integrations {
             integration_command,
         } => integrations::handle_command(integration_command, &config),
+        Commands::Openapi { openapi_command } => match openapi_command {
+            OpenApiCommands::Harvest { source } => {
+                commands::openapi::harvest_command(&config, source.as_deref()).await
+            }
+            OpenApiCommands::List => commands::openapi::list_command(&config).await,
+            OpenApiCommands::Tools { spec_id } => {
+                commands::openapi::tools_command(&config, spec_id.as_str()).await
+            }
+            OpenApiCommands::Test { tool_name, args } => {
+                let args_json: serde_json::Value = serde_json::from_str(args.as_str())
+                    .context("Failed to parse args as JSON")?;
+                commands::openapi::test_command(&config, tool_name.as_str(), args_json).await
+            }
+            OpenApiCommands::Search { query } => {
+                commands::openapi::search_command(&config, query.as_str()).await
+            }
+        },
 
         Commands::Skills { skill_command } => skills::handle_command(skill_command, &config),
 

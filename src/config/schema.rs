@@ -247,6 +247,9 @@ pub struct Config {
     /// HTTP request tool configuration (`[http_request]`).
     #[serde(default)]
     pub http_request: HttpRequestConfig,
+    /// OpenAPI integration system configuration (`[openapi]`).
+    #[serde(default)]
+    pub openapi: OpenApiConfig,
 
     /// Multimodal (image) handling configuration (`[multimodal]`).
     #[serde(default)]
@@ -350,6 +353,46 @@ pub struct Config {
     /// `LANG`, or `LC_ALL` environment variables (defaulting to `"en"`).
     #[serde(default)]
     pub locale: Option<String>,
+}
+
+/// OpenAPI integration subsystem configuration (`[openapi]` section).
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct OpenApiConfig {
+    /// Enable OpenAPI tool loading and CLI operations.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Base directory containing harvested specs and the generated registry file.
+    #[serde(default = "default_openapi_specs_dir")]
+    pub specs_dir: String,
+    /// Load previously harvested specs automatically at startup.
+    #[serde(default)]
+    pub auto_load: bool,
+    /// Default quality tier assigned to newly discovered specs.
+    #[serde(default = "default_openapi_spec_tier")]
+    pub default_tier: crate::tools::openapi::SpecTier,
+    /// Auth presets keyed by provider/service ID.
+    #[serde(default)]
+    pub auth: HashMap<String, crate::tools::openapi::AuthConfig>,
+}
+
+fn default_openapi_specs_dir() -> String {
+    "~/.zeroclaw/openapi-specs".into()
+}
+
+fn default_openapi_spec_tier() -> crate::tools::openapi::SpecTier {
+    crate::tools::openapi::SpecTier::Community
+}
+
+impl Default for OpenApiConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            specs_dir: default_openapi_specs_dir(),
+            auto_load: false,
+            default_tier: default_openapi_spec_tier(),
+            auth: HashMap::new(),
+        }
+    }
 }
 
 /// Multi-client workspace isolation configuration.
@@ -6025,6 +6068,7 @@ impl Default for Config {
             browser: BrowserConfig::default(),
             browser_delegate: crate::tools::browser_delegate::BrowserDelegateConfig::default(),
             http_request: HttpRequestConfig::default(),
+            openapi: OpenApiConfig::default(),
             multimodal: MultimodalConfig::default(),
             web_fetch: WebFetchConfig::default(),
             web_search: WebSearchConfig::default(),

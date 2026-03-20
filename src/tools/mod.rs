@@ -62,6 +62,7 @@ pub mod model_routing_config;
 pub mod model_switch;
 pub mod node_tool;
 pub mod notion_tool;
+pub mod openapi;
 pub mod pdf_read;
 pub mod project_intel;
 pub mod proxy_config;
@@ -124,6 +125,8 @@ pub use model_switch::ModelSwitchTool;
 #[allow(unused_imports)]
 pub use node_tool::NodeTool;
 pub use notion_tool::NotionTool;
+#[allow(unused_imports)]
+pub use openapi::{AuthConfig as OpenApiAuthConfig, OpenApiSpec, SpecTier};
 pub use pdf_read::PdfReadTool;
 pub use project_intel::ProjectIntelTool;
 pub use proxy_config::ProxyConfigTool;
@@ -560,6 +563,43 @@ pub fn all_tools_with_runtime(
             }
             Err(e) => {
                 tracing::warn!("knowledge graph disabled due to init error: {e}");
+            }
+        }
+    }
+
+    // OpenAPI tools integration
+    if root_config.openapi.enabled {
+        let registry = Arc::new(crate::tools::openapi::OpenApiRegistry::new());
+        
+        // Load specs from registry file
+        let registry_path = if root_config.openapi.specs_dir.starts_with("~/") {
+            let home = directories::UserDirs::new()
+                .map(|u| u.home_dir().to_path_buf())
+                .unwrap_or_else(|| std::path::PathBuf::from("."));
+            home.join(&root_config.openapi.specs_dir[2..]).join("registry.json")
+        } else {
+            std::path::PathBuf::from(&root_config.openapi.specs_dir).join("registry.json")
+        };
+
+        if root_config.openapi.auto_load {
+            match registry.load_from_disk(&registry_path) {
+                Ok(()) => {
+                    let tool_count = registry.tool_count();
+                    let spec_count = registry.spec_count();
+                    tracing::info!(
+                        "Loaded {} OpenAPI tools from {} specs",
+                        tool_count,
+                        spec_count
+                    );
+                    
+                    // Add all OpenAPI tools to the registry
+                    for tool in registry.get_all_tools() {
+                        tool_arcs.push(tool);
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to load OpenAPI registry: {}. Run 'zeroclaw openapi harvest' to create it.", e);
+                }
             }
         }
     }
