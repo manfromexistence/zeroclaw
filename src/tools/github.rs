@@ -1,7 +1,7 @@
 //! GitHub/GitLab tool — platform operations.
 //! Actions: repo_info | pr_create | pr_review | pr_comment | issue_manage | actions_trigger | actions_status | gist
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

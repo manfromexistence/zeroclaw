@@ -1,7 +1,7 @@
 //! Context tool — intelligent context window management.
 //! Actions: add | remove | list | compress | prioritize | window_info | auto_manage
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

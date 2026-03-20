@@ -1,7 +1,7 @@
 //! Refactor tool — structural code transformations.
 //! Actions: extract | inline | rename | translate | migrate | regex | feature_flag
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

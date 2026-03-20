@@ -1,7 +1,7 @@
 //! LSP tool — universal language intelligence across 21+ languages.
 //! Actions: start | hover | definition | references | completions | diagnostics | code_actions | rename | format | signature | doc_symbols | ws_symbols | call_hierarchy | type_hierarchy | semantic_tokens | inlay_hints | folding | selection
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

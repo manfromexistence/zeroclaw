@@ -1,7 +1,7 @@
 //! I18n tool — internationalization and localization.
 //! Actions: extract | translate | validate | merge | stats | pseudo | missing
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

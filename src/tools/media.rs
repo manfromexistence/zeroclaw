@@ -1,7 +1,7 @@
 //! Media tool — media processing: image, audio, video manipulation.
 //! Actions: resize | crop | compress | convert | thumbnail | watermark | metadata | optimize
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

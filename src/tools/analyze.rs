@@ -1,7 +1,7 @@
 //! Analyze tool — deep static analysis, the agent's "engineering intuition."
 //! Actions: lint | complexity | dead_code | code_smell | type_coverage | clone_detect | dep_graph | change_impact | api_diff | review | tech_debt | i18n_audit
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

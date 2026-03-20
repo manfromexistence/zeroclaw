@@ -12,7 +12,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;
 
-use crate::definition::{ParameterType, Tool, ToolCall, ToolDefinition, ToolParameter, ToolResult};
+use crate::tools::definition::{ParameterType, Tool, ToolCall, ToolDefinition, ToolParameter, ToolResult};
 
 /// Tool to list active sessions
 pub struct SessionsListTool;
@@ -315,7 +315,7 @@ impl Tool for SessionsEndTool {
 }
 
 /// Register all session tools into a registry
-pub fn register_session_tools(registry: &mut crate::ToolRegistry) {
+pub fn register_session_tools(registry: &mut crate::tools::registry::ToolRegistry) {
     use std::sync::Arc;
     registry.register(Arc::new(SessionsListTool));
     registry.register(Arc::new(SessionsInfoTool));

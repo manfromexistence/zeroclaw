@@ -1,7 +1,7 @@
 //! Kubernetes tool — cluster management via kubectl.
 //! Actions: get | apply | delete | logs | describe | port_forward | scale | rollout | exec | config
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

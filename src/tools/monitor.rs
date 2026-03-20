@@ -1,7 +1,7 @@
 //! Monitor tool — application monitoring, logging, metrics, APM.
 //! Actions: metrics | logs | alerts | apm | uptime | error_rate | latency | resource_usage
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

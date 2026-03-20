@@ -1,7 +1,7 @@
 //! Compliance tool — license checking, GDPR, accessibility, audit trails.
 //! Actions: license_check | gdpr_scan | a11y_audit | audit_trail | spdx | policy_check
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

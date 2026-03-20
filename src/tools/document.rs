@@ -1,7 +1,7 @@
 //! Document tool — document processing, conversion, search.
 //! Actions: parse | convert | extract | summarize | search | template | sign
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

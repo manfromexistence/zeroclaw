@@ -1,7 +1,7 @@
 //! Debug tool — debugging assistant: breakpoints, variable inspection, stack traces.
 //! Actions: breakpoint | inspect | stacktrace | evaluate | watch_var | step | continue_exec
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

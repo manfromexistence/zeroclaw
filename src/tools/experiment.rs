@@ -1,7 +1,7 @@
 //! Experiment tool — A/B testing, feature rollout, hypothesis tracking.
 //! Actions: create | run | compare | rollback | list
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

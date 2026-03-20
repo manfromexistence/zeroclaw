@@ -1,7 +1,7 @@
 //! Profile tool — performance profiling and benchmarking.
 //! Actions: benchmark | flamegraph | allocations | time | compare
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use tokio::process::Command;
 use tracing::warn;
 
-use crate::definition::*;
+use crate::tools::definition::*;
 
 /// Shell command execution tool
 pub struct BashTool {

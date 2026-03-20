@@ -1,7 +1,7 @@
 //! Tracker tool — task/issue tracking, todo management, time tracking.
 //! Actions: create | update | list | close | time_start | time_stop | time_report | assign | label | milestone
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

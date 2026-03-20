@@ -1,7 +1,7 @@
 //! AST tool — parse, query, and transform syntax trees for any language.
 //! Actions: parse | query | transform | detect_lang
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

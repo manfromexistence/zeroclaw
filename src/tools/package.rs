@@ -1,7 +1,7 @@
 //! Package tool — universal package manager (cargo, npm, pip, go, etc.).
 //! Actions: install | remove | update | list | search | audit | publish | outdated | lock
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

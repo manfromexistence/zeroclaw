@@ -1,7 +1,7 @@
 //! LLM tool — multi-provider LLM client (OpenAI, Anthropic, Google, local).
 //! Actions: complete | chat | embed | models | cost | switch
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

@@ -2,7 +2,7 @@
 //!
 //! Actions: info | processes | kill_process | env_get | env_set | service | disk_usage | network_interfaces | port_allocate
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

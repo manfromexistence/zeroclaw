@@ -1,7 +1,7 @@
 //! Docker tool — container management via Docker CLI/API.
 //! Actions: build | run | stop | logs | ps | images | compose | exec | inspect | prune
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

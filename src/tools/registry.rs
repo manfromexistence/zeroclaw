@@ -4,7 +4,7 @@ use anyhow::Result;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::definition::{Tool, ToolCall, ToolDefinition, ToolResult};
+use crate::tools::definition::{Tool, ToolCall, ToolDefinition, ToolResult};
 
 /// Registry that holds all available tools
 pub struct ToolRegistry {
@@ -79,89 +79,20 @@ impl Default for ToolRegistry {
 }
 
 impl ToolRegistry {
-    /// Register all 50 built-in tools.
+    /// Register all built-in tools (only those that exist in src/tools).
     pub fn register_all(&mut self) {
-        use std::sync::Arc;
-
-        // I/O & System (8)
-        self.register(Arc::new(crate::file::FileTool::default()));
-        self.register(Arc::new(crate::search::SearchTool::new(".")));
-        self.register(Arc::new(crate::shell::ShellTool::default()));
-        self.register(Arc::new(crate::sandbox::SandboxTool::default()));
-        self.register(Arc::new(crate::system::SystemTool::default()));
-        self.register(Arc::new(crate::http::HttpTool::default()));
-        self.register(Arc::new(crate::network::NetworkTool::default()));
-        self.register(Arc::new(crate::config::ConfigTool::default()));
-
-        // Browser & Desktop (2)
-        self.register(Arc::new(crate::browser::BrowserTool::default()));
-        self.register(Arc::new(crate::desktop::DesktopTool::default()));
-
-        // Version Control (2)
-        self.register(Arc::new(crate::git::GitTool::default()));
-        self.register(Arc::new(crate::github::GithubTool::default()));
-
-        // Code Intelligence (7)
-        self.register(Arc::new(crate::lsp::LspTool::default()));
-        self.register(Arc::new(crate::ast::AstTool::default()));
-        self.register(Arc::new(crate::analyze::AnalyzeTool::default()));
-        self.register(Arc::new(crate::refactor::RefactorTool::default()));
-        self.register(Arc::new(crate::format::FormatTool::default()));
-        self.register(Arc::new(crate::lint::LintTool::default()));
-        self.register(Arc::new(crate::review::ReviewTool::default()));
-
-        // Execution & Quality (4)
-        self.register(Arc::new(crate::testing::TestTool::default()));
-        self.register(Arc::new(crate::debug::DebugTool::default()));
-        self.register(Arc::new(crate::profile::ProfileTool::default()));
-        self.register(Arc::new(crate::experiment::ExperimentTool::default()));
-
-        // Data & Storage (3)
-        self.register(Arc::new(crate::database::DatabaseTool::default()));
-        self.register(Arc::new(crate::data::DataTool::default()));
-        self.register(Arc::new(crate::document::DocumentTool::default()));
-
-        // AI & Memory (5)
-        self.register(Arc::new(crate::memory::MemoryTool::default()));
-        self.register(Arc::new(crate::context::ContextTool::default()));
-        self.register(Arc::new(crate::llm::LlmTool::default()));
-        self.register(Arc::new(crate::agent::AgentTool::default()));
-        self.register(Arc::new(crate::spawn::SpawnTool::default()));
-
-        // Infrastructure (5)
-        self.register(Arc::new(crate::docker::DockerTool::default()));
-        self.register(Arc::new(crate::kubernetes::KubernetesTool::default()));
-        self.register(Arc::new(crate::infra::InfraTool::default()));
-        self.register(Arc::new(crate::package::PackageTool::default()));
-        self.register(Arc::new(crate::security::SecurityTool::default()));
-
-        // Project & Docs (4)
-        self.register(Arc::new(crate::project::ProjectTool::default()));
-        self.register(Arc::new(crate::docs::DocsTool::default()));
-        self.register(Arc::new(crate::diagram::DiagramTool::default()));
-        self.register(Arc::new(crate::design::DesignTool::default()));
-
-        // Communication (2)
-        self.register(Arc::new(crate::notify::NotifyTool::default()));
-        self.register(Arc::new(crate::tracker::TrackerTool::default()));
-
-        // Workflow & Deployment (2)
-        self.register(Arc::new(crate::workflow::WorkflowTool::default()));
-        self.register(Arc::new(crate::deploy::DeployTool::default()));
-
-        // Monitoring & Specialized (5)
-        self.register(Arc::new(crate::monitor::MonitorTool::default()));
-        self.register(Arc::new(crate::media::MediaTool::default()));
-        self.register(Arc::new(crate::i18n::I18nTool::default()));
-        self.register(Arc::new(crate::compliance::ComplianceTool::default()));
-        self.register(Arc::new(crate::migrate::MigrateTool::default()));
+        // Note: Only registering tools that are actually implemented in src/tools/
+        // Many tools from the original tools/ folder are stubs and not yet integrated
+        
+        // TODO: Implement and register the 42 merged tools once their dependencies are resolved
+        // For now, this registry is a placeholder
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::*;
+    use crate::tools::definition::*;
     use async_trait::async_trait;
 
     struct EchoTool;

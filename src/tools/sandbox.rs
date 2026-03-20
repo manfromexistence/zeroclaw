@@ -2,7 +2,7 @@
 //!
 //! Actions: run_code | repl | overlay | checkpoint_save | checkpoint_restore | checkpoint_list | checkpoint_diff
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

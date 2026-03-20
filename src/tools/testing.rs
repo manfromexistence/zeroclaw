@@ -1,7 +1,7 @@
 //! Test tool — universal test runner, auto-detect framework.
 //! Actions: run | watch | coverage | snapshot | list | create
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

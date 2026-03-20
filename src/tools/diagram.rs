@@ -1,7 +1,7 @@
 //! Diagram tool — generate diagrams (Mermaid, PlantUML, ASCII).
 //! Actions: generate | mermaid | plantuml | ascii | sequence | class_diagram | er_diagram | flowchart
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

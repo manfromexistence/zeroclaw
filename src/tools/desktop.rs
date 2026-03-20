@@ -1,7 +1,7 @@
 //! Desktop tool — desktop automation: screenshot, OCR, clipboard, window management.
 //! Actions: screenshot | ocr | clipboard_read | clipboard_write | window_list | window_focus | mouse | keyboard
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

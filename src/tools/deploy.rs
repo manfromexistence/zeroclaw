@@ -1,7 +1,7 @@
 //! Deploy tool — deployment automation across environments.
 //! Actions: deploy | rollback | status | preview | promote | canary | blue_green | health
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

@@ -1,7 +1,7 @@
 //! Infra tool — cloud infrastructure and IaC management.
 //! Actions: terraform_plan | terraform_apply | ansible_run | cloud_status | dns_manage | ssl_cert | cdn_purge | env_provision
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;

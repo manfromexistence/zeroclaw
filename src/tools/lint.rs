@@ -1,7 +1,7 @@
 //! Lint tool — universal code linting, any language.
 //! Actions: lint | fix
 
-use crate::definition::*;
+use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;
