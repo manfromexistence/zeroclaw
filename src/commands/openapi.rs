@@ -35,23 +35,20 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
     let unique = harvester.deduplicate(specs).await;
     println!("Unique specs: {}", unique.len());
     
-    println!("Building registry (not copying files, using original paths)...");
-    println!("Building registry (not copying files, using original paths)...");
+    println!("Building registry...");
     let mut entries = Vec::new();
-    for spec in &unique {
+    for (i, spec) in unique.iter().enumerate() {
+        if i % 100 == 0 {
+            println!("  Processing {}/{}", i, unique.len());
+        }
+        
         let spec_id = spec.dedup_key();
         
-        // Use the original source path instead of copying
-        let relative_path = if let Some(source_path) = spec.metadata.source.strip_prefix("file://") {
-            // Make path relative to specs_root
-            if let Ok(rel) = PathBuf::from(source_path).strip_prefix(&specs_root) {
-                rel.to_string_lossy().to_string()
-            } else {
-                source_path.to_string()
-            }
-        } else {
-            format!("apis-guru/{}", spec_id.replace("::", "_"))
-        };
+        // Use the original source path
+        let path = spec.metadata.source
+            .strip_prefix("file://")
+            .unwrap_or(&spec.metadata.source)
+            .to_string();
         
         entries.push(RegistryEntry {
             id: spec_id,
@@ -62,7 +59,7 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
             quality_score: spec.metadata.quality_score,
             source: spec.metadata.source.clone(),
             base_url: spec.base_url.clone(),
-            path: relative_path,
+            path,
         });
     }
 
