@@ -209,18 +209,8 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
 
     prompts::outro("✦ DX-Agent setup complete!")?;
 
-    // Show train animation (copied from onboard/src/main.rs)
-    let rainbow = RainbowEffect::new();
-    println!();
-    println!("Thanks for using Dx! Here's a celebration train!");
-    println!();
-
-    print!("\x1B[2J\x1B[H"); // Clear screen
-    for frame in 0..15 {
-        print!("\x1B[H"); // Move cursor to top
-        let _ = splash::render_train_animation(&rainbow, frame);
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
+    // Show train animation
+    crate::util::show_exit_train();
 
     Ok(config)
 }
@@ -270,18 +260,8 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
 
     prompts::outro("✦ Channel repair complete!")?;
 
-    // Show train animation (copied from onboard/src/main.rs)
-    let rainbow = RainbowEffect::new();
-    println!();
-    println!("Thanks for using Dx! Here's a celebration train!");
-    println!();
-
-    print!("\x1B[2J\x1B[H"); // Clear screen
-    for frame in 0..15 {
-        print!("\x1B[H"); // Move cursor to top
-        let _ = splash::render_train_animation(&rainbow, frame);
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
+    // Show train animation
+    crate::util::show_exit_train();
 
     Ok(config)
 }
@@ -336,18 +316,8 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
 
     prompts::outro("✦ Provider update complete!")?;
 
-    // Show train animation (copied from onboard/src/main.rs)
-    let rainbow = RainbowEffect::new();
-    println!();
-    println!("Thanks for using Dx! Here's a celebration train!");
-    println!();
-
-    print!("\x1B[2J\x1B[H"); // Clear screen
-    for frame in 0..15 {
-        print!("\x1B[H"); // Move cursor to top
-        let _ = splash::render_train_animation(&rainbow, frame);
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
+    // Show train animation
+    crate::util::show_exit_train();
 
     Ok(config)
 }
@@ -2401,18 +2371,8 @@ fn print_summary(config: &Config) -> Result<()> {
 
     prompts::log::success("⇒ Happy hacking!")?;
 
-    // Show train animation (copied from onboard/src/main.rs)
-    let rainbow = RainbowEffect::new();
-    println!();
-    println!("Thanks for using Dx! Here's a celebration train!");
-    println!();
-
-    print!("\x1B[2J\x1B[H"); // Clear screen
-    for frame in 0..15 {
-        print!("\x1B[H"); // Move cursor to top
-        let _ = splash::render_train_animation(&rainbow, frame);
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
+    // Show train animation
+    crate::util::show_exit_train();
 
     Ok(())
 }

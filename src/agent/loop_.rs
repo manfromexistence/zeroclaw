@@ -36,21 +36,6 @@ const DEFAULT_MAX_TOOL_ITERATIONS: usize = 10;
 /// Matches the channel-side constant in `channels/mod.rs`.
 const AUTOSAVE_MIN_MESSAGE_CHARS: usize = 20;
 
-/// Show train animation on exit
-fn show_exit_train() {
-    let rainbow = RainbowEffect::new();
-    println!();
-    println!("Thanks for using Dx! Here's a farewell train!");
-    println!();
-    
-    for frame in 0..15 {
-        print!("\x1B[H"); // Move cursor to top
-        let _ = splash::render_train_animation(&rainbow, frame);
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
-    println!();
-}
-
 /// Callback type for checking if model has been switched during tool execution.
 /// Returns Some((provider, model)) if a switch was requested, None otherwise.
 pub type ModelSwitchCallback = Arc<Mutex<Option<(String, String)>>>;
@@ -3653,13 +3638,13 @@ pub async fn run(
             let mut raw = Vec::new();
             match std::io::BufRead::read_until(&mut std::io::stdin().lock(), b'\n', &mut raw) {
                 Ok(0) => {
-                    show_exit_train();
+                    crate::util::show_exit_train();
                     break;
                 }
                 Ok(_) => {}
                 Err(e) => {
                     eprintln!("\nError reading input: {e}\n");
-                    show_exit_train();
+                    crate::util::show_exit_train();
                     break;
                 }
             }
@@ -3672,7 +3657,7 @@ pub async fn run(
             }
             match user_input.as_str() {
                 "/quit" | "/exit" => {
-                    show_exit_train();
+                    crate::util::show_exit_train();
                     break;
                 }
                 "/help" => {

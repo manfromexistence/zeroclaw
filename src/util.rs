@@ -2,6 +2,23 @@
 //!
 //! This module contains reusable helper functions used across the codebase.
 
+use crate::ui::{effects::RainbowEffect, splash};
+
+/// Show train animation on exit - called from anywhere in the application
+pub fn show_exit_train() {
+    let rainbow = RainbowEffect::new();
+    println!();
+    println!("Thanks for using DX-Agent!");
+    println!();
+    
+    for frame in 0..15 {
+        print!("\x1B[H"); // Move cursor to top
+        let _ = splash::render_train_animation(&rainbow, frame);
+        std::thread::sleep(std::time::Duration::from_millis(200));
+    }
+    println!();
+}
+
 /// Truncate a string to at most `max_chars` characters, appending "..." if truncated.
 ///
 /// This function safely handles multi-byte UTF-8 characters (emoji, CJK, accented characters)

@@ -812,6 +812,19 @@ enum MemoryCommands {
 #[tokio::main]
 #[allow(clippy::too_many_lines)]
 async fn main() -> Result<()> {
+    // Register exit handler to show train animation on normal exit
+    let result = main_impl().await;
+    
+    // Show train animation on exit (success or error)
+    if std::io::stdout().is_terminal() {
+        util::show_exit_train();
+    }
+    
+    result
+}
+
+#[allow(clippy::too_many_lines)]
+async fn main_impl() -> Result<()> {
     // Install default crypto provider for Rustls TLS.
     // This prevents the error: "could not automatically determine the process-level CryptoProvider"
     // when both aws-lc-rs and ring features are available (or neither is explicitly selected).
@@ -884,18 +897,7 @@ async fn main() -> Result<()> {
 
         if is_tty && !has_provider_flags {
             ctrlc::set_handler(move || {
-                let rainbow = RainbowEffect::new();
-                println!();
-                println!("Thanks for using Dx! Here's a farewell train!");
-                println!();
-
-                print!("\x1B[2J\x1B[H"); // Clear screen
-                for frame in 0..15 {
-                    print!("\x1B[H"); // Move cursor to top
-                    let _ = splash::render_train_animation(&rainbow, frame);
-                    std::thread::sleep(std::time::Duration::from_millis(200));
-                }
-
+                util::show_exit_train();
                 std::process::exit(0);
             })
             .expect("Error setting Ctrl-C handler");
