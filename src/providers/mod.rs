@@ -25,6 +25,7 @@ pub mod copilot;
 pub mod gemini;
 pub mod gemini_cli;
 pub mod kilocli;
+pub mod local_gguf;
 pub mod model_metadata;
 pub mod ollama;
 pub mod openai;

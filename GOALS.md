@@ -6,9 +6,11 @@ Tool, Metasearch -> Ability
 Token -> Saving
 Serializer, Local Model -> Speed
 
-Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell ai model our about tool calling to use our serializer syntax instead of json for tool calling!!!
+Now please lint and format all files on project and make sure that only used crates are preset in the cargo.toml file so that our binary can as less as possible!!!
 
 -------------------------------------------------------------------------------------------------------------------------
+
+Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell ai model our about tool calling to use our serializer syntax instead of json for tool calling!!!
 
 Now please look at the root LOCAL.md file at the root and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA keep the ollama running functionality too just add the local model gguf running funcatinality add it and configure it correctly on our project!!!
 

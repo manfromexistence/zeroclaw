@@ -1,14 +1,14 @@
 # Serializer for Rust
 
-[![Crates.io](https://img.shields.io/crates/v/toon-format.svg)](https://crates.io/crates/toon-format)
-[![Documentation](https://docs.rs/toon-format/badge.svg)](https://docs.rs/toon-format)
-[![Spec v3.0](https://img.shields.io/badge/spec-v3.0-brightgreen.svg)](https://github.com/toon-format/spec/blob/main/SPEC.md)
+[![Crates.io](https://img.shields.io/crates/v/serializer.svg)](https://crates.io/crates/serializer)
+[![Documentation](https://docs.rs/serializer/badge.svg)](https://docs.rs/serializer)
+[![Spec v3.0](https://img.shields.io/badge/spec-v3.0-brightgreen.svg)](https://github.com/serializer/spec/blob/main/SPEC.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-%20passing-success.svg)]()
 
 **Token-Oriented Object Notation (TOON)** is a compact, human-readable format designed for passing structured data to Large Language Models with significantly reduced token usage.
 
-This crate provides the official, **spec-compliant Rust implementation** of TOON v3.0, offering both a library (`toon-format`) and a full-featured command-line tool (`toon`).
+This crate provides the official, **spec-compliant Rust implementation** of TOON v3.0, offering both a library (`serializer`) and a full-featured command-line tool (`toon`).
 
 ## Quick Example
 
@@ -32,7 +32,7 @@ users[2]{id,name}:
 ## Features
 
 - **Generic API**: Works with any `Serialize`/`Deserialize` type - custom structs, enums, JSON values, and more
-- **Spec-Compliant**: Fully compliant with [TOON Specification v3.0](https://github.com/toon-format/spec/blob/main/SPEC.md)
+- **Spec-Compliant**: Fully compliant with [TOON Specification v3.0](https://github.com/serializer/spec/blob/main/SPEC.md)
 - **Key Folding & Path Expansion**: Collapse and expand dotted key paths
 - **Safe & Performant**: Built with safe, fast Rust
 - **Powerful CLI**: Full-featured command-line tool
@@ -44,13 +44,13 @@ users[2]{id,name}:
 ### As a Library
 
 ```bash
-cargo add toon-format
+cargo add serializer
 ```
 
 ### As a CLI Tool
 
 ```bash
-cargo install toon-format
+cargo install serializer
 ```
 
 ---
@@ -74,7 +74,7 @@ struct User {
     email: String,
 }
 
-fn main() -> Result<(), toon_format::ToonError> {
+fn main() -> Result<(), toon_format::SerializerError> {
     let user = User {
         name: "Alice".to_string(),
         age: 30,
@@ -103,7 +103,7 @@ fn main() -> Result<(), toon_format::ToonError> {
 use serde_json::{json, Value};
 use toon_format::{encode_default, decode_default};
 
-fn main() -> Result<(), toon_format::ToonError> {
+fn main() -> Result<(), toon_format::SerializerError> {
     let data = json!({
         "users": [
             {"id": 1, "name": "Alice"},
@@ -132,7 +132,7 @@ fn main() -> Result<(), toon_format::ToonError> {
 
 ### Encoding
 
-#### `encode<T: Serialize>(&value, &options) -> Result<String, ToonError>`
+#### `encode<T: Serialize>(&value, &options) -> Result<String, SerializerError>`
 
 Encode any serializable type to TOON format. Works with custom structs, enums, collections, and `serde_json::Value`.
 
@@ -170,7 +170,7 @@ let toon = encode(&data, &opts)?;
 
 ### Decoding
 
-#### `decode<T: Deserialize>(&input, &options) -> Result<T, ToonError>`
+#### `decode<T: Deserialize>(&input, &options) -> Result<T, SerializerError>`
 
 Decode TOON format into any deserializable type. Works with custom structs, enums, collections, and `serde_json::Value`.
 
@@ -504,15 +504,15 @@ cargo test -- --nocapture
 
 ## Error Handling
 
-All operations return `Result<T, ToonError>` with descriptive error messages:
+All operations return `Result<T, SerializerError>` with descriptive error messages:
 
 ```rust
 use serde_json::Value;
-use toon_format::{decode_strict, ToonError};
+use toon_format::{decode_strict, SerializerError};
 
 match decode_strict::<Value>("items[3]: a,b") {
     Ok(value) => println!("Success: {:?}", value),
-    Err(ToonError::LengthMismatch { expected, found, .. }) => {
+    Err(SerializerError::LengthMismatch { expected, found, .. }) => {
         eprintln!("Array length mismatch: expected {}, found {}", expected, found);
     }
     Err(e) => eprintln!("Error: {}", e),
@@ -547,11 +547,11 @@ Run with `cargo run --example examples` to see all examples:
 
 ## Resources
 
-- 📖 [TOON Specification v3.0](https://github.com/toon-format/spec/blob/main/SPEC.md)
-- 📦 [Crates.io Package](https://crates.io/crates/toon-format)
-- 📚 [API Documentation](https://docs.rs/toon-format)
-- 🔧 [Main Repository (JS/TS)](https://github.com/toon-format/toon)
-- 🎯 [Benchmarks & Performance](https://github.com/toon-format/toon#benchmarks)
+- 📖 [TOON Specification v3.0](https://github.com/serializer/spec/blob/main/SPEC.md)
+- 📦 [Crates.io Package](https://crates.io/crates/serializer)
+- 📚 [API Documentation](https://docs.rs/serializer)
+- 🔧 [Main Repository (JS/TS)](https://github.com/serializer/toon)
+- 🎯 [Benchmarks & Performance](https://github.com/serializer/toon#benchmarks)
 
 ---
 

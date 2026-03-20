@@ -8,10 +8,10 @@ version = "0.5.0"
 edition = "2024"
 authors = ["theonlyhennygod"]
 license = "MIT OR Apache-2.0"
-description = "DX-Agent - Enhanced Development Experience. The fastest, smallest AI assistant."
+description = "DX-Agent - Enhanced Development Experience. Run local GGUF models or cloud LLMs. Fast, small, powerful."
 repository = "https://github.com/zeroclaw-labs/zeroclaw"
 readme = "README.md"
-keywords = ["ai", "agent", "cli", "assistant", "chatbot"]
+keywords = ["ai", "agent", "cli", "assistant", "llama"]
 categories = ["command-line-utilities", "api-bindings"]
 rust-version = "1.94.0"
 
@@ -52,6 +52,10 @@ futures = "0.3"
 memchr = "2.7"
 blake3 = "1"
 zstd = "0.13"
+
+# Local GGUF model inference (llama.cpp bindings) - DEFAULT FEATURE
+llama-cpp-2 = "0.1"
+rand = "0.8"
 
 # Matrix client + E2EE decryption
 matrix-sdk = { version = "0.16", optional = true, default-features = false, features = ["e2e-encryption", "rustls-tls", "markdown", "sqlite"] }
@@ -233,7 +237,7 @@ landlock = { version = "0.4", optional = true }
 libc = "0.2"
 
 [features]
-default = ["observability-prometheus", "channel-nostr", "skill-creation"]
+default = ["observability-prometheus", "channel-nostr", "skill-creation", "local-gguf"]
 channel-nostr = ["dep:nostr-sdk"]
 hardware = ["nusb", "tokio-serial"]
 channel-matrix = ["dep:matrix-sdk"]
@@ -243,6 +247,8 @@ memory-postgres = ["dep:postgres"]
 observability-prometheus = ["dep:prometheus"]
 observability-otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp"]
 peripheral-rpi = ["rppal"]
+# Local GGUF model inference with llama.cpp - KEY FEATURE: Run models locally without external servers
+local-gguf = ["dep:llama-cpp-2"]
 # Browser backend feature alias used by cfg(feature = "browser-native")
 browser-native = ["dep:fantoccini"]
 # Backward-compatible alias for older invocations
