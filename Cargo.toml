@@ -269,6 +269,12 @@ skill-creation = []
 whatsapp-web = ["dep:wa-rs", "dep:wa-rs-core", "dep:wa-rs-binary", "dep:wa-rs-proto", "dep:wa-rs-ureq-http", "dep:wa-rs-tokio-transport", "dep:serde-big-array", "dep:prost", "dep:qrcode"]
 # WASM plugin system (extism-based)
 plugins-wasm = ["dep:extism"]
+# Database engine features for metasearch (optional, stub implementations if disabled)
+mysql = []
+mongodb = []
+postgres = []
+sqlite = []
+redis = []
 
 [profile.release]
 opt-level = "z"      # Optimize for size
@@ -277,6 +283,10 @@ codegen-units = 1    # Serialized codegen for low-memory devices (e.g., Raspberr
                      # Higher values (e.g., 8) compile faster but require more RAM during compilation
 strip = true          # Remove debug symbols
 panic = "abort"      # Reduce binary size
+
+[profile.dev]
+# Reduce codegen-units to prevent LLVM stack overflow on large projects
+codegen-units = 16   # Default is 256, reducing to 16 prevents stack overflow
 
 [profile.release-fast]
 inherits = "release"

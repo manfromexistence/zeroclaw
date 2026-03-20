@@ -4,7 +4,8 @@
 //! Each engine scrapes or queries a search provider
 //! and returns normalized `SearchResult` items.
 
-use super::{category::SearchCategory, engine::SearchEngine};
+// Unused imports - these types are re-exported but not used in this module
+// use super::{category::SearchCategory, engine::SearchEngine};
 
 // Original engines
 pub mod brave;

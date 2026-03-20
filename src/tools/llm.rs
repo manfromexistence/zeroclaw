@@ -109,7 +109,7 @@ impl Tool for LlmTool {
                             "{}/models/{}:generateContent?key={}",
                             base_url, model, api_key
                         );
-                        let mut contents =
+                        let contents =
                             vec![json!({"role": "user", "parts": [{"text": prompt}]})];
                         let mut body = json!({"contents": contents, "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature}});
                         if let Some(sys) = system {

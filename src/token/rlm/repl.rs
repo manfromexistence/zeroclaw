@@ -2,7 +2,6 @@ use crate::token::rlm::error::{RLMError, Result};
 use rhai::{Engine, Scope, AST};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 pub struct REPLExecutor {
     engine: Engine,

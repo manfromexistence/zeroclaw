@@ -105,7 +105,7 @@ impl Tool for GithubTool {
         let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("repo_info");
         let repo = call.arguments.get("repo").and_then(|v| v.as_str()).unwrap_or("");
 
-        let mut req_builder = |method: reqwest::Method, endpoint: &str| {
+        let req_builder = |method: reqwest::Method, endpoint: &str| {
             let url = format!("https://api.github.com{}", endpoint);
             let mut r = self
                 .http

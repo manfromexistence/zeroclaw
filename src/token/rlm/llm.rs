@@ -278,7 +278,7 @@ impl LLMClient {
         // Spawn task to process stream
         tokio::spawn(async move {
             let mut stream = response.bytes_stream();
-            let mut buffer = String::new();
+            let _buffer = String::new();
 
             while let Some(chunk) = stream.next().await {
                 if let Ok(bytes) = chunk {

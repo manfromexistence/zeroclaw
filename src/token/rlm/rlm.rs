@@ -318,7 +318,7 @@ impl RLM {
         scope.push("query", query.to_string());
 
         let mut llm_calls = 0;
-        let mut iterations = 0;
+        let mut iterations;
 
         // Main iteration loop
         for iteration in 0..self.max_iterations {
@@ -478,7 +478,7 @@ impl RLM {
         scope.push("query", query.to_string());
 
         let mut llm_calls = 0;
-        let mut iterations = 0;
+        let mut iterations;
 
         for iteration in 0..self.max_iterations {
             iterations = iteration + 1;

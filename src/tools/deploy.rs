@@ -5,7 +5,6 @@ use crate::tools::definition::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;
-use std::collections::HashMap;
 use std::sync::Mutex;
 
 pub struct DeployTool {
