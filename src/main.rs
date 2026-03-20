@@ -387,10 +387,10 @@ Examples:
         #[command(subcommand)]
         integration_command: IntegrationCommands,
     },
-    /// Manage OpenAPI-powered integrations
-    Openapi {
+    /// Manage API connects (78,989 external API operations)
+    Connect {
         #[command(subcommand)]
-        openapi_command: OpenApiCommands,
+        connect_command: ConnectCommands,
     },
 
     /// Manage skills (user-defined capabilities)
@@ -580,7 +580,7 @@ enum ConfigCommands {
     Schema,
 }
 #[derive(Subcommand, Debug)]
-enum OpenApiCommands {
+enum ConnectCommands {
     /// Harvest OpenAPI specifications and update the local registry
     Harvest {
         /// Path to APIs.guru-style specs directory
@@ -590,19 +590,19 @@ enum OpenApiCommands {
     /// List all loaded OpenAPI specs
     List,
     /// List connects (API operations) for a specific spec
-    Tools {
+    Connects {
         /// Spec ID to list connects for
         spec_id: String,
     },
-    /// Test a specific OpenAPI connect (API operation)
+    /// Test a specific API connect
     Test {
         /// Connect name to test
-        tool_name: String,
+        connect_name: String,
         /// JSON arguments for the connect
         #[arg(long, default_value = "{}")]
         args: String,
     },
-    /// Search for connects (API operations) by keyword
+    /// Search for connects by keyword
     Search {
         /// Search query
         query: String,
@@ -1388,20 +1388,20 @@ async fn main() -> Result<()> {
         Commands::Integrations {
             integration_command,
         } => integrations::handle_command(integration_command, &config),
-        Commands::Openapi { openapi_command } => match openapi_command {
-            OpenApiCommands::Harvest { source } => {
+        Commands::Connect { connect_command } => match connect_command {
+            ConnectCommands::Harvest { source } => {
                 commands::openapi::harvest_command(&config, source.as_deref()).await
             }
-            OpenApiCommands::List => commands::openapi::list_command(&config).await,
-            OpenApiCommands::Tools { spec_id } => {
+            ConnectCommands::List => commands::openapi::list_command(&config).await,
+            ConnectCommands::Connects { spec_id } => {
                 commands::openapi::tools_command(&config, spec_id.as_str()).await
             }
-            OpenApiCommands::Test { tool_name, args } => {
+            ConnectCommands::Test { connect_name, args } => {
                 let args_json: serde_json::Value = serde_json::from_str(args.as_str())
                     .context("Failed to parse args as JSON")?;
-                commands::openapi::test_command(&config, tool_name.as_str(), args_json).await
+                commands::openapi::test_command(&config, connect_name.as_str(), args_json).await
             }
-            OpenApiCommands::Search { query } => {
+            ConnectCommands::Search { query } => {
                 commands::openapi::search_command(&config, query.as_str()).await
             }
         },
