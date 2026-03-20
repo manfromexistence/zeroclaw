@@ -1,7 +1,7 @@
-Cli Onboard -> Ui
-Providers -> Diversity
-Message fixed(Whatsapp), Linking/Device -> Pairing
-Connect -> Connectivity
-Tool, Metasearch -> Ability
-Token -> Saving
-Serializer, Local Model -> Speed
+- [x] Cli Onboard -> Ui
+- [x] Providers -> Diversity
+- [x] Message fixed(Whatsapp), Linking/Device -> Pairing
+- [x] Connect -> Connectivity
+- [x] Tool, Metasearch -> Ability
+- [x] Token -> Saving
+- [x] Serializer, Local Model -> Speed
