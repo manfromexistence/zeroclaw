@@ -7,7 +7,7 @@ Uses only standard library - no external dependencies.
 import urllib.request
 import json
 
-API_KEY = "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"
+API_KEY = "[YOUR_GROQ_API_KEY_HERE]"
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 def test_groq_api():

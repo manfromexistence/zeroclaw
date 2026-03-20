@@ -2,7 +2,7 @@
 RUST RLM - QUICK START GUIDE
 ================================================================================
 
-Your Groq API Key: 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
+Your Groq API Key: [YOUR_GROQ_API_KEY_HERE]
 
 ================================================================================
 CURRENT STATUS

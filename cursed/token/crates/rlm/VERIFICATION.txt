@@ -14,7 +14,7 @@ API VERIFICATION
 ✅ Model: llama-3.3-70b-versatile responding correctly
 ✅ Test query successful: "What is 2+2?" → "Four."
 
-API Key: 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
+API Key: [YOUR_GROQ_API_KEY_HERE]
 
 ================================================================================
 IMPLEMENTATION STATUS

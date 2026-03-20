@@ -6,7 +6,7 @@ echo ""
 
 curl -s https://api.groq.com/openai/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer [YOUR_GROQ_API_KEY_HERE]" \
   -H "User-Agent: Mozilla/5.0" \
   -d '{
     "model": "llama-3.3-70b-versatile",

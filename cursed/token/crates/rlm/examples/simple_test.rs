@@ -5,7 +5,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🚀 Rust RLM - Simple Test");
     println!();
 
-    let api_key = "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".to_string();
+    let api_key = "[YOUR_GROQ_API_KEY_HERE]".to_string();
 
     // Small context for testing
     let context = r#"

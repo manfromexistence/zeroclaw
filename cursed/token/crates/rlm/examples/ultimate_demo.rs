@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!();
 
     // Use the provided API key
-    let api_key = "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".to_string();
+    let api_key = "[YOUR_GROQ_API_KEY_HERE]".to_string();
 
     // Load a large document
     let doc_path = "integrations/recursive-llm/massive_doc.txt";

@@ -12,7 +12,7 @@ import urllib.error
 import time
 
 # Configuration
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "[YOUR_GROQ_API_KEY_HERE]"
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
 
