@@ -40,8 +40,6 @@ use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use tracing::{info, warn};
 use tracing_subscriber::{EnvFilter, fmt};
-use agent::ui::prompts::PromptInteraction;
-use agent::ui::{effects::RainbowEffect, splash};
 
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
@@ -111,12 +109,12 @@ mod service;
 mod skillforge;
 mod skills;
 mod theme {
-    pub use dx_agent::theme::*;
+    pub use agent::theme::*;
 }
 mod tools;
 mod tunnel;
 mod ui {
-    pub use dx_agent::ui::*;
+    pub use agent::ui::*;
 }
 mod util;
 
@@ -127,6 +125,10 @@ pub use agent::{
     ChannelCommands, CronCommands, GatewayCommands, HardwareCommands, IntegrationCommands,
     MigrateCommands, PeripheralCommands, ServiceCommands, SkillCommands,
 };
+
+// Import UI components after module declarations
+use crate::ui::prompts::PromptInteraction;
+use crate::ui::{effects::RainbowEffect, splash};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
 enum CompletionShell {
@@ -251,7 +253,7 @@ Examples:
   dx gateway get-paircode       # show pairing code")]
     Gateway {
         #[command(subcommand)]
-        gateway_command: Option<agent::GatewayCommands>,
+        gateway_command: Option<crate::GatewayCommands>,
     },
 
     /// Start long-running autonomous runtime (gateway + channels + heartbeat + scheduler)
@@ -429,7 +431,7 @@ Examples:
   zeroclaw hardware info --chip STM32F401RETx")]
     Hardware {
         #[command(subcommand)]
-        hardware_command: agent::HardwareCommands,
+        hardware_command: crate::HardwareCommands,
     },
 
     /// Manage hardware peripherals (STM32, RPi GPIO, etc.)
@@ -448,7 +450,7 @@ Examples:
   zeroclaw peripheral flash-nucleo")]
     Peripheral {
         #[command(subcommand)]
-        peripheral_command: agent::PeripheralCommands,
+        peripheral_command: crate::PeripheralCommands,
     },
 
     /// Manage agent memory (list, get, stats, clear)
@@ -1041,7 +1043,7 @@ async fn main() -> Result<()> {
 
         Commands::Gateway { gateway_command } => {
             match gateway_command {
-                Some(agent::GatewayCommands::Restart { port, host }) => {
+                Some(crate::GatewayCommands::Restart { port, host }) => {
                     let (port, host) = resolve_gateway_addr(&config, port, host);
                     let addr = format!("{host}:{port}");
                     info!("Restarting Agent Gateway on {addr}");
@@ -1077,7 +1079,7 @@ async fn main() -> Result<()> {
                     log_gateway_start(&host, port);
                     Box::pin(gateway::run_gateway(&host, port, config)).await
                 }
-                Some(zeroclaw::GatewayCommands::GetPaircode { new }) => {
+                Some(crate::GatewayCommands::GetPaircode { new }) => {
                     let port = config.gateway.port;
                     let host = &config.gateway.host;
 
@@ -1125,7 +1127,7 @@ async fn main() -> Result<()> {
                     }
                     Ok(())
                 }
-                Some(zeroclaw::GatewayCommands::Start { port, host }) => {
+                Some(crate::GatewayCommands::Start { port, host }) => {
                     let (port, host) = resolve_gateway_addr(&config, port, host);
                     log_gateway_start(&host, port);
                     Box::pin(gateway::run_gateway(&host, port, config)).await
@@ -1581,7 +1583,7 @@ fn handle_estop_command(
                 }
                 if otp_code.is_none() {
                     let entered =
-                        zeroclaw::ui::prompts::password::password("Enter OTP code").interact()?;
+                        agent::ui::prompts::password::password("Enter OTP code").interact()?;
                     otp_code = Some(entered.to_string());
                 }
 
@@ -1927,12 +1929,12 @@ fn clear_pending_oauth_login(config: &Config, provider: &str) {
 }
 
 fn read_auth_input(prompt: &str) -> Result<String> {
-    let input = zeroclaw::ui::prompts::password::password(prompt).interact()?;
+    let input = agent::ui::prompts::password::password(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 
 fn read_plain_input(prompt: &str) -> Result<String> {
-    let input = zeroclaw::ui::prompts::input::input(prompt).interact()?;
+    let input = agent::ui::prompts::input::input(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 

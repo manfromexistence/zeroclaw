@@ -9,11 +9,11 @@ Any Software - Any
 
 Train animation on exit from the whole project and from all places!!!
 
-Now please look at the root onboard folder's local model running functionality and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project. 
-
-Please look at the root serializer create and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens.
+Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell our about tool calling
 
 -------------------------------------------------------------------------------------------------------------------------
+
+Now please look at the root onboard folder's local model running functionality and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project.
 
 For the replacement of the crab the previous zeroclow logo symbols please use "◈" and instead of those emojis -use these:
 ✓ Build passed ✗ 3 tests failed △ Deprecated API usage ⚙ Compiled with Rust ⇒ Pipeline complete ✦ v2.0 released! ↯ 3ms response time
