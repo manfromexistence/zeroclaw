@@ -589,20 +589,20 @@ enum OpenApiCommands {
     },
     /// List all loaded OpenAPI specs
     List,
-    /// List tools for a specific spec
+    /// List connects (API operations) for a specific spec
     Tools {
-        /// Spec ID to list tools for
+        /// Spec ID to list connects for
         spec_id: String,
     },
-    /// Test a specific OpenAPI tool
+    /// Test a specific OpenAPI connect (API operation)
     Test {
-        /// Tool name to test
+        /// Connect name to test
         tool_name: String,
-        /// JSON arguments for the tool
+        /// JSON arguments for the connect
         #[arg(long, default_value = "{}")]
         args: String,
     },
-    /// Search for tools by keyword
+    /// Search for connects (API operations) by keyword
     Search {
         /// Search query
         query: String,

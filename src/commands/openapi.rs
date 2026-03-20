@@ -90,12 +90,12 @@ pub async fn list_command(config: &Config) -> Result<()> {
     let registry = load_registry(config)?;
     
     let spec_count = registry.spec_count();
-    let tool_count = registry.tool_count();
+    let connect_count = registry.tool_count();
     
     println!("OpenAPI Integration Status");
     println!("==========================");
     println!("Specs loaded: {}", spec_count);
-    println!("Tools available: {}", tool_count);
+    println!("Connects available: {}", connect_count);
     println!();
     
     if spec_count == 0 {
@@ -106,8 +106,8 @@ pub async fn list_command(config: &Config) -> Result<()> {
     println!("Available specs:");
     for spec_id in registry.list_specs() {
         if let Some(spec) = registry.get_spec(&spec_id) {
-            let tool_count = registry.get_tools_for_spec(&spec_id).len();
-            println!("  {} - {} tools", spec_id, tool_count);
+            let connect_count = registry.get_tools_for_spec(&spec_id).len();
+            println!("  {} - {} connects", spec_id, connect_count);
             println!("    Service: {}", spec.metadata.service);
             println!("    Version: {}", spec.metadata.version);
             println!("    Tier: {:?}", spec.metadata.tier);
@@ -125,19 +125,19 @@ pub async fn tools_command(config: &Config, spec_id: &str) -> Result<()> {
     let spec = registry.get_spec(spec_id)
         .ok_or_else(|| anyhow::anyhow!("Spec not found: {}", spec_id))?;
     
-    let tools = registry.get_tools_for_spec(spec_id);
+    let connects = registry.get_tools_for_spec(spec_id);
     
-    println!("Tools for spec: {}", spec_id);
+    println!("Connects for spec: {}", spec_id);
     println!("Service: {}", spec.metadata.service);
     println!("Version: {}", spec.metadata.version);
     println!("Base URL: {}", spec.base_url);
     println!();
-    println!("Available tools ({}):", tools.len());
+    println!("Available connects ({}):", connects.len());
     
-    for tool_name in tools {
-        if let Some(tool) = registry.get_tool(&tool_name) {
-            println!("  {}", tool.name());
-            println!("    {}", tool.description());
+    for connect_name in connects {
+        if let Some(connect) = registry.get_tool(&connect_name) {
+            println!("  {}", connect.name());
+            println!("    {}", connect.description());
         }
     }
     
@@ -147,16 +147,16 @@ pub async fn tools_command(config: &Config, spec_id: &str) -> Result<()> {
 pub async fn test_command(config: &Config, tool_name: &str, args: serde_json::Value) -> Result<()> {
     let registry = load_registry(config)?;
     
-    let tool = registry.get_tool(tool_name)
-        .ok_or_else(|| anyhow::anyhow!("Tool not found: {}", tool_name))?;
+    let connect = registry.get_tool(tool_name)
+        .ok_or_else(|| anyhow::anyhow!("Connect not found: {}", tool_name))?;
     
-    println!("Testing tool: {}", tool.name());
-    println!("Description: {}", tool.description());
+    println!("Testing connect: {}", connect.name());
+    println!("Description: {}", connect.description());
     println!("Arguments: {}", serde_json::to_string_pretty(&args)?);
     println!();
     println!("Executing...");
     
-    let result = tool.execute(args).await?;
+    let result = connect.execute(args).await?;
     
     println!();
     if result.success {
@@ -178,13 +178,13 @@ pub async fn search_command(config: &Config, query: &str) -> Result<()> {
     let results = registry.search_tools(query);
     
     println!("Search results for '{}':", query);
-    println!("Found {} tools:", results.len());
+    println!("Found {} connects:", results.len());
     println!();
     
-    for tool_name in results {
-        if let Some(tool) = registry.get_tool(&tool_name) {
-            println!("  {}", tool.name());
-            println!("    {}", tool.description());
+    for connect_name in results {
+        if let Some(connect) = registry.get_tool(&connect_name) {
+            println!("  {}", connect.name());
+            println!("    {}", connect.description());
         }
     }
     
