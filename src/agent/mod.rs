@@ -15,8 +15,10 @@ mod tests;
 pub use agent::{Agent, AgentBuilder};
 #[allow(unused_imports)]
 pub use loop_::{process_message, run};
+#[allow(unused_imports)]
 pub use serializer_helper::{
     SerializerMessage, analyze_format, convert_json_tool_call, format_context_data,
     format_tool_args, format_tool_response, parse_tool_args,
 };
+#[allow(unused_imports)]
 pub use serializer_instructions::{get_serializer_instruction, is_serializer_format};

@@ -10,7 +10,7 @@ pub use string::{
     escape_string, is_valid_unquoted_key, needs_quoting, quote_string, unescape_string,
 };
 
-use crate::types::{JsonValue as Value, Number};
+use crate::serializer::types::{JsonValue as Value, Number};
 
 /// Context for determining when quoting is needed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

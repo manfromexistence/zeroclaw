@@ -1,5 +1,5 @@
 //! Constants
-use crate::types::Delimiter;
+use crate::serializer::types::Delimiter;
 
 /// Characters that have structural meaning in TOON format.
 pub const STRUCTURAL_CHARS: &[char] = &['[', ']', '{', '}', ':', '-'];

@@ -1,6 +1,6 @@
 use serde_json::{Map, Number, Value};
 
-use crate::{
+use crate::serializer::{
     constants::{KEYWORDS, MAX_DEPTH, QUOTED_KEY_MARKER},
     decode::{
         scanner::{Scanner, Token},
@@ -447,7 +447,7 @@ impl<'a> Parser<'a> {
                     Token::String(s, true) => {
                         // Quoted strings need quotes preserved for re-parsing
                         value_str.push('"');
-                        value_str.push_str(&crate::utils::escape_string(s));
+                        value_str.push_str(&crate::serializer::utils::escape_string(s));
                         value_str.push('"');
                     }
                     Token::String(s, false) => value_str.push_str(s),

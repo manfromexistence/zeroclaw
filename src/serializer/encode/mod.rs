@@ -4,7 +4,7 @@ pub mod primitives;
 pub mod writer;
 use indexmap::IndexMap;
 
-use crate::{
+use crate::serializer::{
     constants::MAX_DEPTH,
     types::{
         EncodeOptions, IntoJsonValue, JsonValue as Value, KeyFoldingMode, ToonError, ToonResult,
@@ -55,7 +55,7 @@ use crate::{
 /// assert!(toon.contains("|"));
 /// # Ok::<(), serializer::ToonError>(())
 /// ```
-pub fn encode<T: serde::Serialize>(value: &T, options: &EncodeOptions) -> ToonResult<String> {
+pub fn encode<T: serde::Serialize + ?Sized>(value: &T, options: &EncodeOptions) -> ToonResult<String> {
     let json_value =
         serde_json::to_value(value).map_err(|e| ToonError::SerializationError(e.to_string()))?;
     let json_value: Value = json_value.into();
@@ -117,7 +117,7 @@ fn encode_impl(value: &Value, options: &EncodeOptions) -> ToonResult<String> {
 /// assert_eq!(toon, "tags[3]: reading,gaming,coding");
 /// # Ok::<(), serializer::ToonError>(())
 /// ```
-pub fn encode_default<T: serde::Serialize>(value: &T) -> ToonResult<String> {
+pub fn encode_default<T: serde::Serialize + ?Sized>(value: &T) -> ToonResult<String> {
     encode(value, &EncodeOptions::default())
 }
 
@@ -492,7 +492,7 @@ fn encode_list_item_tabular_array(
     writer.write_char('[')?;
     writer.write_str(&arr.len().to_string())?;
 
-    if writer.options.delimiter != crate::types::Delimiter::Comma {
+    if writer.options.delimiter != crate::serializer::types::Delimiter::Comma {
         writer.write_char(writer.options.delimiter.as_char())?;
     }
 

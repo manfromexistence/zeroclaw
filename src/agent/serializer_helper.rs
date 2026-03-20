@@ -21,7 +21,7 @@ pub fn format_tool_response<T: Serialize>(response: &T) -> String {
 }
 
 /// Parse tool call arguments from either Serializer or JSON
-pub fn parse_tool_args<'a, T: Deserialize<'a>>(input: &'a str) -> Result<T, String> {
+pub fn parse_tool_args<T: for<'de> Deserialize<'de>>(input: &str) -> Result<T, String> {
     from_serializer_or_json(input)
 }
 
@@ -70,7 +70,7 @@ pub fn analyze_format(input: &str) -> FormatAnalysis {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryEntry {
     pub key: String,
     pub value: String,
@@ -95,7 +95,7 @@ impl FormatAnalysis {
     }
 
     pub fn savings_summary(&self) -> Option<String> {
-        self.savings.as_ref().map(|s| s.format_summary())
+        self.savings.as_ref().map(|s: &TokenSavings| s.format_summary())
     }
 }
 

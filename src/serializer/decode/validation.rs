@@ -1,4 +1,4 @@
-use crate::types::{ToonError, ToonResult};
+use crate::serializer::types::{ToonError, ToonResult};
 
 /// Validate that array length matches expected value.
 pub fn validate_array_length(expected: usize, actual: usize) -> ToonResult<()> {
@@ -56,8 +56,8 @@ pub fn validate_row_length(
 
 /// Validate that detected and expected delimiters match.
 pub fn validate_delimiter_consistency(
-    detected: Option<crate::types::Delimiter>,
-    expected: Option<crate::types::Delimiter>,
+    detected: Option<crate::serializer::types::Delimiter>,
+    expected: Option<crate::serializer::types::Delimiter>,
 ) -> ToonResult<()> {
     if let (Some(detected), Some(expected)) = (detected, expected) {
         if detected != expected {

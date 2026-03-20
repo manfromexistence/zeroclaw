@@ -105,6 +105,9 @@ mod plugins;
 mod providers;
 mod runtime;
 mod security;
+mod serializer {
+    pub use agent::serializer::*;
+}
 mod service;
 mod skillforge;
 mod skills;
@@ -128,7 +131,6 @@ pub use ::agent::{
 
 // Import UI components after module declarations
 use crate::ui::prompts::PromptInteraction;
-use crate::ui::{effects::RainbowEffect, splash};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
 enum CompletionShell {

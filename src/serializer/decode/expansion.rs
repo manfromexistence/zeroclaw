@@ -1,6 +1,6 @@
 use indexmap::IndexMap;
 
-use crate::{
+use crate::serializer::{
     constants::QUOTED_KEY_MARKER,
     types::{JsonValue as Value, PathExpansionMode, ToonError, ToonResult, is_identifier_segment},
 };

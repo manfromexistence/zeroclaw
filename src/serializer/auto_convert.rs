@@ -4,7 +4,7 @@
 //! wherever possible to save tokens. It includes smart detection, conversion, and
 //! fallback mechanisms.
 
-use crate::serializer::{ToonError, decode_default, encode_default};
+use crate::serializer::{decode_default, encode_default};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -23,7 +23,7 @@ pub fn to_serializer_or_json<T: Serialize>(value: &T) -> String {
 
 /// Convert any serializable value to pretty Serializer format
 /// Falls back to pretty JSON if conversion fails
-pub fn to_serializer_or_json_pretty<T: Serialize>(value: &T) -> String {
+pub fn to_serializer_or_json_pretty<T: Serialize + ?Sized>(value: &T) -> String {
     // Try Serializer format first (already pretty by default)
     match encode_default(value) {
         Ok(serializer_str) => serializer_str,
@@ -35,7 +35,7 @@ pub fn to_serializer_or_json_pretty<T: Serialize>(value: &T) -> String {
 }
 
 /// Parse from either Serializer or JSON format automatically
-pub fn from_serializer_or_json<'a, T: Deserialize<'a>>(input: &'a str) -> Result<T, String> {
+pub fn from_serializer_or_json<T: for<'de> Deserialize<'de>>(input: &str) -> Result<T, String> {
     // Try Serializer format first
     if is_likely_serializer(input) {
         match decode_default::<T>(input) {

@@ -1,4 +1,4 @@
-use crate::types::Number;
+use crate::serializer::types::Number;
 
 /// Format a number in TOON canonical form (no exponents, no trailing zeros).
 pub fn format_canonical_number(n: &Number) -> String {

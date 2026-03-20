@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "agent"
-version = "0.5.0"
+version = "0.0.0"
 edition = "2024"
 authors = ["theonlyhennygod"]
 license = "MIT OR Apache-2.0"
@@ -199,6 +199,8 @@ qrcode = "0.14"
 sysinfo = "0.38.4"
 walkdir = "2.5.0"
 infer = "0.19.0"
+indexmap = "2.13.0"
+encoding_rs = "0.8.35"
 
 # USB device enumeration (hardware discovery) — only on platforms nusb supports
 # (Linux, macOS, Windows). Android/Termux uses target_os="android" and is excluded.

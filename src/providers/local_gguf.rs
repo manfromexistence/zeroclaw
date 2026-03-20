@@ -4,12 +4,13 @@
 //! Supports persistent KV cache, streaming, and context window management.
 
 use anyhow::{Context, Result};
+use encoding_rs::UTF_8;
 use llama_cpp_2::context::LlamaContext;
 use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;
 use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::params::LlamaModelParams;
-use llama_cpp_2::model::{AddBos, LlamaChatMessage, LlamaModel, Special};
+use llama_cpp_2::model::{AddBos, LlamaModel};
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
 use std::num::NonZeroU32;
@@ -91,10 +92,7 @@ impl LocalGgufProvider {
 
     /// Compute optimal thread count once (physical cores - 1, min 1).
     fn compute_thread_count() -> i32 {
-        let sys = sysinfo::System::new_with_specifics(
-            sysinfo::RefreshKind::nothing().with_cpu(sysinfo::CpuRefreshKind::nothing()),
-        );
-        let physical = sys.physical_core_count().unwrap_or(1).max(1);
+        let physical = sysinfo::System::physical_core_count().unwrap_or(1).max(1);
         if physical > 4 {
             (physical - 1) as i32
         } else {
@@ -170,43 +168,23 @@ impl LocalGgufProvider {
     }
 
     /// Build the prompt string using the model's embedded chat template.
-    fn build_prompt(model: &LlamaModel, history: &[ChatMessage]) -> Result<String> {
-        let mut messages = Vec::with_capacity(history.len() + 1);
-
-        messages.push(
-            LlamaChatMessage::new("system".to_string(), SYSTEM_PROMPT.to_string())
-                .context("Failed to create system chat message")?,
-        );
+    fn build_prompt(_model: &LlamaModel, history: &[ChatMessage]) -> Result<String> {
+        // Manual ChatML construction (apply_chat_template API changed)
+        let mut prompt = String::with_capacity(4096);
+        prompt.push_str("<|im_start|>system\n");
+        prompt.push_str(SYSTEM_PROMPT);
+        prompt.push_str("<|im_end|>\n");
 
         for msg in history {
-            messages.push(
-                LlamaChatMessage::new(msg.role.clone(), msg.content.clone())
-                    .context("Failed to create chat message")?,
-            );
+            prompt.push_str("<|im_start|>");
+            prompt.push_str(&msg.role);
+            prompt.push('\n');
+            prompt.push_str(&msg.content);
+            prompt.push_str("<|im_end|>\n");
         }
 
-        // Try model's embedded template first
-        match model.apply_chat_template(None, &messages, true) {
-            Ok(prompt) => Ok(prompt),
-            Err(_) => {
-                // Fallback: manual ChatML construction
-                let mut prompt = String::with_capacity(4096);
-                prompt.push_str("<|im_start|>system\n");
-                prompt.push_str(SYSTEM_PROMPT);
-                prompt.push_str("<|im_end|>\n");
-
-                for msg in history {
-                    prompt.push_str("<|im_start|>");
-                    prompt.push_str(&msg.role);
-                    prompt.push('\n');
-                    prompt.push_str(&msg.content);
-                    prompt.push_str("<|im_end|>\n");
-                }
-
-                prompt.push_str("<|im_start|>assistant\n");
-                Ok(prompt)
-            }
-        }
+        prompt.push_str("<|im_start|>assistant\n");
+        Ok(prompt)
     }
 
     /// Evict oldest conversation turns when approaching context limit.
@@ -304,6 +282,9 @@ impl LocalGgufProvider {
         let mut gen_batch = LlamaBatch::new(1, 1);
         let mut hit_limit = false;
         let mut grace_tokens = 0;
+        
+        // Create a UTF-8 decoder for token-to-string conversion
+        let mut decoder = UTF_8.new_decoder();
 
         for i in 0..max_loop {
             if cancel.is_cancelled() {
@@ -322,10 +303,11 @@ impl LocalGgufProvider {
                 break;
             }
 
-            let piece = state
-                .model
-                .token_to_str(token, Special::Tokenize)
-                .unwrap_or_default();
+            // Decode token to string piece using the stateful decoder
+            let piece = match state.model.token_to_piece(token, &mut decoder, true, None) {
+                Ok(s) => s,
+                Err(_) => String::from("�"), // Use replacement character on decode error
+            };
 
             on_token(&piece);
             generated.push_str(&piece);

@@ -6,7 +6,7 @@ pub mod validation;
 
 use serde_json::Value;
 
-use crate::types::{DecodeOptions, ToonResult};
+use crate::serializer::types::{DecodeOptions, ToonResult};
 
 /// Decode a TOON string into any deserializable type.
 ///
@@ -62,9 +62,9 @@ pub fn decode<T: serde::de::DeserializeOwned>(
     let value = parser.parse()?;
 
     // Apply path expansion if enabled (v1.5 feature)
-    use crate::types::PathExpansionMode;
+    use crate::serializer::types::PathExpansionMode;
     let final_value = if options.expand_paths != PathExpansionMode::Off {
-        let json_value = crate::types::JsonValue::from(value);
+        let json_value = crate::serializer::types::JsonValue::from(value);
         let expanded =
             expansion::expand_paths_recursive(json_value, options.expand_paths, options.strict)?;
         Value::from(expanded)
@@ -73,7 +73,7 @@ pub fn decode<T: serde::de::DeserializeOwned>(
     };
 
     serde_json::from_value(final_value)
-        .map_err(|e| crate::types::ToonError::DeserializationError(e.to_string()))
+        .map_err(|e| crate::serializer::types::ToonError::DeserializationError(e.to_string()))
 }
 
 /// Decode with strict validation enabled (validates array lengths,

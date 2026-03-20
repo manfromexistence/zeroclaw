@@ -1,4 +1,4 @@
-use crate::{
+use crate::serializer::{
     constants::DEFAULT_INDENT,
     types::{Delimiter, KeyFoldingMode, PathExpansionMode},
 };

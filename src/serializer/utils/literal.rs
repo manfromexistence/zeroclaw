@@ -1,4 +1,4 @@
-use crate::constants;
+use crate::serializer::constants;
 
 /// Check if a string looks like a keyword or number (needs quoting).
 pub fn is_literal_like(s: &str) -> bool {
