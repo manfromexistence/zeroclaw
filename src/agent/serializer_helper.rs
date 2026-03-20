@@ -95,7 +95,9 @@ impl FormatAnalysis {
     }
 
     pub fn savings_summary(&self) -> Option<String> {
-        self.savings.as_ref().map(|s: &TokenSavings| s.format_summary())
+        self.savings
+            .as_ref()
+            .map(|s: &TokenSavings| s.format_summary())
     }
 }
 

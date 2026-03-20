@@ -55,7 +55,10 @@ use crate::serializer::{
 /// assert!(toon.contains("|"));
 /// # Ok::<(), serializer::ToonError>(())
 /// ```
-pub fn encode<T: serde::Serialize + ?Sized>(value: &T, options: &EncodeOptions) -> ToonResult<String> {
+pub fn encode<T: serde::Serialize + ?Sized>(
+    value: &T,
+    options: &EncodeOptions,
+) -> ToonResult<String> {
     let json_value =
         serde_json::to_value(value).map_err(|e| ToonError::SerializationError(e.to_string()))?;
     let json_value: Value = json_value.into();

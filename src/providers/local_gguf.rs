@@ -282,7 +282,7 @@ impl LocalGgufProvider {
         let mut gen_batch = LlamaBatch::new(1, 1);
         let mut hit_limit = false;
         let mut grace_tokens = 0;
-        
+
         // Create a UTF-8 decoder for token-to-string conversion
         let mut decoder = UTF_8.new_decoder();
 
