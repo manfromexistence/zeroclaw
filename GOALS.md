@@ -4,9 +4,9 @@ Message fixed(Whatsapp), Linking/Device -> Pairing
 Connect -> Connectivity
 Tool, Metasearch -> Ability
 Token -> Saving
-Any Software - Any
+Serializer, Local Model -> Speed
 
-Serializer, Local Model -> Speed 
+Any Software - Any
 
 Now as you merge the metasearch root folder or main crate to our src folder directly, please do that for the token folder to move every code from the root token so that between the ai having the response it have special types of token saving tools to save tokens and connect them to our main src folder correctly and mainly the token/crates/rlm as its has the most token savings
 

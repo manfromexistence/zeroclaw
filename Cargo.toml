@@ -19,10 +19,6 @@ rust-version = "1.94.0"
 name = "zeroclaw"
 path = "src/main.rs"
 
-[[bin]]
-name = "test-rlm"
-path = "src/bin/test-rlm.rs"
-
 [lib]
 name = "zeroclaw"
 path = "src/lib.rs"
