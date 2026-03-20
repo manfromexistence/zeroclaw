@@ -3149,7 +3149,7 @@ pub async fn run(
         &config.workspace_dir,
         config.api_key.as_deref(),
     )?);
-    tracing::info!(backend = mem.name(), "Memory initialized");
+    tracing::debug!(backend = mem.name(), "Memory initialized");
 
     // ── Peripherals (merge peripheral tools into registry) ─
     if !peripheral_overrides.is_empty() {
@@ -3633,11 +3633,7 @@ pub async fn run(
         println!("{response}");
         observer.record_event(&ObserverEvent::TurnComplete);
     } else {
-        // Clean Vercel-style header
-        println!("\n┌─────────────────────────────────────────────────────────────────────────────┐");
-        println!("│ Dx - Enhanced Development Experience                                        │");
-        println!("└─────────────────────────────────────────────────────────────────────────────┘");
-        println!("  Type /help for commands\n");
+        println!("\x1b[90mType /help for commands\x1b[0m\n");
 
         // Persistent conversation history across turns
         let mut history = if let Some(path) = session_state_file.as_deref() {
@@ -3647,9 +3643,7 @@ pub async fn run(
         };
 
         loop {
-            // Clean input prompt with full-width box
-            println!("┌─────────────────────────────────────────────────────────────────────────────┐");
-            print!("│ You: ");
+            print!("\x1b[90m>\x1b[0m ");
             let _ = std::io::stdout().flush();
 
             // Read raw bytes to avoid UTF-8 validation errors when PTY
@@ -3671,7 +3665,6 @@ pub async fn run(
             let input = String::from_utf8_lossy(&raw).into_owned();
 
             let user_input = input.trim().to_string();
-            println!("└─────────────────────────────────────────────────────────────────────────────┘\n");
             
             if user_input.is_empty() {
                 continue;
@@ -3844,13 +3837,7 @@ pub async fn run(
                 }
             };
             final_output = response.clone();
-            
-            // Clean assistant response with box
-            println!("┌─────────────────────────────────────────────────────────────────────────────┐");
-            println!("│ Assistant:");
-            println!("└─────────────────────────────────────────────────────────────────────────────┘");
-            println!("{response}\n");
-            
+            println!("\n{response}\n");
             observer.record_event(&ObserverEvent::TurnComplete);
 
             // Auto-compaction before hard trimming to preserve long-context signal.
@@ -3863,7 +3850,7 @@ pub async fn run(
             )
             .await
                 && compacted {
-                    println!("Auto-compaction complete\n");
+                    println!("\x1b[90mAuto-compaction complete\x1b[0m\n");
                 }
 
             // Hard cap as a safety net.

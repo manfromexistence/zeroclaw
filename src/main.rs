@@ -40,8 +40,8 @@ use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use tracing::{info, warn};
 use tracing_subscriber::{EnvFilter, fmt};
-use zeroclaw::ui::prompts::PromptInteraction;
-use zeroclaw::ui::{effects::RainbowEffect, splash};
+use agent::ui::prompts::PromptInteraction;
+use agent::ui::{effects::RainbowEffect, splash};
 
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
@@ -78,7 +78,7 @@ mod auth;
 mod channels;
 mod commands;
 mod rag {
-    pub use zeroclaw::rag::*;
+    pub use agent::rag::*;
 }
 mod config;
 mod cost;
@@ -95,7 +95,7 @@ mod identity;
 mod integrations;
 mod memory;
 mod metasearch {
-    pub use zeroclaw::metasearch::*;
+    pub use agent::metasearch::*;
 }
 mod migration;
 mod multimodal;
@@ -111,19 +111,19 @@ mod service;
 mod skillforge;
 mod skills;
 mod theme {
-    pub use zeroclaw::theme::*;
+    pub use dx_agent::theme::*;
 }
 mod tools;
 mod tunnel;
 mod ui {
-    pub use zeroclaw::ui::*;
+    pub use dx_agent::ui::*;
 }
 mod util;
 
 use config::Config;
 
 // Re-export so binary modules can use crate::<CommandEnum> while keeping a single source of truth.
-pub use zeroclaw::{
+pub use agent::{
     ChannelCommands, CronCommands, GatewayCommands, HardwareCommands, IntegrationCommands,
     MigrateCommands, PeripheralCommands, ServiceCommands, SkillCommands,
 };
@@ -251,7 +251,7 @@ Examples:
   dx gateway get-paircode       # show pairing code")]
     Gateway {
         #[command(subcommand)]
-        gateway_command: Option<zeroclaw::GatewayCommands>,
+        gateway_command: Option<agent::GatewayCommands>,
     },
 
     /// Start long-running autonomous runtime (gateway + channels + heartbeat + scheduler)
@@ -429,7 +429,7 @@ Examples:
   zeroclaw hardware info --chip STM32F401RETx")]
     Hardware {
         #[command(subcommand)]
-        hardware_command: zeroclaw::HardwareCommands,
+        hardware_command: agent::HardwareCommands,
     },
 
     /// Manage hardware peripherals (STM32, RPi GPIO, etc.)
@@ -448,7 +448,7 @@ Examples:
   zeroclaw peripheral flash-nucleo")]
     Peripheral {
         #[command(subcommand)]
-        peripheral_command: zeroclaw::PeripheralCommands,
+        peripheral_command: agent::PeripheralCommands,
     },
 
     /// Manage agent memory (list, get, stats, clear)
@@ -928,7 +928,7 @@ async fn main() -> Result<()> {
                 let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");
                 let backup_dir = format!("{}.backup.{}", zeroclaw_dir.display(), timestamp);
 
-                println!("⚠️  Reinitializing ZeroClaw configuration...");
+                println!("△ Warning: Reinitializing Agent configuration...");
                 println!("   Current config directory: {}", zeroclaw_dir.display());
                 println!(
                     "   This will back up your existing config to: {}",
@@ -1041,10 +1041,10 @@ async fn main() -> Result<()> {
 
         Commands::Gateway { gateway_command } => {
             match gateway_command {
-                Some(zeroclaw::GatewayCommands::Restart { port, host }) => {
+                Some(agent::GatewayCommands::Restart { port, host }) => {
                     let (port, host) = resolve_gateway_addr(&config, port, host);
                     let addr = format!("{host}:{port}");
-                    info!("🔄 Restarting ZeroClaw Gateway on {addr}");
+                    info!("Restarting Agent Gateway on {addr}");
 
                     // Try to gracefully shutdown existing gateway via admin endpoint
                     match shutdown_gateway(&host, port).await {
@@ -1104,7 +1104,7 @@ async fn main() -> Result<()> {
                                 );
                                 println!("   Restart the gateway to generate a new pairing code.");
                             } else {
-                                println!("⚠️  Gateway pairing is disabled in config.");
+                                println!("△ Warning: Gateway pairing is disabled in config.");
                                 println!(
                                     "   All requests will be accepted without authentication."
                                 );
@@ -1115,7 +1115,7 @@ async fn main() -> Result<()> {
                         }
                         Err(e) => {
                             println!(
-                                "❌ Failed to fetch pairing code from gateway at {host}:{port}"
+                                "✗ Failed to fetch pairing code from gateway at {host}:{port}"
                             );
                             println!("   Error: {e}");
                             println!();
@@ -1174,7 +1174,7 @@ async fn main() -> Result<()> {
                     }
                 }
             }
-            println!("🦀 ZeroClaw Status");
+            println!("◈ Agent Status");
             println!();
             println!("Version:     {}", env!("CARGO_PKG_VERSION"));
             println!("Workspace:   {}", config.workspace_dir.display());
@@ -1240,15 +1240,15 @@ async fn main() -> Result<()> {
             println!("  E-stop enabled:    {}", config.security.estop.enabled);
             println!();
             println!("Channels:");
-            println!("  CLI:      ✅ always");
+            println!("  CLI:      ✓ always");
             for (channel, configured) in config.channels_config.channels() {
                 println!(
                     "  {:9} {}",
                     channel.name(),
                     if configured {
-                        "✅ configured"
+                        "✓ configured"
                     } else {
-                        "❌ not configured"
+                        "✗ not configured"
                     }
                 );
             }

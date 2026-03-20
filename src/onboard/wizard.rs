@@ -207,7 +207,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         }
     }
 
-    prompts::outro("🎉 Dx setup complete!")?;
+    prompts::outro("✦ DX-Agent setup complete!")?;
 
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
@@ -268,7 +268,7 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
         }
     }
 
-    prompts::outro("🎉 Channel repair complete!")?;
+    prompts::outro("✦ Channel repair complete!")?;
 
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
@@ -334,7 +334,7 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
         }
     }
 
-    prompts::outro("🎉 Provider update complete!")?;
+    prompts::outro("✦ Provider update complete!")?;
 
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();
@@ -2258,7 +2258,7 @@ async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Resul
 fn print_summary(config: &Config) -> Result<()> {
     let has_channels = has_launchable_channels(&config.channels_config);
 
-    prompts::outro("⚡ ZeroClaw is ready!")?;
+    prompts::outro("⇒ Agent is ready!")?;
 
     prompts::log::info(format!(
         "Configuration saved to: {}",
@@ -2399,7 +2399,7 @@ fn print_summary(config: &Config) -> Result<()> {
     prompts::log::info(format!("{}. Check full status:", step))?;
     prompts::log::info("   zeroclaw status")?;
 
-    prompts::log::success("⚡ Happy hacking! 🦀")?;
+    prompts::log::success("⇒ Happy hacking!")?;
 
     // Show train animation (copied from onboard/src/main.rs)
     let rainbow = RainbowEffect::new();

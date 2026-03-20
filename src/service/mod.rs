@@ -192,7 +192,7 @@ fn stop_linux(init_system: InitSystem) -> Result<()> {
         }
         InitSystem::Auto => unreachable!("Auto should be resolved before this point"),
     }
-    println!("✅ Service stopped");
+    println!("✓ Service stopped");
     Ok(())
 }
 
@@ -200,7 +200,7 @@ fn restart(config: &Config, init_system: InitSystem) -> Result<()> {
     if cfg!(target_os = "macos") {
         stop(config, init_system)?;
         start(config, init_system)?;
-        println!("✅ Service restarted");
+        println!("✓ Service restarted");
         return Ok(());
     }
 
@@ -212,7 +212,7 @@ fn restart(config: &Config, init_system: InitSystem) -> Result<()> {
     if cfg!(target_os = "windows") {
         stop(config, init_system)?;
         start(config, init_system)?;
-        println!("✅ Service restarted");
+        println!("✓ Service restarted");
         return Ok(());
     }
 
@@ -230,7 +230,7 @@ fn restart_linux(init_system: InitSystem) -> Result<()> {
         }
         InitSystem::Auto => unreachable!("Auto should be resolved before this point"),
     }
-    println!("✅ Service restarted");
+    println!("✓ Service restarted");
     Ok(())
 }
 
@@ -241,9 +241,9 @@ fn status(config: &Config, init_system: InitSystem) -> Result<()> {
         println!(
             "Service: {}",
             if running {
-                "✅ running/loaded"
+                "✓ running/loaded"
             } else {
-                "❌ not loaded"
+                "✗ not loaded"
             }
         );
         println!("Unit: {}", macos_service_file()?.display());
@@ -266,15 +266,15 @@ fn status(config: &Config, init_system: InitSystem) -> Result<()> {
                 println!(
                     "Service: {}",
                     if running {
-                        "✅ running"
+                        "✓ running"
                     } else {
-                        "❌ not running"
+                        "✗ not running"
                     }
                 );
                 println!("Task: {}", task_name);
             }
             Err(_) => {
-                println!("Service: ❌ not installed");
+                println!("Service: ✗ not installed");
             }
         }
         return Ok(());
@@ -315,7 +315,7 @@ fn uninstall(config: &Config, init_system: InitSystem) -> Result<()> {
             fs::remove_file(&file)
                 .with_context(|| format!("Failed to remove {}", file.display()))?;
         }
-        println!("✅ Service uninstalled ({})", file.display());
+        println!("✓ Service uninstalled ({})", file.display());
         return Ok(());
     }
 
@@ -337,7 +337,7 @@ fn uninstall(config: &Config, init_system: InitSystem) -> Result<()> {
         if wrapper.exists() {
             fs::remove_file(&wrapper).ok();
         }
-        println!("✅ Service uninstalled");
+        println!("✓ Service uninstalled");
         return Ok(());
     }
 
@@ -353,7 +353,7 @@ fn uninstall_linux(config: &Config, init_system: InitSystem) -> Result<()> {
                     .with_context(|| format!("Failed to remove {}", file.display()))?;
             }
             let _ = run_checked(Command::new("systemctl").args(["--user", "daemon-reload"]));
-            println!("✅ Service uninstalled ({})", file.display());
+            println!("✓ Service uninstalled ({})", file.display());
         }
         InitSystem::Openrc => {
             let init_script = Path::new("/etc/init.d/zeroclaw");
@@ -362,13 +362,13 @@ fn uninstall_linux(config: &Config, init_system: InitSystem) -> Result<()> {
                     run_checked(Command::new("rc-update").args(["del", "zeroclaw", "default"]))
                 {
                     eprintln!(
-                        "⚠️  Warning: Could not remove zeroclaw from OpenRC default runlevel: {err}"
+                        "△ Warning: Could not remove zeroclaw from OpenRC default runlevel: {err}"
                     );
                 }
                 fs::remove_file(init_script)
                     .with_context(|| format!("Failed to remove {}", init_script.display()))?;
             }
-            println!("✅ Service uninstalled (/etc/init.d/zeroclaw)");
+            println!("✓ Service uninstalled (/etc/init.d/zeroclaw)");
         }
         InitSystem::Auto => unreachable!("Auto should be resolved before this point"),
     }
@@ -422,7 +422,7 @@ fn install_macos(config: &Config) -> Result<()> {
     );
 
     fs::write(&file, plist)?;
-    println!("✅ Installed launchd service: {}", file.display());
+    println!("✓ Installed launchd service: {}", file.display());
     println!("   Start with: zeroclaw service start");
     Ok(())
 }
@@ -466,7 +466,7 @@ fn install_linux_systemd(config: &Config) -> Result<()> {
     fs::write(&file, unit)?;
     let _ = run_checked(Command::new("systemctl").args(["--user", "daemon-reload"]));
     let _ = run_checked(Command::new("systemctl").args(["--user", "enable", "zeroclaw.service"]));
-    println!("✅ Installed systemd user service: {}", file.display());
+    println!("✓ Installed systemd user service: {}", file.display());
     println!("   Start with: zeroclaw service start");
     Ok(())
 }
@@ -530,7 +530,7 @@ fn check_zeroclaw_user() -> Result<()> {
 
                 if home != "/var/lib/zeroclaw" && home != "/nonexistent" {
                     eprintln!(
-                        "⚠️  Warning: zeroclaw user has home directory '{}' (expected /var/lib/zeroclaw or /nonexistent)",
+                        "△ Warning: zeroclaw user has home directory '{}' (expected /var/lib/zeroclaw or /nonexistent)",
                         home
                     );
                 }
@@ -566,7 +566,7 @@ fn ensure_zeroclaw_user() -> Result<()> {
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 bail!("Failed to create zeroclaw group: {}", stderr.trim());
             }
-            println!("✅ Created system group: zeroclaw");
+            println!("✓ Created system group: zeroclaw");
         }
 
         let output = Command::new("adduser")
@@ -599,7 +599,7 @@ fn ensure_zeroclaw_user() -> Result<()> {
         }
     }
 
-    println!("✅ Created system user: zeroclaw");
+    println!("✓ Created system user: zeroclaw");
     Ok(())
 }
 
@@ -710,7 +710,7 @@ fn migrate_openrc_runtime_state_if_needed(config_dir: &Path) -> Result<()> {
     let target_config = config_dir.join("config.toml");
     if target_config.exists() {
         println!(
-            "✅ Reusing existing OpenRC config at {}",
+            "✓ Reusing existing OpenRC config at {}",
             target_config.display()
         );
         return Ok(());
@@ -727,7 +727,7 @@ fn migrate_openrc_runtime_state_if_needed(config_dir: &Path) -> Result<()> {
 
     copy_dir_recursive(&source_dir, config_dir)?;
     println!(
-        "✅ Migrated runtime state from {} to {}",
+        "✓ Migrated runtime state from {} to {}",
         source_dir.display(),
         config_dir.display()
     );
@@ -825,7 +825,7 @@ fn warn_if_binary_in_home(exe_path: &Path) {
     let path_str = exe_path.to_string_lossy();
     if path_str.contains("/home/") || path_str.contains(".cargo/bin") {
         eprintln!(
-            "⚠️  Warning: Binary path '{}' appears to be in a user home directory.\n\
+            "△ Warning: Binary path '{}' appears to be in a user home directory.\n\
              For system-wide OpenRC service, consider installing to /usr/local/bin:\n\
              sudo cp '{}' /usr/local/bin/zeroclaw",
             exe_path.display(),
@@ -906,7 +906,7 @@ fn install_linux_openrc(config: &Config) -> Result<()> {
                 || format!("Failed to set permissions on {}", config_dir.display()),
             )?;
         }
-        println!("✅ Created directory: {}", config_dir.display());
+        println!("✓ Created directory: {}", config_dir.display());
     }
 
     migrate_openrc_runtime_state_if_needed(config_dir)?;
@@ -923,7 +923,7 @@ fn install_linux_openrc(config: &Config) -> Result<()> {
         }
         chown_to_zeroclaw(&workspace_dir)?;
         println!(
-            "✅ Created directory: {} (owned by zeroclaw:zeroclaw)",
+            "✓ Created directory: {} (owned by zeroclaw:zeroclaw)",
             workspace_dir.display()
         );
     }
@@ -974,7 +974,7 @@ fn install_linux_openrc(config: &Config) -> Result<()> {
 
     if created_log_dir {
         println!(
-            "✅ Created directory: {} (owned by zeroclaw:zeroclaw)",
+            "✓ Created directory: {} (owned by zeroclaw:zeroclaw)",
             log_dir.display()
         );
     }
@@ -992,7 +992,7 @@ fn install_linux_openrc(config: &Config) -> Result<()> {
     }
 
     run_checked(Command::new("rc-update").args(["add", "zeroclaw", "default"]))?;
-    println!("✅ Installed OpenRC service: /etc/init.d/zeroclaw");
+    println!("✓ Installed OpenRC service: /etc/init.d/zeroclaw");
     println!("   Config path: /etc/zeroclaw/config.toml");
     println!("   Start with: sudo zeroclaw service start");
     let _ = config;
@@ -1041,7 +1041,7 @@ fn install_windows(config: &Config) -> Result<()> {
         "/F",
     ]))?;
 
-    println!("✅ Installed Windows scheduled task: {}", task_name);
+    println!("✓ Installed Windows scheduled task: {}", task_name);
     println!("   Wrapper: {}", wrapper.display());
     println!("   Logs: {}", logs_dir.display());
     println!("   Start with: zeroclaw service start");

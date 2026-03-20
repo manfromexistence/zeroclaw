@@ -6918,7 +6918,7 @@ impl Config {
 
             config.apply_env_overrides();
             config.validate()?;
-            tracing::info!(
+            tracing::debug!(
                 path = %config.config_path.display(),
                 workspace = %config.workspace_dir.display(),
                 source = resolution_source.as_str(),
@@ -6941,7 +6941,7 @@ impl Config {
 
             config.apply_env_overrides();
             config.validate()?;
-            tracing::info!(
+            tracing::debug!(
                 path = %config.config_path.display(),
                 workspace = %config.workspace_dir.display(),
                 source = resolution_source.as_str(),

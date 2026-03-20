@@ -8,13 +8,16 @@ Serializer, Local Model -> Speed
 
 Any Software - Any
 
-Make the main ZeroClaw Labs to be DX-Agent, and ZeroClaw to just Agent. 
-
 Now please look at the root onboard folder's local model running functionality and copy that functionality on our zeroclaw main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project. 
 
 Please look at the root serializer create and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens.
 
 -------------------------------------------------------------------------------------------------------------------------
+
+For the replacement of the crab the previous zeroclow logo symbols please use "◈" and instead of those emojis -use these:
+✓ Build passed ✗ 3 tests failed △ Deprecated API usage ⚙ Compiled with Rust ⇒ Pipeline complete ✦ v2.0 released! ↯ 3ms response time
+
+Make the main ZeroClaw Labs to be DX-Agent, and ZeroClaw to just Agent. 
 
 Now as you merge the metasearch root folder or main crate to our src folder directly, please do that for the token folder to move every code from the root token so that between the ai having the response it have special types of token saving tools to save tokens and connect them to our main src folder correctly and mainly the token/crates/rlm as its has the most token savings
 

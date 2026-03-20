@@ -3,8 +3,8 @@
 //! Tests the integrated metasearch functionality with 215+ search engines.
 
 use serde_json::json;
-use zeroclawlabs::tools::web_search_tool::WebSearchTool;
-use zeroclawlabs::tools::traits::Tool;
+use dx_agent::tools::web_search_tool::WebSearchTool;
+use dx_agent::tools::traits::Tool;
 
 #[tokio::test]
 async fn test_metasearch_basic_query() {
@@ -41,7 +41,7 @@ async fn test_metasearch_basic_query() {
 
 #[tokio::test]
 async fn test_metasearch_engine_registry() {
-    use zeroclawlabs::metasearch::engines::EngineRegistry;
+    use dx_agent::metasearch::engines::EngineRegistry;
     use reqwest::Client;
 
     // Create registry with all 215+ engines
@@ -65,8 +65,8 @@ async fn test_metasearch_engine_registry() {
 
 #[tokio::test]
 async fn test_metasearch_categories() {
-    use zeroclawlabs::metasearch::engines::EngineRegistry;
-    use zeroclawlabs::metasearch::category::SearchCategory;
+    use dx_agent::metasearch::engines::EngineRegistry;
+    use dx_agent::metasearch::category::SearchCategory;
     use reqwest::Client;
 
     let client = Client::new();
@@ -92,9 +92,9 @@ async fn test_metasearch_categories() {
 
 #[tokio::test]
 async fn test_metasearch_parallel_search() {
-    use zeroclawlabs::metasearch::engines::EngineRegistry;
-    use zeroclawlabs::metasearch::query::SearchQuery;
-    use zeroclawlabs::metasearch::category::SearchCategory;
+    use dx_agent::metasearch::engines::EngineRegistry;
+    use dx_agent::metasearch::query::SearchQuery;
+    use dx_agent::metasearch::category::SearchCategory;
     use reqwest::Client;
     use std::sync::Arc;
 
@@ -138,8 +138,8 @@ async fn test_metasearch_parallel_search() {
 
 #[tokio::test]
 async fn test_metasearch_result_aggregation() {
-    use zeroclawlabs::metasearch::ranking::ResultAggregator;
-    use zeroclawlabs::metasearch::result::SearchResult;
+    use dx_agent::metasearch::ranking::ResultAggregator;
+    use dx_agent::metasearch::result::SearchResult;
     use dashmap::DashMap;
 
     // Create some test results
