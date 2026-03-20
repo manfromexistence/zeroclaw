@@ -5,7 +5,7 @@ Now about our root src folder, big project, please look for all of the places th
 
 Now here's the thing: as you can see our one go to root folder UI framework is quiet professional, production-ready code so you don't have to recreate it on our main project. You just have to copy them and reconfigure them to be used on our main project. Please start working on it and ask me a clarification question about where to work first!!!
 
-So I just forked the ZEROCLAW project. What AI slot is this project? It is like 7,000 plus lines of code in one file; that is the real AI slot.
+So I just forked the AGENT project. What AI slot is this project? It is like 7,000 plus lines of code in one file; that is the real AI slot.
 
 As you can see the wizard file is used and yet it is so bad UI plus bad coding practice all over the place. Learn from our root on boot productionary professional UI framework and there you can find a DX logo with a train animation, right? Use that and try to create the wizard fully with a backup so that it gets split into smaller files instead of all the things being in one file and making more than 7,000 lines of code. You understand? If not then ask me a clarification question.
 
@@ -17,10 +17,10 @@ Now look for our main SRC folder and check for any other places that we are usin
 
 Now in the root there is the providers.md file and there I have created a markdown plan about adding more relation providers into our product. Now tell me, by searching the whole codebase, is it possible to do this and is it easy to do this? Give me full details.
 
-Now zeroclaw has maybe WhatsApp but by default it may not use it so please search this codebase and tell me if we use that WhatsApp by default what will happen and how is it an easy or hard job
+Now agent has maybe WhatsApp but by default it may not use it so please search this codebase and tell me if we use that WhatsApp by default what will happen and how is it an easy or hard job
 I wanna put a way so that we can send the data to not only Chat messaging but also to different operating systems and show a QR code so that different operating systems have pairing with each other. Like, use REST terminal trait and show that QR code so that we can scan it and then we can connect to the waste directly instead of using any third-party messaging app. The messaging app still be there, just we will add QR code scanner so that we have a good ecosystem. I will convert this to DX, which will have native apps for all possible operating systems. There we will need QR code pairing so that every user device can be synced with each other, much like Apple's ecosystem, so that it will all create a nice ecosystem of DX products. 
 
-Now please rename zeroclawlabs to dx-agent and zeroclaw to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.
+Now please rename agentlabs to dx-agent and agent to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -36,16 +36,16 @@ Train animation on exit from the whole project and from all places!!! So make su
 For the replacement of the crab the previous zeroclow logo symbols please use "◈" and instead of those emojis -use these:
 ✓ Build passed ✗ 3 tests failed △ Deprecated API usage ⚙ Compiled with Rust ⇒ Pipeline complete ✦ v2.0 released! ↯ 3ms response time
 
-Make the main ZeroClaw Labs to be DX-Agent, and ZeroClaw to just Agent. 
+Make the main Agent Labs to be DX-Agent, and Agent to just Agent. 
 
 Now as you merge the metasearch root folder or main crate to our src folder directly, please do that for the token folder to move every code from the root token so that between the ai having the response it have special types of token saving tools to save tokens and connect them to our main src folder correctly and mainly the token/crates/rlm as its has the most token savings
 
-Now in all of our tui instead of the crag and zeroclaw pleas show the "Dx - Enhanced Developmemnt Experince"
+Now in all of our tui instead of the crag and agent pleas show the "Dx - Enhanced Developmemnt Experince"
 in the tiltlt and whenever anything ends the program in any way they should the train animation like the animation in the onboard ui!!!
 
 Now as you can see from the current cli as its very bad so please just make it a little better don't overengineer it - just use vercel design system and shadcnui like design system by doing web search and make it beautiful while doing as less as possible
 
 So, I have fixed the problem now here is a new task!
-Now Zeroclaw has an agent command right? So please make the agent command Comment it out or just be there but don't show it in the main help command and make that functionality on the no hell in the Zeroclaw. So when we just run the Zeroclaw the current agent will run. The current agent command functionality will run. And in our agent command, currently just the 0 clock command. Please use good UI using Rata UI, like the creative box in the input box, using Data UI box. Generally, make the agent command input-output more better.
+Now Agent has an agent command right? So please make the agent command Comment it out or just be there but don't show it in the main help command and make that functionality on the no hell in the Agent. So when we just run the Agent the current agent will run. The current agent command functionality will run. And in our agent command, currently just the 0 clock command. Please use good UI using Rata UI, like the creative box in the input box, using Data UI box. Generally, make the agent command input-output more better.
 
 git clone https://github.com/HKUDS/CLI-Anything any

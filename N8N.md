@@ -1,15 +1,15 @@
-So, I am forking zeroclaw and wanna use connect support for 1000+ app n8n now please give plan to integrate the n8n nodes natively the fastest possible with maintaining the size and speed of zeroclaw correctly!!!
+So, I am forking agent and wanna use connect support for 1000+ app n8n now please give plan to integrate the n8n nodes natively the fastest possible with maintaining the size and speed of agent correctly!!!
 
 ```markdown
-Let me research the exact internal structures of both projects to give you a production-grade implementation.Now I have a comprehensive understanding of both architectures. Here's the full deep-dive on **Strategy 3: Compile n8n Nodes as Native ZeroClaw Tools**.
+Let me research the exact internal structures of both projects to give you a production-grade implementation.Now I have a comprehensive understanding of both architectures. Here's the full deep-dive on **Strategy 3: Compile n8n Nodes as Native Agent Tools**.
 
 ---
 
-# 🔥 Strategy 3: Compile n8n Nodes → ZeroClaw Tools (Full Production Blueprint)
+# 🔥 Strategy 3: Compile n8n Nodes → Agent Tools (Full Production Blueprint)
 
 ## The Core Idea
 
-Instead of calling n8n at runtime (which adds HTTP latency), you **parse n8n's TypeScript node descriptors at build time** and **generate native Rust `Tool` trait implementations** that call the target APIs directly. This eliminates n8n as a runtime dependency entirely — your ZeroClaw fork ships with 400+ native Rust tools baked into the binary.
+Instead of calling n8n at runtime (which adds HTTP latency), you **parse n8n's TypeScript node descriptors at build time** and **generate native Rust `Tool` trait implementations** that call the target APIs directly. This eliminates n8n as a runtime dependency entirely — your Agent fork ships with 400+ native Rust tools baked into the binary.
 
 ---
 
@@ -57,12 +57,12 @@ The modular n8n node structure uses: actions — a directory containing sub-dire
 
 Auth types include: API Key/Token (e.g., SlackApi, GithubApi), OAuth2 (e.g., SlackOAuth2Api, GoogleOAuth2Api), Basic Auth (e.g., HttpBasicAuth), and Custom Auth (e.g., JwtAuth, HttpHeaderAuth).
 
-### ZeroClaw Tool Trait (Target — What You're Generating)
+### Agent Tool Trait (Target — What You're Generating)
 
 Tools implement a `Tool` trait that requires declaring permissions upfront. Every tool declares what it needs — file access, network access, specific paths — before it runs. The runtime enforces allowlists based on those declarations. A tool that claims it needs read access to `~/documents` can't silently access `~/.ssh`.
 
 ```rust
-// ZeroClaw's Tool trait (from the official blog)
+// Agent's Tool trait (from the official blog)
 pub trait Tool: Send + Sync {
     fn name(&self) -> &str;
     fn description(&self) -> &str;
@@ -71,14 +71,14 @@ pub trait Tool: Send + Sync {
 }
 ```
 
-ZeroClaw enables compile-time polymorphism via `Box<dyn Trait>` and runtime selection via configuration.
+Agent enables compile-time polymorphism via `Box<dyn Trait>` and runtime selection via configuration.
 
 ---
 
 ## 📁 Step 1: Project Directory Structure
 
 ```
-zeroclaw-n8n/                         # Your fork root
+agent-n8n/                         # Your fork root
 ├── Cargo.toml
 ├── build.rs                          # 🔑 THE CODEGEN ENGINE
 ├── vendor/
@@ -129,7 +129,7 @@ zeroclaw-n8n/                         # Your fork root
 │       │   ├── rate_limiter.rs       # Per-service rate limiting
 │       │   └── error.rs             # Unified error types
 │       └── registry.rs              # Tool discovery & registration
-├── src/                              # Your ZeroClaw fork source
+├── src/                              # Your Agent fork source
 │   ├── main.rs
 │   ├── tools/
 │   │   ├── mod.rs
@@ -630,7 +630,7 @@ impl From<walkdir::Error> for ParseError {
 
 ## ⚡ Step 4: The Rust Code Emitter
 
-This transforms the IR into actual Rust code implementing ZeroClaw's `Tool` trait:
+This transforms the IR into actual Rust code implementing Agent's `Tool` trait:
 
 ```rust
 // codegen/src/rust_emitter.rs — Generate Rust Tool implementations from IR
@@ -646,7 +646,7 @@ impl RustEmitter {
         let mut out = String::with_capacity(8192);
 
         // File header
-        writeln!(out, "//! Auto-generated ZeroClaw tool for: {}", node.display_name).unwrap();
+        writeln!(out, "//! Auto-generated Agent tool for: {}", node.display_name).unwrap();
         writeln!(out, "//! Source: n8n node '{}' v{}", node.internal_name, node.version).unwrap();
         writeln!(out, "//! DO NOT EDIT — regenerate with `cargo build`").unwrap();
         writeln!(out).unwrap();
@@ -1219,7 +1219,7 @@ fn extract_domain(url: &str) -> String {
 ```
 
 ```rust
-// n8n-tools/src/runtime/auth.rs — Credential resolution from ZeroClaw config
+// n8n-tools/src/runtime/auth.rs — Credential resolution from Agent config
 
 use crate::runtime::http_executor::AuthHeader;
 use serde::Deserialize;
@@ -1257,7 +1257,7 @@ pub enum Credential {
 }
 
 impl AuthProvider {
-    /// Load from ~/.zeroclaw/n8n_credentials.toml
+    /// Load from ~/.agent/n8n_credentials.toml
     pub async fn from_config(config_path: &PathBuf) -> Result<Self, AuthError> {
         let content = tokio::fs::read_to_string(config_path).await?;
         let creds: HashMap<String, Credential> = toml::from_str(&content)?;
@@ -1448,7 +1448,7 @@ pub fn build_registry() -> HashMap<&'static str, ToolConstructor> {
     ).unwrap();
 
     println!(
-        "cargo:warning=✅ Generated {} ZeroClaw tools from n8n nodes",
+        "cargo:warning=✅ Generated {} Agent tools from n8n nodes",
         nodes.len()
     );
 }
@@ -1456,10 +1456,10 @@ pub fn build_registry() -> HashMap<&'static str, ToolConstructor> {
 
 ---
 
-## 🔌 Step 7: Integration into ZeroClaw's Core
+## 🔌 Step 7: Integration into Agent's Core
 
 ```rust
-// src/tools/n8n_tools.rs — Register generated tools into ZeroClaw runtime
+// src/tools/n8n_tools.rs — Register generated tools into Agent runtime
 
 use n8n_tools::generated::registry::build_registry;
 use n8n_tools::runtime::{HttpExecutor, AuthProvider};
@@ -1479,7 +1479,7 @@ pub async fn register_n8n_tools(
     let n8n_registry = build_registry();
 
     println!(
-        "Registering {} n8n tools into ZeroClaw...",
+        "Registering {} n8n tools into Agent...",
         n8n_registry.len()
     );
 
@@ -1494,7 +1494,7 @@ pub async fn register_n8n_tools(
 ```
 
 ```toml
-# ~/.zeroclaw/n8n_credentials.toml — User configures their API keys here
+# ~/.agent/n8n_credentials.toml — User configures their API keys here
 
 [slackApi]
 type = "bearer"
@@ -1539,14 +1539,14 @@ This is what makes your project **go viral** — developer experience:
 // src/cli/n8n_commands.rs
 
 /// List all available n8n integrations
-/// `zeroclaw n8n list`
+/// `agent n8n list`
 pub fn cmd_n8n_list(filter: Option<&str>) {
     let manifest: Vec<Value> = serde_json::from_str(
         include_str!(concat!(env!("OUT_DIR"), "/n8n-tools/src/generated/manifest.json"))
     ).unwrap();
 
     println!("╔══════════════════════════════════════════════╗");
-    println!("║  🔌 ZeroClaw × n8n: {} Native Integrations  ║", manifest.len());
+    println!("║  🔌 Agent × n8n: {} Native Integrations  ║", manifest.len());
     println!("╚══════════════════════════════════════════════╝\n");
 
     for node in &manifest {
@@ -1568,7 +1568,7 @@ pub fn cmd_n8n_list(filter: Option<&str>) {
 }
 
 /// Setup credentials for an n8n service
-/// `zeroclaw n8n auth slack`
+/// `agent n8n auth slack`
 pub async fn cmd_n8n_auth(service: &str) {
     println!("🔐 Setting up {} credentials...\n", service);
     // Interactive wizard that writes to n8n_credentials.toml
@@ -1576,14 +1576,14 @@ pub async fn cmd_n8n_auth(service: &str) {
 }
 
 /// Test a specific n8n integration
-/// `zeroclaw n8n test slack message send --channel general --text "Hello from ZeroClaw!"`
+/// `agent n8n test slack message send --channel general --text "Hello from Agent!"`
 pub async fn cmd_n8n_test(service: &str, resource: &str, operation: &str, params: Value) {
     // Executes the tool and shows the result
     // ...
 }
 
 /// Show what code was generated for a specific node
-/// `zeroclaw n8n inspect slack`
+/// `agent n8n inspect slack`
 pub fn cmd_n8n_inspect(service: &str) {
     // Prints the generated Rust source for debugging
     // ...
@@ -1594,9 +1594,9 @@ pub fn cmd_n8n_inspect(service: &str) {
 
 ```bash
 # Discover what's available
-$ zeroclaw n8n list
+$ agent n8n list
 ╔══════════════════════════════════════════════╗
-║  🔌 ZeroClaw × n8n: 412 Native Integrations ║
+║  🔌 Agent × n8n: 412 Native Integrations ║
 ╚══════════════════════════════════════════════╝
 
   ● Slack
@@ -1612,19 +1612,19 @@ $ zeroclaw n8n list
     Operations: append, clear, create, delete, read, update, ...
 
 # Search for specific tools
-$ zeroclaw n8n list --filter crm
+$ agent n8n list --filter crm
   ● HubSpot
   ● Salesforce
   ● Pipedrive
   ● Zoho CRM
 
 # Setup auth
-$ zeroclaw n8n auth slack
+$ agent n8n auth slack
 🔐 Setting up Slack credentials...
   Enter your Slack Bot Token (xoxb-...): ▊
 
 # Use directly with the agent
-$ zeroclaw agent -m "Post 'Deploy v2.3 complete ✅' to #engineering on Slack"
+$ agent agent -m "Post 'Deploy v2.3 complete ✅' to #engineering on Slack"
   → [n8n:slack] message.send → #engineering → 200 OK (43ms)
   ✓ Message posted successfully
 ```
@@ -1640,7 +1640,7 @@ $ zeroclaw agent -m "Post 'Deploy v2.3 complete ✅' to #engineering on Slack"
 | **Binary size impact** | +0MB | +0MB | +2-4MB (more code in binary) |
 | **Dependency** | n8n running | n8n + Docker | **None** (fully standalone) |
 | **Offline capable** | ❌ | ❌ | **✅** (binary has all tool code) |
-| **Cold start** | +5-10s (n8n boot) | +5-10s (container) | **<10ms** (same as ZeroClaw) |
+| **Cold start** | +5-10s (n8n boot) | +5-10s (container) | **<10ms** (same as Agent) |
 | **Auth management** | In n8n | In n8n | **Native TOML** (encrypted) |
 
 ---
@@ -1649,18 +1649,18 @@ $ zeroclaw agent -m "Post 'Deploy v2.3 complete ✅' to #engineering on Slack"
 
 | Feature | What It Does | Why Devs Love It |
 |---------|-------------|------------------|
-| `zeroclaw n8n list` | Browse all 400+ integrations | Instant discoverability |
-| `zeroclaw n8n auth <service>` | Interactive credential wizard | No config file editing |
-| `zeroclaw n8n test <service> <op>` | Test any operation from CLI | Debug without writing code |
-| `zeroclaw n8n inspect <service>` | Show generated Rust source | Full transparency |
+| `agent n8n list` | Browse all 400+ integrations | Instant discoverability |
+| `agent n8n auth <service>` | Interactive credential wizard | No config file editing |
+| `agent n8n test <service> <op>` | Test any operation from CLI | Debug without writing code |
+| `agent n8n inspect <service>` | Show generated Rust source | Full transparency |
 | `cargo build` auto-regenerates | New n8n version → new tools | Always up-to-date |
 | **Zero runtime dependencies** | No n8n, Node.js, or Docker | Ship ONE binary |
 | **AI Agent auto-routing** | Agent knows all 400+ operations | "Send a Slack message" just works |
 | Feature flags per node | `--features=slack,github,notion` | Ship only what you need |
 
-This approach is fundamentally different from OpenClaw's model — where OpenClaw's plugin system led to supply chain attacks, ZeroClaw uses Rust traits instead — compile-time safe, zero runtime injection, and extensible by design.
+This approach is fundamentally different from OpenClaw's model — where OpenClaw's plugin system led to supply chain attacks, Agent uses Rust traits instead — compile-time safe, zero runtime injection, and extensible by design.
 
-Combined with ZeroClaw's native performance profile — 400x faster startup, 99% lower memory footprint, running on $10 hardware — this gives you a binary that ships with 400+ integrations baked in and starts in under 10ms.
+Combined with Agent's native performance profile — 400x faster startup, 99% lower memory footprint, running on $10 hardware — this gives you a binary that ships with 400+ integrations baked in and starts in under 10ms.
 
 This is the architecture that can actually make your fork go viral — **one binary, 400+ integrations, zero dependencies, native Rust speed**. Ship it. 🔥
 
@@ -1678,11 +1678,11 @@ Here's the full truth — the performance ceiling, the real engineering difficul
 
 ### Why It's the Fastest Possible Architecture
 
-ZeroClaw already has a <10ms cold start and runs within a single 8.8MB binary. Strategy 3 keeps all that intact because there's **zero additional runtime process**. Here's the comparison:
+Agent already has a <10ms cold start and runs within a single 8.8MB binary. Strategy 3 keeps all that intact because there's **zero additional runtime process**. Here's the comparison:
 
 | What Happens Per API Call | Strategy 1 (Webhook) | Strategy 2 (Sidecar) | **Strategy 3 (Compiled)** |
 |---|---|---|---|
-| ZeroClaw processes intent | ✅ ~1ms | ✅ ~1ms | ✅ ~1ms |
+| Agent processes intent | ✅ ~1ms | ✅ ~1ms | ✅ ~1ms |
 | Serialize to HTTP request | ✅ ~1ms | ✅ ~1ms | ✅ ~1ms |
 | Internal routing to n8n | 🐌 ~10-50ms (TCP) | 🐌 ~5-30ms (localhost) | ⚡ **0ms** (compiled in) |
 | n8n parses workflow | 🐌 ~20-100ms (Node.js) | 🐌 ~20-100ms (Node.js) | ⚡ **0ms** (no n8n) |
@@ -1913,13 +1913,13 @@ cargo build --release --features all
 
 ---
 
-### 🟢 HARD PROBLEM 7: ZeroClaw Integration (Difficulty: 3/10)
+### 🟢 HARD PROBLEM 7: Agent Integration (Difficulty: 3/10)
 
-This is actually the **easiest part**. ZeroClaw's Tools implement a `Tool` trait that requires declaring permissions upfront: "pub trait Tool: Send + Sync { fn name(&self) -> &str; fn description(&self) -> &str; async fn execute(&self, args: Value) -> Result..."
+This is actually the **easiest part**. Agent's Tools implement a `Tool` trait that requires declaring permissions upfront: "pub trait Tool: Send + Sync { fn name(&self) -> &str; fn description(&self) -> &str; async fn execute(&self, args: Value) -> Result..."
 
-ZeroClaw adopts a modular, trait-based architecture. This means every subsystem—including the memory provider, the communication channel, or the tool execution environment—is defined by a simple interface (trait).
+Agent adopts a modular, trait-based architecture. This means every subsystem—including the memory provider, the communication channel, or the tool execution environment—is defined by a simple interface (trait).
 
-Instead of hardcoding functionality, ZeroClaw exposes its entire extension surface via Rust traits.
+Instead of hardcoding functionality, Agent exposes its entire extension surface via Rust traits.
 
 So once you generate the code, plugging it in is straightforward — implement the `Tool` trait, register it, done.
 
@@ -1935,7 +1935,7 @@ So once you generate the code, plugging it in is straightforward — implement t
 | Auth system (OAuth2, API key, Basic) | 🟡 6/10 | 3-4 weeks | 1-2 weeks |
 | Build time optimization | 🟡 6/10 | 1-2 weeks | 1 week |
 | Shared HTTP runtime (pooling, retry, cache) | 🟡 5/10 | 2-3 weeks | 1 week |
-| ZeroClaw Tool trait integration | 🟢 3/10 | 1 week | 3 days |
+| Agent Tool trait integration | 🟢 3/10 | 1 week | 3 days |
 | CLI DX commands | 🟢 3/10 | 1-2 weeks | 1 week |
 | Testing 400+ nodes work | 🟡 7/10 | 4-6 weeks | 2-3 weeks |
 | **TOTAL** | **🔴 7.5/10** | **~26-38 weeks** | **~13-19 weeks** |
@@ -2020,7 +2020,7 @@ Tackle programmatic nodes with a more sophisticated AST analyzer, or contribute 
 
 ## 🔑 What Makes This Go Viral
 
-OpenClaw's plugin system led to supply chain attacks. ZeroClaw uses Rust traits instead — compile-time safe, zero runtime injection, and extensible by design.
+OpenClaw's plugin system led to supply chain attacks. Agent uses Rust traits instead — compile-time safe, zero runtime injection, and extensible by design.
 
 Your DX advantage comes from the **security story**:
 
@@ -2031,7 +2031,7 @@ Security researchers found that 41.7% of published ClawHub skills contained vuln
 **Your viral pitch is**: "400+ integrations. One binary. Zero supply chain risk. No Node.js. No Docker. Runs on a Raspberry Pi."
 
 The phased approach lets you market this from Day 1:
-- **Week 3**: "ZeroClaw + n8n: 400+ integrations with native fallback"
+- **Week 3**: "Agent + n8n: 400+ integrations with native fallback"
 - **Week 8**: "Top 20 integrations now compiled to native Rust — 50x faster than webhook mode"
 - **Week 16**: "200+ nodes fully compiled — no n8n required"
 - **Week 24**: "Full 400+ native nodes — the world's fastest integration runtime"
@@ -2064,11 +2064,11 @@ Okay, I've now researched both projects thoroughly. Let me give you a **research
 
 Your blueprint correctly identifies the core architectures on both sides:
 
-ZeroClaw is a lightweight, security-first autonomous AI agent framework built in Rust, designed for fast startup, low memory usage, and production-grade extensibility. It uses <5MB RAM, <10ms cold start, and ships as an 8.8MB single binary.
+Agent is a lightweight, security-first autonomous AI agent framework built in Rust, designed for fast startup, low memory usage, and production-grade extensibility. It uses <5MB RAM, <10ms cold start, and ships as an 8.8MB single binary.
 
 On the n8n side, the n8n-nodes-base package is a monorepo workspace package that contains the complete catalog of standard n8n integrations, following a conventional structure where nodes and credentials are TypeScript classes compiled to JavaScript with accompanying metadata. It contains "credentials: Paths to ~400 credential definition files" and "nodes: Paths to ~400 node implementation files."
 
-Your understanding of ZeroClaw's trait-driven architecture is also correct: ZeroClaw employs a trait-driven design where every subsystem is swappable. Each component implements a common trait interface, allowing you to mix and match implementations without changing your agent logic.
+Your understanding of Agent's trait-driven architecture is also correct: Agent employs a trait-driven design where every subsystem is swappable. Each component implements a common trait interface, allowing you to mix and match implementations without changing your agent logic.
 
 ---
 
@@ -2160,7 +2160,7 @@ Your blueprint gets several things right that you should keep:
 
 **2. The Auth Provider** — Your credential resolution from TOML is clean. Multiple authentication methods are supported: "API Key/Token: Simple token-based auth, OAuth2: Full OAuth2 flow, Basic Auth: Username/password." Your `AuthProvider` handles all three.
 
-**3. Feature Flags per Node** — Critical for binary size. ZeroClaw ships as an 8.8MB single binary. Adding 400 nodes without feature flags could triple that. Your `Cargo.toml` feature flag approach is correct:
+**3. Feature Flags per Node** — Critical for binary size. Agent ships as an 8.8MB single binary. Adding 400 nodes without feature flags could triple that. Your `Cargo.toml` feature flag approach is correct:
 
 ```toml
 [features]
@@ -2169,9 +2169,9 @@ popular = ["slack", "github", "notion"]
 all = [...]
 ```
 
-**4. The Registry Pattern** — Your `build_registry()` function that maps `"n8n:slack"` → constructor is the right abstraction for ZeroClaw's trait-based system.
+**4. The Registry Pattern** — Your `build_registry()` function that maps `"n8n:slack"` → constructor is the right abstraction for Agent's trait-based system.
 
-**5. The CLI Commands** — `zeroclaw n8n list`, `zeroclaw n8n auth`, `zeroclaw n8n test` — these are excellent DX touches. ZeroClaw's CLI is opinionated, explicit, and clearly designed for operators. Your n8n commands fit that philosophy.
+**5. The CLI Commands** — `agent n8n list`, `agent n8n auth`, `agent n8n test` — these are excellent DX touches. Agent's CLI is opinionated, explicit, and clearly designed for operators. Your n8n commands fit that philosophy.
 
 ---
 
@@ -2197,7 +2197,7 @@ For Phase 1, **skip non-REST nodes entirely** and let them fall through to the n
 
 ### 4. The Permission Model Needs Real Domain Extraction
 
-Your `permissions()` implementation hardcodes domains. ZeroClaw's security model is strict: Secure by design: pairing, strict sandboxing, explicit allowlists, workspace scoping. ZeroClaw includes authentication pairing, workspace isolation, and explicit tool allowlists.
+Your `permissions()` implementation hardcodes domains. Agent's security model is strict: Secure by design: pairing, strict sandboxing, explicit allowlists, workspace scoping. Agent includes authentication pairing, workspace isolation, and explicit tool allowlists.
 
 Each generated tool's `permissions()` must accurately reflect the real domains it contacts. Parse this from the node's routing configuration, not from a lookup table.
 
@@ -2225,7 +2225,7 @@ Generating 400 Rust files means compile times will explode. Your Cranelift sugge
 
 ## 🎯 Bottom Line
 
-Your architecture is **fundamentally sound** — compile n8n nodes to native Rust tools is the right call for ZeroClaw's performance profile. But your implementation plan has the parser cart before the metadata horse. 
+Your architecture is **fundamentally sound** — compile n8n nodes to native Rust tools is the right call for Agent's performance profile. But your implementation plan has the parser cart before the metadata horse. 
 
 **The fastest path to shipping**: Use n8n's own build output as your source of truth (JSON, not TypeScript), ship the hybrid in 2-3 weeks, hand-write the top 20, THEN build the SWC codegen engine. Everything else in your blueprint — the shared HTTP runtime, auth provider, registry, feature flags, CLI commands — keep it all.
 ```
@@ -2248,7 +2248,7 @@ I've now done the research. Here's the brutally honest competitive landscape **t
 | **n8n (npm packages)** | Nearly 2,000 community nodes published on npm, with over 8 million downloads | Accelerating | Node.js |
 | **APIs.guru** | 4,395 entries in the openapi-directory | Definitions automatically updated from original source, update script runs at least weekly | N/A (specs only) |
 | **API Tracker** | Aggregates 14,000+ APIs, SDKs, API specifications, integrations and DX profiles | Growing | N/A (index only) |
-| **Your ZeroClaw Fork** | **0 (today)** | ∞ potential | **Rust** |
+| **Your Agent Fork** | **0 (today)** | ∞ potential | **Rust** |
 
 ### Zapier's Real Position (The Target to Beat)
 
@@ -2409,7 +2409,7 @@ These 20 serve as proof that native Rust IS faster, and justify the project's ex
 
 ### 📱 Move 5: The "App Store" for Specs — Community Flywheel
 
-Build a public GitHub repo: `zeroclaw-specs/` — the community contributes specs like n8n has community nodes:
+Build a public GitHub repo: `agent-specs/` — the community contributes specs like n8n has community nodes:
 
 Since the first crawl (2025-02-04), the n8n ecosystem has grown by 4,759 nodes — 13.6 per day on average.
 
@@ -2432,22 +2432,22 @@ Your pricing: **Free. Unlimited tasks. Forever.** Self-hosted. One binary.
 The marketing angle for every piece of content:
 
 > "Zapier charges $300+/month for 5,000 tasks across 8,500 apps.
-> ZeroClaw gives you 10,000+ integrations, unlimited tasks, in a 9MB binary. Free."
+> Agent gives you 10,000+ integrations, unlimited tasks, in a 9MB binary. Free."
 
 ### 🌊 Move 7: MCP Server — Ride the AI Agent Wave
 
 Zapier uses its Workflow API and 8,000 integrations to power automation. Zapier handles auth, infrastructure, and support.
 
-Zapier is already positioning as THE MCP provider for AI agents. But MCP is an open protocol. Build your ZeroClaw fork as an MCP server that exposes all 10,000+ integrations to ANY AI agent (Claude Desktop, Cursor, Windsurf, OpenCode, etc.):
+Zapier is already positioning as THE MCP provider for AI agents. But MCP is an open protocol. Build your Agent fork as an MCP server that exposes all 10,000+ integrations to ANY AI agent (Claude Desktop, Cursor, Windsurf, OpenCode, etc.):
 
 ```bash
 # Any AI agent connects via MCP
-$ zeroclaw mcp serve --port 3000
+$ agent mcp serve --port 3000
 🔌 MCP Server running: 10,247 tools available
    Connect from Claude Desktop, Cursor, or any MCP client
 ```
 
-This makes your project useful to people who DON'T even use ZeroClaw directly. Any AI agent in the ecosystem can tap into your integration engine via MCP.
+This makes your project useful to people who DON'T even use Agent directly. Any AI agent in the ecosystem can tap into your integration engine via MCP.
 
 ---
 
@@ -2459,7 +2459,7 @@ This makes your project useful to people who DON'T even use ZeroClaw directly. A
 | **Week 2** | Universal OpenAPI Executor + Auth Engine in Rust | **~5,000** (now executable) | "Every spec is now a working integration" |
 | **Week 3** | AI spec generation pipeline for long-tail APIs | **~8,000** | "8,000 integrations — zero hand-written code" |
 | **Week 4** | Hand-craft top 20 native tools + MCP server | **~8,000** (20 native) | "Slack, GitHub, Stripe — native Rust, 5ms" |
-| **Week 5** | CLI DX, `zeroclaw-specs` community repo, auto-updater | **~9,000** | "Drop a JSON file, get an integration" |
+| **Week 5** | CLI DX, `agent-specs` community repo, auto-updater | **~9,000** | "Drop a JSON file, get an integration" |
 | **Week 6** | Polish, docs, demo video, Product Hunt launch | **~10,000+** | "10,000 integrations. 9MB binary. $0." |
 
 ---
@@ -2471,7 +2471,7 @@ This makes your project useful to people who DON'T even use ZeroClaw directly. A
 
 The comparison chart for your README:
 
-| | **Zapier** | **n8n** | **Your ZeroClaw Fork** |
+| | **Zapier** | **n8n** | **Your Agent Fork** |
 |---|---|---|---|
 | **Integrations** | 8,500+ | 5,834 (with community) | **10,000+** |
 | **Cost** | $103-300+/month | Free (self-hosted) | **Free** |

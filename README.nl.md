@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="zeroclaw.png" alt="ZeroClaw" width="200" />
+  <img src="agent.png" alt="Agent" width="200" />
 </p>
 
-<h1 align="center">ZeroClaw 🦀</h1>
+<h1 align="center">Agent 🦀</h1>
 
 <p align="center">
   <strong>Nul overhead. Nul compromis. 100% Rust. 100% Agnostisch.</strong><br>
@@ -13,15 +13,15 @@
   <a href="LICENSE-APACHE"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache%202.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
   <a href="NOTICE"><img src="https://img.shields.io/badge/contributors-27+-green.svg" alt="Contributors" /></a>
   <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=flat&logo=buy-me-a-coffee" alt="Buy Me a Coffee" /></a>
-  <a href="https://x.com/zeroclawlabs?s=21"><img src="https://img.shields.io/badge/X-%40zeroclawlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @zeroclawlabs" /></a>
-  <a href="https://zeroclawlabs.cn/group.jpg"><img src="https://img.shields.io/badge/WeChat-Group-B7D7A8?logo=wechat&logoColor=white" alt="WeChat Group" /></a>
+  <a href="https://x.com/agentlabs?s=21"><img src="https://img.shields.io/badge/X-%40agentlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @agentlabs" /></a>
+  <a href="https://agentlabs.cn/group.jpg"><img src="https://img.shields.io/badge/WeChat-Group-B7D7A8?logo=wechat&logoColor=white" alt="WeChat Group" /></a>
   <a href="https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search"><img src="https://img.shields.io/badge/Xiaohongshu-Official-FF2442?style=flat" alt="Xiaohongshu: Official" /></a>
-  <a href="https://t.me/zeroclawlabs"><img src="https://img.shields.io/badge/Telegram-%40zeroclawlabs-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram: @zeroclawlabs" /></a>
-  <a href="https://www.facebook.com/groups/zeroclawlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
+  <a href="https://t.me/agentlabs"><img src="https://img.shields.io/badge/Telegram-%40agentlabs-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram: @agentlabs" /></a>
+  <a href="https://www.facebook.com/groups/agentlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
   <a href="https://discord.com/invite/wDshRVqRjx"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord" /></a>
-  <a href="https://www.tiktok.com/@zeroclawlabs"><img src="https://img.shields.io/badge/TikTok-%40zeroclawlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @zeroclawlabs" /></a>
+  <a href="https://www.tiktok.com/@agentlabs"><img src="https://img.shields.io/badge/TikTok-%40agentlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @agentlabs" /></a>
   <a href="https://www.rednote.com/user/profile/69b735e6000000002603927e"><img src="https://img.shields.io/badge/RedNote-Official-FF2442?style=flat" alt="RedNote" /></a>
-  <a href="https://www.reddit.com/r/zeroclawlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fzeroclawlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/zeroclawlabs" /></a>
+  <a href="https://www.reddit.com/r/agentlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fagentlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/agentlabs" /></a>
 </p>
 <p align="center">
 Gebouwd door studenten en leden van de Harvard, MIT en Sundai.Club gemeenschappen.
@@ -84,7 +84,7 @@ Gebouwd door studenten en leden van de Harvard, MIT en Sundai.Club gemeenschappe
 </p>
 
 <p align="center">
-  ZeroClaw is het <strong>runtime besturingssysteem</strong> voor agent workflows — een infrastructuur die modellen, tools, geheugen en uitvoering abstraheert om agenten één keer te bouwen en overal uit te voeren.
+  Agent is het <strong>runtime besturingssysteem</strong> voor agent workflows — een infrastructuur die modellen, tools, geheugen en uitvoering abstraheert om agenten één keer te bouwen en overal uit te voeren.
 </p>
 
 <p align="center"><code>Trait-gedreven architectuur · veilige runtime standaard · verwisselbare provider/kanaal/tool · alles is plugbaar</code></p>
@@ -105,8 +105,8 @@ Gebruik deze tabel voor belangrijke aankondigingen (compatibiliteitswijzigingen,
 
 | Datum (UTC) | Niveau      | Aankondiging                                                                                                                                                                                                                                                                                                                                                                                                              | Actie                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-19 | _Kritiek_  | **We zijn niet gelieerd** met `openagen/zeroclaw` of `zeroclaw.org`. Het domein `zeroclaw.org` wijst momenteel naar de fork `openagen/zeroclaw`, en dit domein/repository imiteert onze officiële website/project.                                                                                                                                                                                 | Vertrouw geen informatie, binaire bestanden, fondsenwerving of aankondigingen van deze bronnen. Gebruik alleen [deze repository](https://github.com/zeroclaw-labs/zeroclaw) en onze geverifieerde sociale media accounts.                                                                                                                                                                                                                                                                                                                                                          |
-| 2026-02-21 | _Belangrijk_ | Onze officiële website is nu online: [zeroclawlabs.ai](https://zeroclawlabs.ai). Bedankt voor je geduld tijdens het wachten. We detecteren nog steeds imitatiepogingen: neem niet deel aan enige investering/fondsenwerving activiteit in naam van ZeroClaw als deze niet via onze officiële kanalen wordt gepubliceerd.                                                                                                                   | Gebruik [deze repository](https://github.com/zeroclaw-labs/zeroclaw) als de enige bron van waarheid. Volg [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Facebook (groep)](https://www.facebook.com/groups/zeroclawlabs), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/), en [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) voor officiële updates. |
+| 2026-02-19 | _Kritiek_  | **We zijn niet gelieerd** met `openagen/agent` of `agent.org`. Het domein `agent.org` wijst momenteel naar de fork `openagen/agent`, en dit domein/repository imiteert onze officiële website/project.                                                                                                                                                                                 | Vertrouw geen informatie, binaire bestanden, fondsenwerving of aankondigingen van deze bronnen. Gebruik alleen [deze repository](https://github.com/agent-labs/agent) en onze geverifieerde sociale media accounts.                                                                                                                                                                                                                                                                                                                                                          |
+| 2026-02-21 | _Belangrijk_ | Onze officiële website is nu online: [agentlabs.ai](https://agentlabs.ai). Bedankt voor je geduld tijdens het wachten. We detecteren nog steeds imitatiepogingen: neem niet deel aan enige investering/fondsenwerving activiteit in naam van Agent als deze niet via onze officiële kanalen wordt gepubliceerd.                                                                                                                   | Gebruik [deze repository](https://github.com/agent-labs/agent) als de enige bron van waarheid. Volg [X (@agentlabs)](https://x.com/agentlabs?s=21), [Telegram (@agentlabs)](https://t.me/agentlabs), [Facebook (groep)](https://www.facebook.com/groups/agentlabs), [Reddit (r/agentlabs)](https://www.reddit.com/r/agentlabs/), en [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) voor officiële updates. |
 | 2026-02-19 | _Belangrijk_ | Anthropic heeft de gebruiksvoorwaarden voor authenticatie en inloggegevens bijgewerkt op 2026-02-19. OAuth authenticatie (Free, Pro, Max) is exclusief voor Claude Code en Claude.ai; het gebruik van Claude Free/Pro/Max OAuth tokens in enig ander product, tool of service (inclusief Agent SDK) is niet toegestaan en kan in strijd zijn met de Consumenten Gebruiksvoorwaarden. | Vermijd tijdelijk Claude Code OAuth integraties om potentiële verliezen te voorkomen. Originele clausule: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).                                                                                                                                                                                                                                                                                                                      |
 
 ### ✨ Functies
@@ -116,18 +116,18 @@ Gebruik deze tabel voor belangrijke aankondigingen (compatibiliteitswijzigingen,
 - ⚡ **Snelle Koude Starts:** De single-binary Rust runtime houdt commando en daemon starts bijna direct voor dagelijkse operaties.
 - 🌍 **Draagbare Architectuur:** Een single-binary workflow op ARM, x86 en RISC-V met verwisselbare provider/kanaal/tool.
 
-### Waarom teams kiezen voor ZeroClaw
+### Waarom teams kiezen voor Agent
 
 - **Lichtgewicht standaard:** kleine Rust binary, snelle start, laag geheugengebruik.
 - **Veilig door design:** pairing, strikte sandboxing, expliciete allowlists, workspace scope.
 - **Volledig verwisselbaar:** kernsystemen zijn traits (providers, kanalen, tools, geheugen, tunnels).
 - **Geen vendor lock-in:** OpenAI-compatibele provider ondersteuning + plugbare custom endpoints.
 
-## Benchmark Snapshot (ZeroClaw vs OpenClaw, Reproduceerbaar)
+## Benchmark Snapshot (Agent vs OpenClaw, Reproduceerbaar)
 
 Snelle benchmark op lokale machine (macOS arm64, feb. 2026) genormaliseerd voor 0.8 GHz edge hardware.
 
-|                              | OpenClaw      | NanoBot        | PicoClaw        | ZeroClaw 🦀           |
+|                              | OpenClaw      | NanoBot        | PicoClaw        | Agent 🦀           |
 | ---------------------------- | ------------- | -------------- | --------------- | --------------------- |
 | **Taal**                  | TypeScript    | Python         | Go              | **Rust**              |
 | **RAM**                      | > 1 GB        | > 100 MB       | < 10 MB         | **< 5 MB**            |
@@ -135,10 +135,10 @@ Snelle benchmark op lokale machine (macOS arm64, feb. 2026) genormaliseerd voor 
 | **Binary Grootte**           | ~28 MB (dist) | N/A (Scripts)  | ~8 MB           | **3.4 MB**            |
 | **Kosten**                     | Mac Mini $599 | Linux SBC ~$50 | Linux board $10 | **Elke hardware $10** |
 
-> Opmerkingen: ZeroClaw resultaten worden gemeten op productie builds met `/usr/bin/time -l`. OpenClaw vereist de Node.js runtime (typisch ~390 MB extra geheugen overhead), terwijl NanoBot de Python runtime vereist. PicoClaw en ZeroClaw zijn statische binaries. De bovenstaande RAM cijfers zijn runtime geheugen; build-time compilatievereisten zijn hoger.
+> Opmerkingen: Agent resultaten worden gemeten op productie builds met `/usr/bin/time -l`. OpenClaw vereist de Node.js runtime (typisch ~390 MB extra geheugen overhead), terwijl NanoBot de Python runtime vereist. PicoClaw en Agent zijn statische binaries. De bovenstaande RAM cijfers zijn runtime geheugen; build-time compilatievereisten zijn hoger.
 
 <p align="center">
-  <img src="zero-claw.jpeg" alt="ZeroClaw vs OpenClaw Vergelijking" width="800" />
+  <img src="zero-claw.jpeg" alt="Agent vs OpenClaw Vergelijking" width="800" />
 </p>
 
 ### Reproduceerbare Lokale Meting
@@ -147,17 +147,17 @@ Benchmark beweringen kunnen afwijken naarmate code en toolchains evolueren, dus 
 
 ```bash
 cargo build --release
-ls -lh target/release/zeroclaw
+ls -lh target/release/agent
 
-/usr/bin/time -l target/release/zeroclaw --help
-/usr/bin/time -l target/release/zeroclaw status
+/usr/bin/time -l target/release/agent --help
+/usr/bin/time -l target/release/agent status
 ```
 
 Voorbeeld monster (macOS arm64, gemeten op 18 februari 2026):
 
 - Release binary grootte: `8.8M`
-- `zeroclaw --help`: werkelijke tijd ongeveer `0.02s`, piek geheugengebruik ~`3.9 MB`
-- `zeroclaw status`: werkelijke tijd ongeveer `0.01s`, piek geheugengebruik ~`4.1 MB`
+- `agent --help`: werkelijke tijd ongeveer `0.02s`, piek geheugengebruik ~`3.9 MB`
+- `agent status`: werkelijke tijd ongeveer `0.01s`, piek geheugengebruik ~`4.1 MB`
 
 ## Vereisten
 
@@ -231,22 +231,22 @@ Voorbeeld monster (macOS arm64, gemeten op 18 februari 2026):
 
 ### Optie 1: Geautomatiseerde setup (aanbevolen)
 
-Het `bootstrap.sh` script installeert Rust, kloont ZeroClaw, compileert het, en stelt je initiële ontwikkelomgeving in:
+Het `bootstrap.sh` script installeert Rust, kloont Agent, compileert het, en stelt je initiële ontwikkelomgeving in:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/agent-labs/agent/master/bootstrap.sh | bash
 ```
 
 Dit zal:
 
 1. Rust installeren (indien afwezig)
-2. De ZeroClaw repository klonen
-3. ZeroClaw compileren in release modus
-4. `zeroclaw` installeren in `~/.cargo/bin/`
-5. De standaard workspace structuur maken in `~/.zeroclaw/workspace/`
-6. Een initiële configuratie `~/.zeroclaw/workspace/config.toml` genereren
+2. De Agent repository klonen
+3. Agent compileren in release modus
+4. `agent` installeren in `~/.cargo/bin/`
+5. De standaard workspace structuur maken in `~/.agent/workspace/`
+6. Een initiële configuratie `~/.agent/workspace/config.toml` genereren
 
-Na de bootstrap, herlaad je shell of voer `source ~/.cargo/env` uit om het `zeroclaw` commando globaal te gebruiken.
+Na de bootstrap, herlaad je shell of voer `source ~/.cargo/env` uit om het `agent` commando globaal te gebruiken.
 
 ### Optie 2: Handmatige installatie
 
@@ -255,8 +255,8 @@ Na de bootstrap, herlaad je shell of voer `source ~/.cargo/env` uit om het `zero
 
 ```bash
 # 1. Kloon de repository
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 
 # 2. Compileer in release
 cargo build --release --locked
@@ -265,11 +265,11 @@ cargo build --release --locked
 cargo install --path . --locked
 
 # 4. Initialiseer de workspace
-zeroclaw init
+agent init
 
 # 5. Verifieer de installatie
-zeroclaw --version
-zeroclaw status
+agent --version
+agent status
 ```
 
 </details>
@@ -279,7 +279,7 @@ zeroclaw status
 Eenmaal geïnstalleerd (via bootstrap of handmatig), zou je moeten zien:
 
 ```
-~/.zeroclaw/workspace/
+~/.agent/workspace/
 ├── config.toml          # Hoofdconfiguratie
 ├── .pairing             # Pairing geheimen (gegenereerd bij eerste lancering)
 ├── logs/                # Daemon/agent logs
@@ -289,14 +289,14 @@ Eenmaal geïnstalleerd (via bootstrap of handmatig), zou je moeten zien:
 
 **Volgende stappen:**
 
-1. Configureer je AI providers in `~/.zeroclaw/workspace/config.toml`
+1. Configureer je AI providers in `~/.agent/workspace/config.toml`
 2. Bekijk de [configuratie referentie](docs/config-reference.md) voor geavanceerde opties
-3. Start de agent: `zeroclaw agent start`
+3. Start de agent: `agent agent start`
 4. Test via je voorkeurskanaal (zie [kanalen referentie](docs/channels-reference.md))
 
 ## Configuratie
 
-Bewerk `~/.zeroclaw/workspace/config.toml` om providers, kanalen en systeemgedrag te configureren.
+Bewerk `~/.agent/workspace/config.toml` om providers, kanalen en systeemgedrag te configureren.
 
 ### Snelle Configuratie Referentie
 
@@ -335,7 +335,7 @@ kind = "native"    # of "docker" (vereist Docker)
 
 ### Huidige Runtime Ondersteuning
 
-ZeroClaw ondersteunt twee code uitvoeringsbackends:
+Agent ondersteunt twee code uitvoeringsbackends:
 
 - **`native`** (standaard) — directe procesuitvoering, snelste pad, ideaal voor vertrouwde omgevingen
 - **`docker`** — volledige container isolatie, versterkt beveiligingsbeleid, vereist Docker
@@ -346,32 +346,32 @@ Gebruik `runtime.kind = "docker"` als je strikte sandboxing of netwerkisolatie n
 
 ```bash
 # Workspace beheer
-zeroclaw init                # Initialiseert een nieuwe workspace
-zeroclaw status              # Toont daemon/agent status
-zeroclaw config validate     # Verifieert config.toml syntax en waarden
+agent init                # Initialiseert een nieuwe workspace
+agent status              # Toont daemon/agent status
+agent config validate     # Verifieert config.toml syntax en waarden
 
 # Daemon beheer
-zeroclaw daemon start        # Start de daemon in de achtergrond
-zeroclaw daemon stop         # Stopt de draaiende daemon
-zeroclaw daemon restart      # Herstart de daemon (config herladen)
-zeroclaw daemon logs         # Toont daemon logs
+agent daemon start        # Start de daemon in de achtergrond
+agent daemon stop         # Stopt de draaiende daemon
+agent daemon restart      # Herstart de daemon (config herladen)
+agent daemon logs         # Toont daemon logs
 
 # Agent beheer
-zeroclaw agent start         # Start de agent (vereist draaiende daemon)
-zeroclaw agent stop          # Stopt de agent
-zeroclaw agent restart       # Herstart de agent (config herladen)
+agent agent start         # Start de agent (vereist draaiende daemon)
+agent agent stop          # Stopt de agent
+agent agent restart       # Herstart de agent (config herladen)
 
 # Pairing operaties
-zeroclaw pairing init        # Genereert een nieuw pairing geheim
-zeroclaw pairing rotate      # Roteert het bestaande pairing geheim
+agent pairing init        # Genereert een nieuw pairing geheim
+agent pairing rotate      # Roteert het bestaande pairing geheim
 
 # Tunneling (voor publieke blootstelling)
-zeroclaw tunnel start        # Start een tunnel naar de lokale daemon
-zeroclaw tunnel stop         # Stopt de actieve tunnel
+agent tunnel start        # Start een tunnel naar de lokale daemon
+agent tunnel stop         # Stopt de actieve tunnel
 
 # Diagnostiek
-zeroclaw doctor              # Voert systeem gezondheidscontroles uit
-zeroclaw version             # Toont versie en build informatie
+agent doctor              # Voert systeem gezondheidscontroles uit
+agent version             # Toont versie en build informatie
 ```
 
 Zie [Commando's Referentie](docs/commands-reference.md) voor volledige opties en voorbeelden.
@@ -409,9 +409,9 @@ Voor implementatie en runtime operaties:
 - Netwerk Implementatie Gids: [docs/network-deployment.md](docs/network-deployment.md)
 - Proxy Agent Playbook: [docs/proxy-agent-playbook.md](docs/proxy-agent-playbook.md)
 
-## ZeroClaw Ondersteunen
+## Agent Ondersteunen
 
-Als ZeroClaw je werk helpt en je de doorlopende ontwikkeling wilt ondersteunen, kun je hier doneren:
+Als Agent je werk helpt en je de doorlopende ontwikkeling wilt ondersteunen, kun je hier doneren:
 
 <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee" alt="Koop Een Koffie Voor Mij" /></a>
 
@@ -442,19 +442,19 @@ Thank you to everyone who opened issues, reviewed PRs, translated docs, and help
 
 ## ⚠️ Officiële Repository en Waarschuwing voor Imitatie
 
-**Dit is de enige officiële ZeroClaw repository:**
+**Dit is de enige officiële Agent repository:**
 
-> <https://github.com/zeroclaw-labs/zeroclaw>
+> <https://github.com/agent-labs/agent>
 
-Elke andere repository, organisatie, domein of pakket dat beweert "ZeroClaw" te zijn of affiniteit met ZeroClaw Labs suggereert is **niet-geautoriseerd en niet gelieerd aan dit project**. Bekende niet-geautoriseerde forks worden vermeld in [TRADEMARK.md](TRADEMARK.md).
+Elke andere repository, organisatie, domein of pakket dat beweert "Agent" te zijn of affiniteit met Agent Labs suggereert is **niet-geautoriseerd en niet gelieerd aan dit project**. Bekende niet-geautoriseerde forks worden vermeld in [TRADEMARK.md](TRADEMARK.md).
 
-Als je imitatie of handelsmerk misbruik tegenkomt, [open dan een issue](https://github.com/zeroclaw-labs/zeroclaw/issues).
+Als je imitatie of handelsmerk misbruik tegenkomt, [open dan een issue](https://github.com/agent-labs/agent/issues).
 
 ---
 
 ## Licentie
 
-ZeroClaw is dubbel gelicentieerd voor maximale openheid en bijdrager bescherming:
+Agent is dubbel gelicentieerd voor maximale openheid en bijdrager bescherming:
 
 | Licentie                      | Gebruiksscenario's                                            |
 | ---------------------------- | ------------------------------------------------------------ |
@@ -465,7 +465,7 @@ Je kunt een van beide licenties kiezen. **Bijdragers verlenen automatisch rechte
 
 ### Handelsmerk
 
-De naam **ZeroClaw** en het logo zijn geregistreerde handelsmerken van ZeroClaw Labs. Deze licentie verleent geen toestemming om ze te gebruiken om goedkeuring of affiniteit te impliceren. Zie [TRADEMARK.md](TRADEMARK.md) voor toegestane en verboden gebruiksmogelijkheden.
+De naam **Agent** en het logo zijn geregistreerde handelsmerken van Agent Labs. Deze licentie verleent geen toestemming om ze te gebruiken om goedkeuring of affiniteit te impliceren. Zie [TRADEMARK.md](TRADEMARK.md) voor toegestane en verboden gebruiksmogelijkheden.
 
 ### Bijdrager Beschermingen
 
@@ -485,20 +485,20 @@ Zie [CONTRIBUTING.md](CONTRIBUTING.md) en [CLA.md](CLA.md). Implementeer een tra
 - Nieuwe `Tool` → `src/tools/`
 - Nieuwe `Memory` → `src/memory/`
 - Nieuwe `Tunnel` → `src/tunnel/`
-- Nieuwe `Skill` → `~/.zeroclaw/workspace/skills/<n>/`
+- Nieuwe `Skill` → `~/.agent/workspace/skills/<n>/`
 
 ---
 
-**ZeroClaw** — Nul overhead. Nul compromis. Implementeer overal. Wissel alles. 🦀
+**Agent** — Nul overhead. Nul compromis. Implementeer overal. Wissel alles. 🦀
 
 ## Sterren Geschiedenis
 
 <p align="center">
-  <a href="https://www.star-history.com/#zeroclaw-labs/zeroclaw&type=date&legend=top-left">
+  <a href="https://www.star-history.com/#agent-labs/agent&type=date&legend=top-left">
     <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&theme=dark&legend=top-left" />
-     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
-     <img alt="Sterren Geschiedenis Grafiek" src="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
+     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&theme=dark&legend=top-left" />
+     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
+     <img alt="Sterren Geschiedenis Grafiek" src="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
     </picture>
   </a>
 </p>

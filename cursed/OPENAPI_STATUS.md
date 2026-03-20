@@ -22,11 +22,11 @@
 
 ### CLI Commands ✅
 ```bash
-zeroclaw openapi harvest          # Load specs from APIs.guru
-zeroclaw openapi list             # List all loaded specs
-zeroclaw openapi tools <spec>     # List tools for a spec
-zeroclaw openapi test <tool>      # Test a tool
-zeroclaw openapi search <query>   # Search for tools
+agent openapi harvest          # Load specs from APIs.guru
+agent openapi list             # List all loaded specs
+agent openapi tools <spec>     # List tools for a spec
+agent openapi test <tool>      # Test a tool
+agent openapi search <query>   # Search for tools
 ```
 
 ## What's Not Working

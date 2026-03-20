@@ -3,13 +3,13 @@
 
 **Date:** March 20, 2026  
 **Analyzed by:** AI Assistant  
-**Project:** ZeroClaw Integration Expansion
+**Project:** Agent Integration Expansion
 
 ---
 
 ## Executive Summary
 
-After analyzing the CONNECT.md requirements against the current ZeroClaw codebase, implementing the proposed OpenAPI-based integration system is **moderately challenging but highly feasible**. The project already has 70% of the required infrastructure in place.
+After analyzing the CONNECT.md requirements against the current Agent codebase, implementing the proposed OpenAPI-based integration system is **moderately challenging but highly feasible**. The project already has 70% of the required infrastructure in place.
 
 **Overall Difficulty: 6.5/10**
 
@@ -21,7 +21,7 @@ After analyzing the CONNECT.md requirements against the current ZeroClaw codebas
 
 ## Current Infrastructure Assessment
 
-### ✅ What ZeroClaw Already Has (70% Complete)
+### ✅ What Agent Already Has (70% Complete)
 
 #### 1. HTTP Request Tool (COMPLETE)
 **Location:** `src/tools/http_request.rs`
@@ -361,7 +361,7 @@ impl SpecGenerator {
 - [ ] OAuth2 auth provider
 - [ ] Hand-craft top 10 native tools (Progenitor)
 - [ ] MCP server for OpenAPI tools
-- [ ] CLI commands (`zeroclaw tools list`, `zeroclaw tools add`)
+- [ ] CLI commands (`agent tools list`, `agent tools add`)
 - [ ] Documentation
 
 **Deliverable:** 3,000-4,000 tools + MCP server
@@ -449,7 +449,7 @@ impl SpecGenerator {
 
 ### vs. Zapier (8,500+ integrations)
 
-**ZeroClaw Advantages:**
+**Agent Advantages:**
 - ✅ Free, unlimited tasks
 - ✅ Open source
 - ✅ Native Rust performance
@@ -465,7 +465,7 @@ impl SpecGenerator {
 
 ### vs. n8n (1,000+ built-in, 5,834 community)
 
-**ZeroClaw Advantages:**
+**Agent Advantages:**
 - ✅ OpenAPI-native (self-documenting)
 - ✅ Faster (Rust vs TypeScript)
 - ✅ Better spec quality (validated)
@@ -562,7 +562,7 @@ impl SpecGenerator {
 
 **The CONNECT.md plan is achievable at 6.5/10 difficulty.**
 
-ZeroClaw already has the hard parts (HTTP client, MCP, security, auth). The missing pieces (OpenAPI parsing, runtime executor, spec harvesting) are well-understood problems with existing solutions.
+Agent already has the hard parts (HTTP client, MCP, security, auth). The missing pieces (OpenAPI parsing, runtime executor, spec harvesting) are well-understood problems with existing solutions.
 
 **The biggest challenges are not technical:**
 1. Maintaining spec quality at scale (organizational)

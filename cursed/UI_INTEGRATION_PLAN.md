@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document identifies all UI locations in the main ZeroClaw project that should adopt the onboard framework's theming system (rainbow colors, effects, and consistent styling).
+This document identifies all UI locations in the main Agent project that should adopt the onboard framework's theming system (rainbow colors, effects, and consistent styling).
 
 ---
 
@@ -194,7 +194,7 @@ fn print_bullet(text: &str) {
 - Plain `println!` statements
 
 **Lines to Update:**
-- Line 96: Header "🩺 ZeroClaw Doctor"
+- Line 96: Header "🩺 Agent Doctor"
 - Line 103-110: Category headers and status icons
 - Line 126: Summary line
 
@@ -260,7 +260,7 @@ pub use onboard::splash::{render_dx_logo, render_train_animation};
 pub use onboard::prompts::theme::DxTheme;
 ```
 
-3. **Copy theme.toml** to main project root or `.zeroclaw/` config dir
+3. **Copy theme.toml** to main project root or `.agent/` config dir
 
 ### Phase 2: Replace Dialoguer (High Impact)
 
@@ -317,8 +317,8 @@ Before I start implementing, please clarify:
 
 ### 1. **Splash Screen Placement**
 Where should the DX logo appear?
-- [ ] A. On every `zeroclaw` command (before help text)
-- [ ] B. Only on `zeroclaw onboard`
+- [ ] A. On every `agent` command (before help text)
+- [ ] B. Only on `agent onboard`
 - [ ] C. Only when no command is provided
 - [ ] D. Optional flag `--splash` to enable
 
@@ -349,7 +349,7 @@ Which prompts should I replace first?
 ### 5. **Theme Configuration Location**
 Where should `theme.toml` live?
 - [ ] A. Project root (alongside Cargo.toml)
-- [ ] B. `~/.zeroclaw/theme.toml` (user config)
+- [ ] B. `~/.agent/theme.toml` (user config)
 - [ ] C. Both (user overrides project default)
 - [ ] D. Embedded in binary (no external file)
 
@@ -400,4 +400,4 @@ Should we use Unicode box drawing?
 3. We'll implement phase by phase
 4. Test each phase before moving to the next
 
-Ready to make ZeroClaw beautiful! 🌈🚂
+Ready to make Agent beautiful! 🌈🚂

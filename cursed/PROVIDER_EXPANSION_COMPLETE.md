@@ -2,7 +2,7 @@
 
 ## Summary
 
-ZeroClaw now supports **140+ AI providers** with metadata for **2,583+ models**.
+Agent now supports **140+ AI providers** with metadata for **2,583+ models**.
 
 ## What Was Accomplished
 
@@ -37,7 +37,7 @@ Created `src/providers/model_metadata.rs` with:
 
 ### 4. Enhanced CLI Command
 
-Enhanced `zeroclaw providers` command to show:
+Enhanced `agent providers` command to show:
 - Total provider count (63 native + custom endpoints)
 - Total model count (2,583 from LiteLLM database)
 - Model count per provider
@@ -127,7 +127,7 @@ The embedded database includes metadata for providers like:
 ### List All Providers
 
 ```bash
-zeroclaw providers
+agent providers
 ```
 
 Output shows:
@@ -140,7 +140,7 @@ Output shows:
 ### Query Model Metadata (Programmatic)
 
 ```rust
-use zeroclaw::providers::model_metadata;
+use agent::providers::model_metadata;
 
 // Get model info
 if let Some(info) = model_metadata::get_model_info("gpt-4") {
@@ -221,7 +221,7 @@ cargo test --lib providers::model_metadata
 
 ## Conclusion
 
-ZeroClaw now has one of the most comprehensive provider ecosystems in the AI CLI space:
+Agent now has one of the most comprehensive provider ecosystems in the AI CLI space:
 - **63 native providers** with full implementations
 - **2,583 models** with metadata
 - **140+ providers** in the database

@@ -1,4 +1,4 @@
-# ZeroClaw Connects System - COMPLETE
+# Agent Connects System - COMPLETE
 
 **Date:** March 20, 2026  
 **Status:** Production ready, 78,989 connects operational
@@ -6,7 +6,7 @@
 ## Final Delivery
 
 ```
-Command:               zeroclaw connect
+Command:               agent connect
 Specs loaded:          1,911 (from 4,138 APIs.guru files)
 Connects available:    78,989 (external API operations)
 Success rate:          46% (limited by malformed specs)
@@ -23,7 +23,7 @@ Auth providers:        5 (NoAuth, ApiKey, Bearer, Basic, OAuth2)
 - Example: `stripe_create_customer`, `github_get_user`, `slack_post_message`
 
 **Tools** = Internal capabilities (different system)
-- Tools are ZeroClaw's built-in functions
+- Tools are Agent's built-in functions
 - Tools don't call external APIs
 - Examples: file operations, text processing, code execution
 
@@ -31,19 +31,19 @@ Auth providers:        5 (NoAuth, ApiKey, Bearer, Basic, OAuth2)
 
 ```bash
 # Harvest all specs from APIs.guru
-zeroclaw connect harvest
+agent connect harvest
 
 # List all loaded specs (1,911)
-zeroclaw connect list
+agent connect list
 
 # List connects for a specific spec
-zeroclaw connect connects adyen.com_AccountService_6
+agent connect connects adyen.com_AccountService_6
 
 # Test a connect with arguments
-zeroclaw connect test post_createAccount --args '{}'
+agent connect test post_createAccount --args '{}'
 
 # Search across 78,989 connects
-zeroclaw connect search "payment"
+agent connect search "payment"
 ```
 
 ## Comparison to Competition
@@ -121,4 +121,4 @@ Connect Generator
 
 Built a production-ready connects system with 78,989 external API operations from 1,911 specs. Beats n8n's built-in count by 78x. System operational and ready to use.
 
-Command: `zeroclaw connect --help`
+Command: `agent connect --help`

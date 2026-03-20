@@ -1,7 +1,7 @@
-# ZeroClaw Complete Details & Capabilities
+# Agent Complete Details & Capabilities
 
 ## Overview
-**ZeroClaw** is a Rust-based autonomous AI agent runtime - a lightweight, secure, and highly efficient alternative to OpenClaw. It's designed to run on minimal hardware (even $10 boards) while providing enterprise-grade features.
+**Agent** is a Rust-based autonomous AI agent runtime - a lightweight, secure, and highly efficient alternative to OpenClaw. It's designed to run on minimal hardware (even $10 boards) while providing enterprise-grade features.
 
 ## 🎯 Key Statistics
 
@@ -14,12 +14,12 @@
 
 ### Provider Support
 - **Total Providers:** 60 providers
-- **Comparison:** OpenCode has 75+ providers (ZeroClaw has 15 fewer)
+- **Comparison:** OpenCode has 75+ providers (Agent has 15 fewer)
 - **All Major Providers Covered:** OpenAI, Anthropic, Google, OpenRouter, Groq, Mistral, DeepSeek, Cerebras, and 52 more
 
 ## 💰 Cost Structure
 
-### ZeroClaw is 100% FREE and Open Source
+### Agent is 100% FREE and Open Source
 - **License:** Dual MIT/Apache 2.0
 - **No Subscription Fees:** Zero cost to use
 - **No API Markup:** Direct provider pricing
@@ -281,20 +281,20 @@ You only pay for:
 ### Local Development
 ```bash
 cargo build --release
-zeroclaw onboard
-zeroclaw agent -m "Hello!"
+agent onboard
+agent agent -m "Hello!"
 ```
 
 ### System Service
 ```bash
-zeroclaw service install
-zeroclaw service start
-zeroclaw service status
+agent service install
+agent service start
+agent service status
 ```
 
 ### Docker
 ```bash
-docker run -v ~/.zeroclaw:/root/.zeroclaw zeroclaw/zeroclaw
+docker run -v ~/.agent:/root/.agent agent/agent
 ```
 
 ### Edge Devices
@@ -328,8 +328,8 @@ docker run -v ~/.zeroclaw:/root/.zeroclaw zeroclaw/zeroclaw
 ## 🔧 Configuration
 
 ### Config File Location
-- **User:** `~/.zeroclaw/config.toml`
-- **Workspace:** `.zeroclaw/config.toml`
+- **User:** `~/.agent/config.toml`
+- **Workspace:** `.agent/config.toml`
 
 ### Key Configuration Sections
 - `[provider]` - LLM provider settings
@@ -388,12 +388,12 @@ docker run -v ~/.zeroclaw:/root/.zeroclaw zeroclaw/zeroclaw
 
 ### Homebrew (macOS/Linux)
 ```bash
-brew install zeroclaw
+brew install agent
 ```
 
 ### One-Click Installer
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/agent-labs/agent/master/install.sh | bash
 ```
 
 ### Pre-built Binaries
@@ -404,15 +404,15 @@ Download from GitHub Releases for:
 
 ### From Source
 ```bash
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 cargo build --release --locked
 cargo install --path . --force --locked
 ```
 
-## 🆚 ZeroClaw vs OpenCode vs OpenClaw
+## 🆚 Agent vs OpenCode vs OpenClaw
 
-| Feature | ZeroClaw | OpenCode | OpenClaw |
+| Feature | Agent | OpenCode | OpenClaw |
 |---------|----------|----------|----------|
 | **Language** | Rust | TypeScript | TypeScript |
 | **Binary Size** | 8.8 MB | N/A (Node) | ~28 MB |
@@ -426,9 +426,9 @@ cargo install --path . --force --locked
 | **Cost** | FREE | FREE | FREE |
 | **Best For** | Edge/embedded | Coding | Full-featured |
 
-## 🎯 When to Choose ZeroClaw
+## 🎯 When to Choose Agent
 
-Choose ZeroClaw if you need:
+Choose Agent if you need:
 - ✅ Minimal resource usage
 - ✅ Edge/embedded deployment
 - ✅ Fast startup times
@@ -465,16 +465,16 @@ Choose OpenClaw if you need:
 
 ## 🤝 Community & Support
 
-- **GitHub:** https://github.com/zeroclaw-labs/zeroclaw
-- **Website:** https://zeroclawlabs.ai
-- **X/Twitter:** @zeroclawlabs
-- **Facebook:** facebook.com/groups/zeroclaw
-- **Reddit:** r/zeroclawlabs
+- **GitHub:** https://github.com/agent-labs/agent
+- **Website:** https://agentlabs.ai
+- **X/Twitter:** @agentlabs
+- **Facebook:** facebook.com/groups/agent
+- **Reddit:** r/agentlabs
 - **Donate:** buymeacoffee.com/argenistherose
 
 ## 🎉 Summary
 
-ZeroClaw is a **production-ready, enterprise-grade AI agent runtime** that:
+Agent is a **production-ready, enterprise-grade AI agent runtime** that:
 - Costs **$0** to use (only pay for LLM API calls)
 - Runs on **$10 hardware** (99% cheaper than alternatives)
 - Uses **< 5 MB RAM** (99% less than OpenClaw)

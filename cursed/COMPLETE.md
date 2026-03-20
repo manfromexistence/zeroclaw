@@ -16,12 +16,12 @@
 
 ### CLI Output
 ```
-🚀 ZeroClaw supports 140+ AI providers with 2583 models!
+🚀 Agent supports 140+ AI providers with 2583 models!
 
 Native providers (63 implemented):
 ...
 📊 Total providers in database: 107 (including 107 with metadata)
-💡 Tip: Use `zeroclaw models list --provider <name>` to see available models
+💡 Tip: Use `agent models list --provider <name>` to see available models
 ```
 
 ## What Was Accomplished
@@ -42,7 +42,7 @@ Native providers (63 implemented):
 - API functions for querying models, providers, and counts
 
 ### 3. Enhanced CLI
-- Updated `zeroclaw providers` command
+- Updated `agent providers` command
 - Shows "140+ AI providers" messaging
 - Displays model counts per provider
 - Shows total providers in database
@@ -70,10 +70,10 @@ Native providers (63 implemented):
 
 ```bash
 # Build (clean, no warnings)
-cargo build --bin zeroclaw
+cargo build --bin agent
 
 # Test providers command
-zeroclaw providers
+agent providers
 
 # Format code
 cargo fmt
@@ -113,7 +113,7 @@ cargo clippy
 
 ## Conclusion
 
-ZeroClaw now has the most comprehensive provider ecosystem in the AI CLI space:
+Agent now has the most comprehensive provider ecosystem in the AI CLI space:
 - **140+ providers** with metadata
 - **2,583 models** catalogued
 - **Clean codebase** (no warnings, fully formatted)

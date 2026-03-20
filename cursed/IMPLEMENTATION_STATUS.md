@@ -1,4 +1,4 @@
-# ZeroClaw OpenAPI Integration - Implementation Status & Timeline
+# Agent OpenAPI Integration - Implementation Status & Timeline
 
 **Last Updated:** March 20, 2026  
 **Current Status:** Week 2 Complete (70% of Week 1-5 plan)
@@ -18,7 +18,7 @@
 - ✅ Implemented `SpecHarvester` with deduplication
 - ✅ Implemented `ApisGuruSource` for spec loading
 - ✅ Added `OpenApiConfig` to config system
-- ✅ Created CLI command: `zeroclaw openapi harvest`
+- ✅ Created CLI command: `agent openapi harvest`
 - ✅ All code compiles successfully
 
 **Deliverable:** Can parse and validate 1,500-2,000 OpenAPI specs ✅
@@ -45,10 +45,10 @@
   - Search and lookup functions
 - ✅ Integrated with main tool system (`src/tools/mod.rs`)
 - ✅ Added CLI commands:
-  - `zeroclaw openapi list`
-  - `zeroclaw openapi tools <spec>`
-  - `zeroclaw openapi test <tool>`
-  - `zeroclaw openapi search <query>`
+  - `agent openapi list`
+  - `agent openapi tools <spec>`
+  - `agent openapi test <tool>`
+  - `agent openapi search <query>`
 - ✅ All code compiles successfully
 
 **Deliverable:** Can execute 1,500-2,000 OpenAPI specs as tools ✅
@@ -61,9 +61,9 @@
 
 1. **Test End-to-End Execution** (HIGH PRIORITY)
    - [ ] Download/clone APIs.guru repository
-   - [ ] Run `zeroclaw openapi harvest`
+   - [ ] Run `agent openapi harvest`
    - [ ] Verify registry.json creation
-   - [ ] Test `zeroclaw openapi list`
+   - [ ] Test `agent openapi list`
    - [ ] Test tool execution with real API
    - [ ] Fix any runtime issues
 
@@ -101,9 +101,9 @@
   - Convert Google API definitions
   - Add ~300 Google services
 - [ ] Add CLI commands:
-  - `zeroclaw openapi convert postman <url>`
-  - `zeroclaw openapi convert aws <service>`
-  - `zeroclaw openapi convert google <api>`
+  - `agent openapi convert postman <url>`
+  - `agent openapi convert aws <service>`
+  - `agent openapi convert google <api>`
 - [ ] Test all converters
 - [ ] Update quality scoring for converted specs
 
@@ -131,7 +131,7 @@
   - HubSpot API
 - [ ] Create MCP server for OpenAPI tools
   - Implement `OpenApiMcpServer`
-  - Add `zeroclaw openapi mcp start`
+  - Add `agent openapi mcp start`
   - Test MCP integration
 - [ ] Performance optimization
   - Cache parsed specs
@@ -155,7 +155,7 @@
   - Quality scoring automation
   - Tier assignment automation
 - [ ] Create GitHub repository structure
-  - `zeroclaw-openapi-specs` repo
+  - `agent-openapi-specs` repo
   - `specs/verified/`, `specs/community/`, `specs/experimental/`
   - CONTRIBUTING.md
   - README.md with examples
@@ -244,11 +244,11 @@ If you want to launch faster, here's the minimum viable path:
    - List specs and tools
 
 4. **CLI Commands** ✅
-   - `zeroclaw openapi harvest` - Harvest specs
-   - `zeroclaw openapi list` - List specs
-   - `zeroclaw openapi tools <spec>` - List tools for spec
-   - `zeroclaw openapi test <tool>` - Test tool execution
-   - `zeroclaw openapi search <query>` - Search tools
+   - `agent openapi harvest` - Harvest specs
+   - `agent openapi list` - List specs
+   - `agent openapi tools <spec>` - List tools for spec
+   - `agent openapi test <tool>` - Test tool execution
+   - `agent openapi search <query>` - Search tools
 
 5. **Integration** ✅
    - Integrated with main tool system
@@ -325,19 +325,19 @@ If you want to launch faster, here's the minimum viable path:
 
 1. **Download APIs.guru** (30 min)
    ```bash
-   git clone https://github.com/APIs-guru/openapi-directory.git ~/.zeroclaw/openapi-specs/apis-guru
+   git clone https://github.com/APIs-guru/openapi-directory.git ~/.agent/openapi-specs/apis-guru
    ```
 
 2. **Run Harvest** (5-10 min)
    ```bash
-   zeroclaw openapi harvest
+   agent openapi harvest
    ```
 
 3. **Test Execution** (30 min)
    ```bash
-   zeroclaw openapi list
-   zeroclaw openapi tools <spec-id>
-   zeroclaw openapi test <tool-name> --args '{}'
+   agent openapi list
+   agent openapi tools <spec-id>
+   agent openapi test <tool-name> --args '{}'
    ```
 
 4. **Fix Runtime Issues** (1-2 hours)

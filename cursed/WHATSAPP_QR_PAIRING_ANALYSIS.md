@@ -4,7 +4,7 @@
 
 ### WhatsApp Integration Status
 
-ZeroClaw **DOES have WhatsApp support** with TWO implementations:
+Agent **DOES have WhatsApp support** with TWO implementations:
 
 1. **WhatsApp Web** (`src/channels/whatsapp_web.rs`)
    - Uses `wa-rs` library for WhatsApp Web protocol
@@ -22,7 +22,7 @@ ZeroClaw **DOES have WhatsApp support** with TWO implementations:
 
 ### Existing Pairing/QR System
 
-ZeroClaw **ALREADY HAS** a device pairing system with QR code support:
+Agent **ALREADY HAS** a device pairing system with QR code support:
 
 **Location:** `src/gateway/api_pairing.rs` + `src/security/pairing.rs`
 
@@ -84,7 +84,7 @@ Create an Apple-like ecosystem where:
 
 ### Current Architecture Supports This!
 
-ZeroClaw already has 90% of what you need:
+Agent already has 90% of what you need:
 
 #### ✅ Already Implemented:
 1. **Device Registry** - Tracks all paired devices
@@ -132,7 +132,7 @@ image = "0.25"
 
 // src/gateway/qr.rs
 pub fn generate_pairing_qr(code: &str, gateway_url: &str) -> String {
-    let data = format!("zeroclaw://pair?code={}&gateway={}", code, gateway_url);
+    let data = format!("agent://pair?code={}&gateway={}", code, gateway_url);
     let qr = QrCode::new(data).unwrap();
     qr.render::<unicode::Dense1x2>().build()
 }
@@ -173,7 +173,7 @@ enum SyncMessage {
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    ZeroClaw Gateway                      │
+│                    Agent Gateway                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │ REST API     │  │ WebSocket    │  │ Device       │  │
 │  │ /api/pair    │  │ /ws          │  │ Registry     │  │
@@ -228,7 +228,7 @@ use qrcode::QrCode;
 use qrcode::render::unicode;
 
 pub fn generate_pairing_qr(code: &str, gateway_url: &str) -> anyhow::Result<String> {
-    let data = format!("zeroclaw://pair?code={}&gateway={}", code, gateway_url);
+    let data = format!("agent://pair?code={}&gateway={}", code, gateway_url);
     let qr = QrCode::new(data)?;
     Ok(qr.render::<unicode::Dense1x2>()
         .dark_color(unicode::Dense1x2::Dark)
@@ -237,7 +237,7 @@ pub fn generate_pairing_qr(code: &str, gateway_url: &str) -> anyhow::Result<Stri
 }
 
 pub fn generate_pairing_qr_png(code: &str, gateway_url: &str) -> anyhow::Result<Vec<u8>> {
-    let data = format!("zeroclaw://pair?code={}&gateway={}", code, gateway_url);
+    let data = format!("agent://pair?code={}&gateway={}", code, gateway_url);
     let qr = QrCode::new(data)?;
     let image = qr.render::<image::Luma<u8>>().build();
     let mut buf = Vec::new();

@@ -4,7 +4,7 @@
 
 ## Summary
 
-Successfully integrated metasearch (215+ search engines) directly into the ZeroClaw codebase. The web search tool now uses metasearch by default for free, privacy-respecting search across multiple engines.
+Successfully integrated metasearch (215+ search engines) directly into the Agent codebase. The web search tool now uses metasearch by default for free, privacy-respecting search across multiple engines.
 
 ## What Was Done
 

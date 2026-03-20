@@ -27,7 +27,7 @@ chmod +x test_metasearch_with_mistral.sh
 
 ## What Will Happen
 
-1. ZeroClaw builds (first time may take 5-10 minutes)
+1. Agent builds (first time may take 5-10 minutes)
 2. Mistral AI agent starts
 3. Agent receives the search query
 4. Agent calls the web_search_tool

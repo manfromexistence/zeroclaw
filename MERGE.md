@@ -1,8 +1,8 @@
 ```powershell
-PS F:\zeroclaw> git remote -v
-origin  https://github.com/zeroclaw-labs/zeroclaw (fetch)
-origin  https://github.com/zeroclaw-labs/zeroclaw (push)
-PS F:\zeroclaw> git branch -a
+PS F:\agent> git remote -v
+origin  https://github.com/agent-labs/agent (fetch)
+origin  https://github.com/agent-labs/agent (push)
+PS F:\agent> git branch -a
 * master
   remotes/origin/HEAD -> origin/master
   remotes/origin/channel-matrix
@@ -152,8 +152,8 @@ PS F:\zeroclaw> git branch -a
   remotes/origin/work/project-delivery
   remotes/origin/work/secure-node-comms
   remotes/origin/work/security-ops
-  remotes/origin/zeroclaw_homecomming
-PS F:\zeroclaw> git status
+  remotes/origin/agent_homecomming
+PS F:\agent> git status
 On branch master
 Your branch is behind 'origin/master' by 145 commits, and can be fast-forwarded.
   (use "git pull" to update your local branch)
@@ -161,7 +161,7 @@ Your branch is behind 'origin/master' by 145 commits, and can be fast-forwarded.
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
         new file:   DX.md
-        new file:   ZEROCLAW_DETAILS.md
+        new file:   AGENT_DETAILS.md
         new file:   cursed/README.md
         new file:   hexed/README.md
 
@@ -169,18 +169,18 @@ Changes not staged for commit:
   (use "git add/rm <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
         modified:   DX.md
-        deleted:    ZEROCLAW_DETAILS.md
+        deleted:    AGENT_DETAILS.md
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
         TODO.md
 
-PS F:\zeroclaw> git remote set-url origin https://github.com/manfromexistence/zeroclaw
-PS F:\zeroclaw> git remote -v
-origin  https://github.com/manfromexistence/zeroclaw (fetch)
-origin  https://github.com/manfromexistence/zeroclaw (push)
-PS F:\zeroclaw> git fetch origin
-PS F:\zeroclaw> git branch -a
+PS F:\agent> git remote set-url origin https://github.com/manfromexistence/agent
+PS F:\agent> git remote -v
+origin  https://github.com/manfromexistence/agent (fetch)
+origin  https://github.com/manfromexistence/agent (push)
+PS F:\agent> git fetch origin
+PS F:\agent> git branch -a
 * master
   remotes/origin/HEAD -> origin/master
   remotes/origin/channel-matrix
@@ -336,11 +336,11 @@ PS F:\zeroclaw> git branch -a
   remotes/origin/work/project-delivery
   remotes/origin/work/secure-node-comms
   remotes/origin/work/security-ops
-  remotes/origin/zeroclaw_homecomming
-PS F:\zeroclaw> git stash push -u -m "local-changes-before-merge"
+  remotes/origin/agent_homecomming
+PS F:\agent> git stash push -u -m "local-changes-before-merge"
 Saved working directory and index state On master: local-changes-before-merge
-PS F:\zeroclaw> git pull origin master
-From https://github.com/manfromexistence/zeroclaw
+PS F:\agent> git pull origin master
+From https://github.com/manfromexistence/agent
  * branch              master     -> FETCH_HEAD
 Updating 813ae17f..92940a3d
 Fast-forward
@@ -397,7 +397,7 @@ Fast-forward
  deny.toml                                          |    7 +
  dist/aur/.SRCINFO                                  |   16 +
  dist/aur/PKGBUILD                                  |   32 +
- dist/scoop/zeroclaw.json                           |   27 +
+ dist/scoop/agent.json                           |   27 +
  docker-compose.yml                                 |    9 +-
  docs/contributing/ci-map.md                        |   22 +-
  docs/contributing/release-process.md               |   37 +
@@ -586,7 +586,7 @@ Fast-forward
  create mode 100644 Dockerfile.debian.ci
  create mode 100644 dist/aur/.SRCINFO
  create mode 100644 dist/aur/PKGBUILD
- create mode 100644 dist/scoop/zeroclaw.json
+ create mode 100644 dist/scoop/agent.json
  delete mode 100644 docs/i18n/el/config-reference.md
  delete mode 100644 docs/i18n/vi/README.md
  delete mode 100644 docs/i18n/vi/SUMMARY.md
@@ -666,14 +666,14 @@ Fast-forward
  delete mode 100644 web/public/logo.png
  create mode 100644 web/src/hooks/useDevices.ts
  create mode 100644 web/src/pages/Pairing.tsx
-PS F:\zeroclaw> git stash pop
+PS F:\agent> git stash pop
 On branch master
 Your branch is up to date with 'origin/master'.
 
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
         new file:   DX.md
-        new file:   ZEROCLAW_DETAILS.md
+        new file:   AGENT_DETAILS.md
         new file:   cursed/README.md
         new file:   hexed/README.md
 
@@ -682,23 +682,23 @@ Untracked files:
         TODO.md
 
 Dropped refs/stash@{0} (6a3290b5462849528104a65103eb85c753ae599d)
-PS F:\zeroclaw> git add -A && git commit -m "chore: add DX.md, ZEROCLAW_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md"
+PS F:\agent> git add -A && git commit -m "chore: add DX.md, AGENT_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md"
 At line:1 char:12
-+ git add -A && git commit -m "chore: add DX.md, ZEROCLAW_DETAILS.md, c ...
++ git add -A && git commit -m "chore: add DX.md, AGENT_DETAILS.md, c ...
 +            ~~
 The token '&&' is not a valid statement separator in this version.
     + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
     + FullyQualifiedErrorId : InvalidEndOfLine
 
-PS F:\zeroclaw> git add -A; git commit -m "chore: add DX.md, ZEROCLAW_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md"
-[master e5a20779] chore: add DX.md, ZEROCLAW_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md
+PS F:\agent> git add -A; git commit -m "chore: add DX.md, AGENT_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md"
+[master e5a20779] chore: add DX.md, AGENT_DETAILS.md, cursed/README.md, hexed/README.md, TODO.md
  5 files changed, 498 insertions(+)
  create mode 100644 DX.md
  create mode 100644 TODO.md
- create mode 100644 ZEROCLAW_DETAILS.md
+ create mode 100644 AGENT_DETAILS.md
  create mode 100644 cursed/README.md
  create mode 100644 hexed/README.md
-PS F:\zeroclaw> git push origin master
+PS F:\agent> git push origin master
 Enumerating objects: 8, done.
 Counting objects: 100% (8/8), done.
 Delta compression using up to 12 threads
@@ -706,9 +706,9 @@ Compressing objects: 100% (5/5), done.
 Writing objects: 100% (7/7), 7.25 KiB | 1.45 MiB/s, done.
 Total 7 (delta 1), reused 1 (delta 0), pack-reused 0 (from 0)
 remote: Resolving deltas: 100% (1/1), completed with 1 local object.
-To https://github.com/manfromexistence/zeroclaw
+To https://github.com/manfromexistence/agent
    92940a3d..e5a20779  master -> master
 ```
-Please make this "https://github.com/manfromexistence/zeroclaw" the remote branch and merge local and remote changes correctly!!!
+Please make this "https://github.com/manfromexistence/agent" the remote branch and merge local and remote changes correctly!!!
 
 please pull and sync our git with remote

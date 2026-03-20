@@ -1,20 +1,20 @@
 # One-Click Bootstrap
 
-This page defines the fastest supported path to install and initialize ZeroClaw.
+This page defines the fastest supported path to install and initialize Agent.
 
 Last verified: **February 20, 2026**.
 
 ## Option 0: Homebrew (macOS/Linuxbrew)
 
 ```bash
-brew install zeroclaw
+brew install agent
 ```
 
 ## Option A (Recommended): Clone + local script
 
 ```bash
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 ./install.sh
 ```
 
@@ -50,7 +50,7 @@ To bypass pre-built flow and force source compilation:
 
 ## Dual-mode bootstrap
 
-Default behavior is **app-only** (build/install ZeroClaw) and expects existing Rust toolchain.
+Default behavior is **app-only** (build/install Agent) and expects existing Rust toolchain.
 
 For fresh machines, enable environment bootstrap explicitly:
 
@@ -69,7 +69,7 @@ Notes:
 ## Option B: Remote one-liner
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/agent-labs/agent/master/install.sh | bash
 ```
 
 For high-security environments, prefer Option A so you can review the script before execution.
@@ -84,33 +84,33 @@ If you run Option B outside a repository checkout, the install script automatica
 ./install.sh --docker
 ```
 
-This builds a local ZeroClaw image and launches onboarding inside a container while
-persisting config/workspace to `./.zeroclaw-docker`.
+This builds a local Agent image and launches onboarding inside a container while
+persisting config/workspace to `./.agent-docker`.
 
 Container CLI defaults to `docker`. If Docker CLI is unavailable and `podman` exists,
-the installer auto-falls back to `podman`. You can also set `ZEROCLAW_CONTAINER_CLI`
-explicitly (for example: `ZEROCLAW_CONTAINER_CLI=podman ./install.sh --docker`).
+the installer auto-falls back to `podman`. You can also set `AGENT_CONTAINER_CLI`
+explicitly (for example: `AGENT_CONTAINER_CLI=podman ./install.sh --docker`).
 
 For Podman, the installer runs with `--userns keep-id` and `:Z` volume labels so
 workspace/config mounts remain writable inside the container.
 
 If you add `--skip-build`, the installer skips local image build. It first tries the local
-Docker tag (`ZEROCLAW_DOCKER_IMAGE`, default: `zeroclaw-bootstrap:local`); if missing,
-it pulls `ghcr.io/zeroclaw-labs/zeroclaw:latest` and tags it locally before running.
+Docker tag (`AGENT_DOCKER_IMAGE`, default: `agent-bootstrap:local`); if missing,
+it pulls `ghcr.io/agent-labs/agent:latest` and tags it locally before running.
 
 ### Stopping and restarting a Docker/Podman container
 
 After `./install.sh --docker` finishes, the container exits. Your config and workspace
-are persisted in the data directory (default: `./.zeroclaw-docker`, or `~/.zeroclaw-docker`
-when bootstrapping via `curl | bash`). You can override this path with `ZEROCLAW_DOCKER_DATA_DIR`.
+are persisted in the data directory (default: `./.agent-docker`, or `~/.agent-docker`
+when bootstrapping via `curl | bash`). You can override this path with `AGENT_DOCKER_DATA_DIR`.
 
 **Do not re-run `install.sh`** to restart -- it will rebuild the image and re-run onboarding.
 Instead, start a new container from the existing image and mount the persisted data directory.
 
 #### Using the repository docker-compose.yml
 
-The simplest way to run ZeroClaw long-term in Docker/Podman is with the provided
-`docker-compose.yml` at the repository root. It uses a named volume (`zeroclaw-data`)
+The simplest way to run Agent long-term in Docker/Podman is with the provided
+`docker-compose.yml` at the repository root. It uses a named volume (`agent-data`)
 and sets `restart: unless-stopped` so the container survives reboots.
 
 ```bash
@@ -128,32 +128,32 @@ Replace `docker` with `podman` if you use Podman.
 
 #### Manual container run (using install.sh data directory)
 
-If you installed via `./install.sh --docker` and want to reuse the `.zeroclaw-docker`
+If you installed via `./install.sh --docker` and want to reuse the `.agent-docker`
 data directory without compose:
 
 ```bash
 # Docker
-docker run -d --name zeroclaw \
+docker run -d --name agent \
   --restart unless-stopped \
-  -v "$PWD/.zeroclaw-docker/.zeroclaw:/zeroclaw-data/.zeroclaw" \
-  -v "$PWD/.zeroclaw-docker/workspace:/zeroclaw-data/workspace" \
-  -e HOME=/zeroclaw-data \
-  -e ZEROCLAW_WORKSPACE=/zeroclaw-data/workspace \
+  -v "$PWD/.agent-docker/.agent:/agent-data/.agent" \
+  -v "$PWD/.agent-docker/workspace:/agent-data/workspace" \
+  -e HOME=/agent-data \
+  -e AGENT_WORKSPACE=/agent-data/workspace \
   -p 42617:42617 \
-  zeroclaw-bootstrap:local \
+  agent-bootstrap:local \
   gateway
 
 # Podman (add --userns keep-id and :Z volume labels)
-podman run -d --name zeroclaw \
+podman run -d --name agent \
   --restart unless-stopped \
   --userns keep-id \
   --user "$(id -u):$(id -g)" \
-  -v "$PWD/.zeroclaw-docker/.zeroclaw:/zeroclaw-data/.zeroclaw:Z" \
-  -v "$PWD/.zeroclaw-docker/workspace:/zeroclaw-data/workspace:Z" \
-  -e HOME=/zeroclaw-data \
-  -e ZEROCLAW_WORKSPACE=/zeroclaw-data/workspace \
+  -v "$PWD/.agent-docker/.agent:/agent-data/.agent:Z" \
+  -v "$PWD/.agent-docker/workspace:/agent-data/workspace:Z" \
+  -e HOME=/agent-data \
+  -e AGENT_WORKSPACE=/agent-data/workspace \
   -p 42617:42617 \
-  zeroclaw-bootstrap:local \
+  agent-bootstrap:local \
   gateway
 ```
 
@@ -161,19 +161,19 @@ podman run -d --name zeroclaw \
 
 ```bash
 # Stop the container (preserves data)
-docker stop zeroclaw
+docker stop agent
 
 # Start a stopped container (config and workspace are intact)
-docker start zeroclaw
+docker start agent
 
 # View logs
-docker logs -f zeroclaw
+docker logs -f agent
 
-# Remove the container (data in volumes/.zeroclaw-docker is preserved)
-docker rm zeroclaw
+# Remove the container (data in volumes/.agent-docker is preserved)
+docker rm agent
 
 # Check health
-docker exec zeroclaw zeroclaw status
+docker exec agent agent status
 ```
 
 #### Environment variables
@@ -182,18 +182,18 @@ When running manually, pass provider configuration as environment variables
 or ensure they are already saved in the persisted `config.toml`:
 
 ```bash
-docker run -d --name zeroclaw \
+docker run -d --name agent \
   -e API_KEY="sk-..." \
   -e PROVIDER="openrouter" \
-  -v "$PWD/.zeroclaw-docker/.zeroclaw:/zeroclaw-data/.zeroclaw" \
-  -v "$PWD/.zeroclaw-docker/workspace:/zeroclaw-data/workspace" \
+  -v "$PWD/.agent-docker/.agent:/agent-data/.agent" \
+  -v "$PWD/.agent-docker/workspace:/agent-data/workspace" \
   -p 42617:42617 \
-  zeroclaw-bootstrap:local \
+  agent-bootstrap:local \
   gateway
 ```
 
 If you already ran `onboard` during the initial install, your API key and provider are
-saved in `.zeroclaw-docker/.zeroclaw/config.toml` and do not need to be passed again.
+saved in `.agent-docker/.agent/config.toml` and do not need to be passed again.
 
 ### Quick onboarding (non-interactive)
 
@@ -204,14 +204,14 @@ saved in `.zeroclaw-docker/.zeroclaw/config.toml` and do not need to be passed a
 Or with environment variables:
 
 ```bash
-ZEROCLAW_API_KEY="sk-..." ZEROCLAW_PROVIDER="openrouter" ./install.sh
+AGENT_API_KEY="sk-..." AGENT_PROVIDER="openrouter" ./install.sh
 ```
 
 ## Useful flags
 
 - `--install-system-deps`
 - `--install-rust`
-- `--skip-build` (in `--docker` mode: use local image if present, otherwise pull `ghcr.io/zeroclaw-labs/zeroclaw:latest`)
+- `--skip-build` (in `--docker` mode: use local image if present, otherwise pull `ghcr.io/agent-labs/agent:latest`)
 - `--skip-install`
 - `--provider <id>`
 

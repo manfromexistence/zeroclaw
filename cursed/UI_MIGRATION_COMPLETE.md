@@ -2,7 +2,7 @@
 
 ## Summary
 
-Successfully migrated the entire ZeroClaw project to a unified UI system using the onboard UI framework and theme system.
+Successfully migrated the entire Agent project to a unified UI system using the onboard UI framework and theme system.
 
 ## What Was Done
 
@@ -107,5 +107,5 @@ cargo check --bin    # ✅ Success
 ## Date
 
 **Completed**: 2026-03-20  
-**Project**: ZeroClaw v0.5.0  
+**Project**: Agent v0.5.0  
 **Status**: ✅ COMPLETE

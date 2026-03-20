@@ -1,6 +1,6 @@
-# ZeroClaw Commands Reference
+# Agent Commands Reference
 
-This reference is derived from the current CLI surface (`zeroclaw --help`).
+This reference is derived from the current CLI surface (`agent --help`).
 
 Last verified: **February 21, 2026**.
 
@@ -32,13 +32,13 @@ Last verified: **February 21, 2026**.
 
 ### `onboard`
 
-- `zeroclaw onboard`
-- `zeroclaw onboard --channels-only`
-- `zeroclaw onboard --force`
-- `zeroclaw onboard --reinit`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --memory <sqlite|lucid|markdown|none>`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none>`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none> --force`
+- `agent onboard`
+- `agent onboard --channels-only`
+- `agent onboard --force`
+- `agent onboard --reinit`
+- `agent onboard --api-key <KEY> --provider <ID> --memory <sqlite|lucid|markdown|none>`
+- `agent onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none>`
+- `agent onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none> --force`
 
 `onboard` safety behavior:
 
@@ -46,15 +46,15 @@ Last verified: **February 21, 2026**.
   - Full onboarding (overwrite `config.toml`)
   - Provider-only update (update provider/model/API key while preserving existing channels, tunnel, memory, hooks, and other settings)
 - In non-interactive environments, existing `config.toml` causes a safe refusal unless `--force` is passed.
-- Use `zeroclaw onboard --channels-only` when you only need to rotate channel tokens/allowlists.
-- Use `zeroclaw onboard --reinit` to start fresh. This backs up your existing config directory with a timestamp suffix and creates a new configuration from scratch.
+- Use `agent onboard --channels-only` when you only need to rotate channel tokens/allowlists.
+- Use `agent onboard --reinit` to start fresh. This backs up your existing config directory with a timestamp suffix and creates a new configuration from scratch.
 
 ### `agent`
 
-- `zeroclaw agent`
-- `zeroclaw agent -m "Hello"`
-- `zeroclaw agent --provider <ID> --model <MODEL> --temperature <0.0-2.0>`
-- `zeroclaw agent --peripheral <board:path>`
+- `agent agent`
+- `agent agent -m "Hello"`
+- `agent agent --provider <ID> --model <MODEL> --temperature <0.0-2.0>`
+- `agent agent --peripheral <board:path>`
 
 Tip:
 
@@ -62,21 +62,21 @@ Tip:
 
 ### `gateway` / `daemon`
 
-- `zeroclaw gateway [--host <HOST>] [--port <PORT>]`
-- `zeroclaw daemon [--host <HOST>] [--port <PORT>]`
+- `agent gateway [--host <HOST>] [--port <PORT>]`
+- `agent daemon [--host <HOST>] [--port <PORT>]`
 
 ### `estop`
 
-- `zeroclaw estop` (engage `kill-all`)
-- `zeroclaw estop --level network-kill`
-- `zeroclaw estop --level domain-block --domain "*.chase.com" [--domain "*.paypal.com"]`
-- `zeroclaw estop --level tool-freeze --tool shell [--tool browser]`
-- `zeroclaw estop status`
-- `zeroclaw estop resume`
-- `zeroclaw estop resume --network`
-- `zeroclaw estop resume --domain "*.chase.com"`
-- `zeroclaw estop resume --tool shell`
-- `zeroclaw estop resume --otp <123456>`
+- `agent estop` (engage `kill-all`)
+- `agent estop --level network-kill`
+- `agent estop --level domain-block --domain "*.chase.com" [--domain "*.paypal.com"]`
+- `agent estop --level tool-freeze --tool shell [--tool browser]`
+- `agent estop status`
+- `agent estop resume`
+- `agent estop resume --network`
+- `agent estop resume --domain "*.chase.com"`
+- `agent estop resume --tool shell`
+- `agent estop resume --otp <123456>`
 
 Notes:
 
@@ -86,23 +86,23 @@ Notes:
 
 ### `service`
 
-- `zeroclaw service install`
-- `zeroclaw service start`
-- `zeroclaw service stop`
-- `zeroclaw service restart`
-- `zeroclaw service status`
-- `zeroclaw service uninstall`
+- `agent service install`
+- `agent service start`
+- `agent service stop`
+- `agent service restart`
+- `agent service status`
+- `agent service uninstall`
 
 ### `cron`
 
-- `zeroclaw cron list`
-- `zeroclaw cron add <expr> [--tz <IANA_TZ>] <command>`
-- `zeroclaw cron add-at <rfc3339_timestamp> <command>`
-- `zeroclaw cron add-every <every_ms> <command>`
-- `zeroclaw cron once <delay> <command>`
-- `zeroclaw cron remove <id>`
-- `zeroclaw cron pause <id>`
-- `zeroclaw cron resume <id>`
+- `agent cron list`
+- `agent cron add <expr> [--tz <IANA_TZ>] <command>`
+- `agent cron add-at <rfc3339_timestamp> <command>`
+- `agent cron add-every <every_ms> <command>`
+- `agent cron once <delay> <command>`
+- `agent cron remove <id>`
+- `agent cron pause <id>`
+- `agent cron resume <id>`
 
 Notes:
 
@@ -111,29 +111,29 @@ Notes:
 
 ### `models`
 
-- `zeroclaw models refresh`
-- `zeroclaw models refresh --provider <ID>`
-- `zeroclaw models refresh --force`
+- `agent models refresh`
+- `agent models refresh --provider <ID>`
+- `agent models refresh --force`
 
 `models refresh` currently supports live catalog refresh for provider IDs: `openrouter`, `openai`, `anthropic`, `groq`, `mistral`, `deepseek`, `xai`, `together-ai`, `gemini`, `ollama`, `llamacpp`, `sglang`, `vllm`, `astrai`, `venice`, `fireworks`, `cohere`, `moonshot`, `glm`, `zai`, `qwen`, and `nvidia`.
 
 ### `doctor`
 
-- `zeroclaw doctor`
-- `zeroclaw doctor models [--provider <ID>] [--use-cache]`
-- `zeroclaw doctor traces [--limit <N>] [--event <TYPE>] [--contains <TEXT>]`
-- `zeroclaw doctor traces --id <TRACE_ID>`
+- `agent doctor`
+- `agent doctor models [--provider <ID>] [--use-cache]`
+- `agent doctor traces [--limit <N>] [--event <TYPE>] [--contains <TEXT>]`
+- `agent doctor traces --id <TRACE_ID>`
 
 `doctor traces` reads runtime tool/model diagnostics from `observability.runtime_trace_path`.
 
 ### `channel`
 
-- `zeroclaw channel list`
-- `zeroclaw channel start`
-- `zeroclaw channel doctor`
-- `zeroclaw channel bind-telegram <IDENTITY>`
-- `zeroclaw channel add <type> <json>`
-- `zeroclaw channel remove <name>`
+- `agent channel list`
+- `agent channel start`
+- `agent channel doctor`
+- `agent channel bind-telegram <IDENTITY>`
+- `agent channel add <type> <json>`
+- `agent channel remove <name>`
 
 Runtime in-chat commands (Telegram/Discord while channel server is running):
 
@@ -154,14 +154,14 @@ Channel runtime also watches `config.toml` and hot-applies updates to:
 
 ### `integrations`
 
-- `zeroclaw integrations info <name>`
+- `agent integrations info <name>`
 
 ### `skills`
 
-- `zeroclaw skills list`
-- `zeroclaw skills audit <source_or_name>`
-- `zeroclaw skills install <source>`
-- `zeroclaw skills remove <name>`
+- `agent skills list`
+- `agent skills audit <source_or_name>`
+- `agent skills install <source>`
+- `agent skills remove <name>`
 
 `<source>` accepts git remotes (`https://...`, `http://...`, `ssh://...`, and `git@host:owner/repo.git`) or a local filesystem path.
 
@@ -177,43 +177,43 @@ Skill manifests (`SKILL.toml`) support `prompts` and `[[tools]]`; both are injec
 
 ### `migrate`
 
-- `zeroclaw migrate openclaw [--source <path>] [--dry-run]`
+- `agent migrate openclaw [--source <path>] [--dry-run]`
 
 ### `config`
 
-- `zeroclaw config schema`
+- `agent config schema`
 
 `config schema` prints a JSON Schema (draft 2020-12) for the full `config.toml` contract to stdout.
 
 ### `completions`
 
-- `zeroclaw completions bash`
-- `zeroclaw completions fish`
-- `zeroclaw completions zsh`
-- `zeroclaw completions powershell`
-- `zeroclaw completions elvish`
+- `agent completions bash`
+- `agent completions fish`
+- `agent completions zsh`
+- `agent completions powershell`
+- `agent completions elvish`
 
 `completions` is stdout-only by design so scripts can be sourced directly without log/warning contamination.
 
 ### `hardware`
 
-- `zeroclaw hardware discover`
-- `zeroclaw hardware introspect <path>`
-- `zeroclaw hardware info [--chip <chip_name>]`
+- `agent hardware discover`
+- `agent hardware introspect <path>`
+- `agent hardware info [--chip <chip_name>]`
 
 ### `peripheral`
 
-- `zeroclaw peripheral list`
-- `zeroclaw peripheral add <board> <path>`
-- `zeroclaw peripheral flash [--port <serial_port>]`
-- `zeroclaw peripheral setup-uno-q [--host <ip_or_host>]`
-- `zeroclaw peripheral flash-nucleo`
+- `agent peripheral list`
+- `agent peripheral add <board> <path>`
+- `agent peripheral flash [--port <serial_port>]`
+- `agent peripheral setup-uno-q [--host <ip_or_host>]`
+- `agent peripheral flash-nucleo`
 
 ## Validation Tip
 
 To verify docs against your current binary quickly:
 
 ```bash
-zeroclaw --help
-zeroclaw <command> --help
+agent --help
+agent <command> --help
 ```

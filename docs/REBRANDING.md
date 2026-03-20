@@ -1,14 +1,14 @@
-# Rebranding from ZeroClaw to DX-Agent
+# Rebranding from Agent to DX-Agent
 
-This document summarizes the rebranding changes from ZeroClaw to DX-Agent.
+This document summarizes the rebranding changes from Agent to DX-Agent.
 
 ## Configuration Directory Changes
 
 ### Old Paths
-- Config directory: `~/.zeroclaw/`
-- Workspace: `~/.zeroclaw/workspace/`
-- Environment variable: `ZEROCLAW_CONFIG_DIR`
-- Workspace env var: `ZEROCLAW_WORKSPACE`
+- Config directory: `~/.agent/`
+- Workspace: `~/.agent/workspace/`
+- Environment variable: `AGENT_CONFIG_DIR`
+- Workspace env var: `AGENT_WORKSPACE`
 
 ### New Paths
 - Config directory: `~/.dx/agent/`
@@ -22,7 +22,7 @@ This document summarizes the rebranding changes from ZeroClaw to DX-Agent.
 
 The agent will automatically migrate your existing configuration:
 
-1. On first run, if `~/.zeroclaw/` exists and `~/.dx/agent/` doesn't:
+1. On first run, if `~/.agent/` exists and `~/.dx/agent/` doesn't:
    - Configuration will be copied to the new location
    - Old directory will be preserved (not deleted)
 
@@ -35,11 +35,11 @@ If you prefer to migrate manually:
 mkdir -p ~/.dx/agent
 
 # Copy configuration
-cp -r ~/.zeroclaw/* ~/.dx/agent/
+cp -r ~/.agent/* ~/.dx/agent/
 
 # Update environment variables (if set)
 # In your shell profile (.bashrc, .zshrc, etc.):
-# OLD: export ZEROCLAW_CONFIG_DIR=...
+# OLD: export AGENT_CONFIG_DIR=...
 # NEW: export DX_CONFIG_DIR=...
 ```
 
@@ -49,8 +49,8 @@ Update any scripts or configurations that use the old environment variables:
 
 ```bash
 # Old
-export ZEROCLAW_CONFIG_DIR=/path/to/config
-export ZEROCLAW_WORKSPACE=/path/to/workspace
+export AGENT_CONFIG_DIR=/path/to/config
+export AGENT_WORKSPACE=/path/to/workspace
 
 # New
 export DX_CONFIG_DIR=/path/to/config
@@ -60,18 +60,18 @@ export DX_WORKSPACE=/path/to/workspace
 ## Branding Changes
 
 ### Product Name
-- **Old**: ZeroClaw
+- **Old**: Agent
 - **New**: DX-Agent (Display: "DX - Enhanced Development Experience")
 
 ### CLI Output
-- Interactive mode: "◆ DX-Agent Interactive Mode" (was "🦀 ZeroClaw Interactive Mode")
+- Interactive mode: "◆ DX-Agent Interactive Mode" (was "🦀 Agent Interactive Mode")
 - Logo symbol: ◆ (diamond) instead of 🦀 (crab)
 - All user-facing messages updated to reference DX-Agent
 
 ### System Prompts
 - Tool descriptions updated to mention DX-Agent
 - Identity section refers to "DX - Enhanced Development Experience"
-- No references to ZeroClaw in agent prompts
+- No references to Agent in agent prompts
 
 ## Code Changes Summary
 
@@ -103,7 +103,7 @@ export DX_WORKSPACE=/path/to/workspace
 
 The agent maintains backward compatibility:
 
-1. **Config Detection**: Checks for old `~/.zeroclaw/` directory
+1. **Config Detection**: Checks for old `~/.agent/` directory
 2. **Auto-Migration**: Offers to migrate on first run
 3. **Environment Variables**: Still reads old variables if new ones aren't set (with deprecation warning)
 
@@ -150,7 +150,7 @@ chmod 600 ~/.dx/agent/config.toml
 
 ### Old References
 
-If you see references to ZeroClaw:
+If you see references to Agent:
 
 1. Update to latest version
 2. Clear any cached data
@@ -165,7 +165,7 @@ If you see references to ZeroClaw:
 
 ## Related Changes
 
-- Package name: `agent` (was `zeroclawlabs`)
-- Binary name: `agent` (was `zeroclaw`)
+- Package name: `agent` (was `agentlabs`)
+- Binary name: `agent` (was `agent`)
 - Display name: "DX-Agent - Enhanced Development Experience"
-- Repository: Still at github.com/zeroclaw-labs/zeroclaw (for now)
+- Repository: Still at github.com/agent-labs/agent (for now)

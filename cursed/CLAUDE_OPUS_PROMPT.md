@@ -1,6 +1,6 @@
 # Implementation Prompt for Claude Opus 4.6
 
-**Project:** ZeroClaw OpenAPI Integration System  
+**Project:** Agent OpenAPI Integration System  
 **Goal:** Implement 3,500-4,000 API integrations in 5 weeks  
 **Current Status:** 70% infrastructure complete, 30% needs implementation
 
@@ -8,7 +8,7 @@
 
 ## Context
 
-You are working on ZeroClaw, a Rust-based AI agent framework. The project already has:
+You are working on Agent, a Rust-based AI agent framework. The project already has:
 - Complete HTTP request tool (`src/tools/http_request.rs`)
 - Full MCP (Model Context Protocol) infrastructure (`src/tools/mcp_*.rs`)
 - Robust security and auth system (`src/security/`)
@@ -141,16 +141,16 @@ impl SpecHarvester {
 ```
 
 6. **Clone APIs.guru Repository**
-   - Add as git submodule or download to `~/.zeroclaw/openapi-specs/`
+   - Add as git submodule or download to `~/.agent/openapi-specs/`
    - Implement `ApisGuruSource` to parse all specs
    - Handle YAML and JSON formats
    - Deduplicate by provider+service+version
 
-7. **Create CLI Command: `zeroclaw openapi harvest`**
+7. **Create CLI Command: `agent openapi harvest`**
    - Add to `src/main.rs`
    - Harvest specs from all sources
    - Validate and score each spec
-   - Save to `~/.zeroclaw/openapi-specs/registry.json`
+   - Save to `~/.agent/openapi-specs/registry.json`
 
 **Deliverable:** 1,500-2,000 parsed and validated specs
 
@@ -311,9 +311,9 @@ pub struct OpenApiConfig {
 ```
 
 6. **Create CLI Commands**
-   - `zeroclaw openapi list` - List all loaded specs
-   - `zeroclaw openapi tools <spec>` - List tools for a spec
-   - `zeroclaw openapi test <tool>` - Test a tool execution
+   - `agent openapi list` - List all loaded specs
+   - `agent openapi tools <spec>` - List tools for a spec
+   - `agent openapi test <tool>` - Test a tool execution
 
 **Deliverable:** 1,500-2,000 executable OpenAPI tools
 
@@ -374,9 +374,9 @@ impl GoogleDiscoveryConverter {
    - Assign quality scores
 
 6. **Create CLI Commands**
-   - `zeroclaw openapi convert postman <url>`
-   - `zeroclaw openapi convert aws <service>`
-   - `zeroclaw openapi convert google <api>`
+   - `agent openapi convert postman <url>`
+   - `agent openapi convert aws <service>`
+   - `agent openapi convert google <api>`
 
 **Deliverable:** 2,500-3,500 tools (including conversions)
 
@@ -420,8 +420,8 @@ impl OpenApiMcpServer {
 ```
 
 4. **Add CLI Commands**
-   - `zeroclaw openapi mcp start` - Start MCP server
-   - `zeroclaw openapi mcp test` - Test MCP server
+   - `agent openapi mcp start` - Start MCP server
+   - `agent openapi mcp test` - Test MCP server
 
 5. **Documentation**
    - Create `docs/OPENAPI.md` with usage guide
@@ -447,7 +447,7 @@ impl OpenApiMcpServer {
 
 2. **Create GitHub Repository Structure**
 ```
-zeroclaw-openapi-specs/
+agent-openapi-specs/
 ├── specs/
 │   ├── verified/
 │   ├── community/
@@ -463,7 +463,7 @@ zeroclaw-openapi-specs/
    - Add progress bars for harvesting
    - Add colored output
    - Add interactive tool selection
-   - Add `zeroclaw openapi search <query>`
+   - Add `agent openapi search <query>`
 
 4. **Create Marketing Materials**
    - Blog post draft
@@ -645,34 +645,34 @@ zeroclaw-openapi-specs/
 
 ```bash
 # Harvest specs from all sources
-zeroclaw openapi harvest
+agent openapi harvest
 
 # List available specs
-zeroclaw openapi list
+agent openapi list
 
 # Show tools for a specific spec
-zeroclaw openapi tools github
+agent openapi tools github
 
 # Test a tool
-zeroclaw openapi test github__create_issue \
+agent openapi test github__create_issue \
   --args '{"owner":"user","repo":"repo","title":"Test"}'
 
 # Add a custom spec
-zeroclaw openapi add https://api.example.com/openapi.json
+agent openapi add https://api.example.com/openapi.json
 
 # Start MCP server
-zeroclaw openapi mcp start --port 3000
+agent openapi mcp start --port 3000
 
 # Search for tools
-zeroclaw openapi search "create issue"
+agent openapi search "create issue"
 ```
 
 ```rust
 // Programmatic usage
-use zeroclaw::tools::openapi::{OpenApiRegistry, OpenApiTool};
+use agent::tools::openapi::{OpenApiRegistry, OpenApiTool};
 
 let mut registry = OpenApiRegistry::new();
-registry.load_from_disk("~/.zeroclaw/openapi-specs")?;
+registry.load_from_disk("~/.agent/openapi-specs")?;
 
 let tool = registry.get_tool("github__create_issue")?;
 let result = tool.execute(json!({
@@ -719,7 +719,7 @@ src/tools/openapi/
 ```
 
 ```
-~/.zeroclaw/openapi-specs/
+~/.agent/openapi-specs/
 ├── registry.json       # Metadata for all specs
 ├── specs/
 │   ├── github.yaml

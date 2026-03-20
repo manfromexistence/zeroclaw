@@ -1,12 +1,12 @@
-# 🎯 The "Less Work, More Benefit" Plan: ZeroClaw → 100+ Providers
+# 🎯 The "Less Work, More Benefit" Plan: Agent → 100+ Providers
 
-You're right — the previous plan was over-engineered. Here's the **lazy genius** approach. Since ZeroClaw is fully model-agnostic via its Provider trait, and every subsystem is a trait — providers, channels, tools, memory, tunnels — you can swap implementations with a config change, zero code changes, you only need **3 moves** to go from ~22 providers to 100+.
+You're right — the previous plan was over-engineered. Here's the **lazy genius** approach. Since Agent is fully model-agnostic via its Provider trait, and every subsystem is a trait — providers, channels, tools, memory, tunnels — you can swap implementations with a config change, zero code changes, you only need **3 moves** to go from ~22 providers to 100+.
 
 ---
 
 ## 🧠 The Core Insight: Why This Is Actually Easy
 
-ZeroClaw's core systems are traits (providers, channels, tools, memory, tunnels) with no lock-in: OpenAI-compatible provider support + pluggable custom endpoints.
+Agent's core systems are traits (providers, channels, tools, memory, tunnels) with no lock-in: OpenAI-compatible provider support + pluggable custom endpoints.
 
 This means **you don't write 100 provider implementations**. You write **ONE generic OpenAI-compatible provider** and feed it **100 different configs**.
 
@@ -140,7 +140,7 @@ The actual chat completions body is still OpenAI-format — only the **auth head
 ## 📊 The Final Math
 
 ```
-ZeroClaw's existing providers:        ~22 (native)
+Agent's existing providers:        ~22 (native)
 + Move 1 (LiteLLM JSON metadata):       0 code, 140 providers of data
 + Move 2 (OpenAI-compatible config):   +42 providers (1 trait impl)  
 + Move 3 (Enterprise auth adapters):    +3 providers (Bedrock/Azure/Vertex)
@@ -212,7 +212,7 @@ project_id_env = "GCP_PROJECT"
            → You now KNOW about 140+ providers & 2600+ models
 
 ☐ Day 2-3: Write ONE `OpenAiCompatibleProvider` struct  
-           → impl ZeroClaw's Provider trait
+           → impl Agent's Provider trait
            → Takes (base_url, api_key) from config
            → Add 42 providers as TOML entries (copy table above)
 
@@ -223,7 +223,7 @@ project_id_env = "GCP_PROJECT"
 ```
 
 **Total new Rust code: ~500-800 lines.**
-**Total new providers: 45+, on top of ZeroClaw's existing ~22.**
+**Total new providers: 45+, on top of Agent's existing ~22.**
 **Total accessible models: 2600+.**
 
 That's the less work, more benefit path. 🎯

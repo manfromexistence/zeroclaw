@@ -4,7 +4,7 @@
 
 ### Provider Expansion (Main Goal)
 
-**Result: ZeroClaw now supports 140+ providers with 2,583 models**
+**Result: Agent now supports 140+ providers with 2,583 models**
 
 #### 1. Added 7 New OpenAI-Compatible Providers
 - `inference-net` / `inferencenet` - Inference.net
@@ -33,7 +33,7 @@ All added to `src/providers/mod.rs` factory function.
 - Lazy-loaded at runtime with compile-time embedding
 
 #### 4. Enhanced CLI Command
-- `zeroclaw providers` now shows:
+- `agent providers` now shows:
   - Total provider count: 63 native providers
   - Total model count: 2,583 models
   - Model count per provider (from LiteLLM database)
@@ -63,13 +63,13 @@ All `std::env::set_var` and `std::env::remove_var` calls now wrapped in `unsafe`
 
 ### Compilation Status
 ```bash
-cargo build --bin zeroclaw
+cargo build --bin agent
 # ✅ Success - builds with only 3 harmless warnings about unnecessary unsafe blocks
 ```
 
 ### Provider Command Test
 ```bash
-zeroclaw providers
+agent providers
 # ✅ Shows: "Supported providers (63 total, 2583 models)"
 ```
 
@@ -110,7 +110,7 @@ Top providers by model count:
 
 ## Conclusion
 
-ZeroClaw now has one of the most comprehensive provider ecosystems:
+Agent now has one of the most comprehensive provider ecosystems:
 - **63 native providers** with full implementations
 - **2,583 models** with complete metadata
 - **140+ providers** in the embedded database

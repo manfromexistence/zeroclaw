@@ -1,4 +1,4 @@
-# ZeroClaw OpenAPI Integration - COMPLETE
+# Agent OpenAPI Integration - COMPLETE
 
 ## DELIVERED ✅
 
@@ -21,11 +21,11 @@
 ### What Works Right Now ✅
 ```bash
 # All CLI commands operational
-zeroclaw openapi harvest          # Loads all specs
-zeroclaw openapi list             # Lists 1,913 specs
-zeroclaw openapi connects <spec>  # Lists connects for spec
-zeroclaw openapi test <connect>   # Tests connect execution
-zeroclaw openapi search <query>   # Searches 78,989 connects
+agent openapi harvest          # Loads all specs
+agent openapi list             # Lists 1,913 specs
+agent openapi connects <spec>  # Lists connects for spec
+agent openapi test <connect>   # Tests connect execution
+agent openapi search <query>   # Searches 78,989 connects
 ```
 
 ## Terminology
@@ -36,7 +36,7 @@ zeroclaw openapi search <query>   # Searches 78,989 connects
 - 78,989 connects = 78,989 ways to connect to external services
 
 **Tools** = Internal capabilities (different system)
-- Tools are ZeroClaw's built-in functions
+- Tools are Agent's built-in functions
 - Tools don't call external APIs
 - Examples: file operations, text processing, etc.
 

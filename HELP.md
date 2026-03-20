@@ -22,16 +22,16 @@ error[E0432]: unresolved import `super::metasearch`
 ```rust
 use crate::metasearch::{SearchCategory, SearchQuery, ...};
 ```
-- Result: Works for `cargo check --lib` but fails for `cargo check --bin zeroclaw`
+- Result: Works for `cargo check --lib` but fails for `cargo check --bin agent`
 - Error: "unresolved import `crate::metasearch`" when building binary
 - Reason: In binary context, `crate::` refers to the binary crate, not the library
 
-**Attempt 2: Using `zeroclawlabs::metasearch`**
+**Attempt 2: Using `agentlabs::metasearch`**
 ```rust
-use zeroclawlabs::metasearch::{SearchCategory, SearchQuery, ...};
+use agentlabs::metasearch::{SearchCategory, SearchQuery, ...};
 ```
 - Result: Works for binary but fails for library
-- Error: "use of unresolved module or unlinked crate `zeroclawlabs`"
+- Error: "use of unresolved module or unlinked crate `agentlabs`"
 - Reason: Within the library, can't reference the library by its external name
 
 **Attempt 3: Using `super::metasearch`**
@@ -87,8 +87,8 @@ src/
 - Language: Rust edition 2024
 - Compiler: rustc 1.94.0
 - Project: Library + Binary in same crate
-- Crate name: `zeroclawlabs`
-- Binary name: `zeroclaw`
+- Crate name: `agentlabs`
+- Binary name: `agent`
 
 ### What Needs to Work
 

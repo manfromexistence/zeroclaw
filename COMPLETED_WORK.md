@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes all major changes and integrations completed for DX-Agent (formerly ZeroClaw).
+This document summarizes all major changes and integrations completed for DX-Agent (formerly Agent).
 
 ---
 
@@ -51,22 +51,22 @@ This document summarizes all major changes and integrations completed for DX-Age
 
 ---
 
-## 4. Rebranding: ZeroClaw → DX-Agent
+## 4. Rebranding: Agent → DX-Agent
 
 ✅ **Status**: Complete
 
 ### Package Changes
-- Package name: `zeroclawlabs` → `agent`
-- Binary name: `zeroclaw` → `agent`
-- Library name: `zeroclaw` → `agent`
+- Package name: `agentlabs` → `agent`
+- Binary name: `agent` → `agent`
+- Library name: `agent` → `agent`
 
 ### Configuration Directory
-- **Old**: `~/.zeroclaw/`
+- **Old**: `~/.agent/`
 - **New**: `~/.dx/agent/`
 
 ### Environment Variables
-- `ZEROCLAW_CONFIG_DIR` → `DX_CONFIG_DIR`
-- `ZEROCLAW_WORKSPACE` → `DX_WORKSPACE`
+- `AGENT_CONFIG_DIR` → `DX_CONFIG_DIR`
+- `AGENT_WORKSPACE` → `DX_WORKSPACE`
 
 ### Branding
 - CLI branding: "DX-Agent - Enhanced Development Experience"
@@ -310,7 +310,7 @@ docs/
 1. Test local GGUF model loading
 2. Verify Serializer format with AI models
 3. Test train animation on all exit paths
-4. Verify config migration from `~/.zeroclaw/` to `~/.dx/agent/`
+4. Verify config migration from `~/.agent/` to `~/.dx/agent/`
 5. Run full test suite
 6. Build release binary and check size
 

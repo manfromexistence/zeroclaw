@@ -2,7 +2,7 @@
 
 ## Overview
 
-Metasearch has been successfully integrated into ZeroClaw with 215+ search engines. This guide shows you how to test and verify the integration.
+Metasearch has been successfully integrated into Agent with 215+ search engines. This guide shows you how to test and verify the integration.
 
 ## ✅ Integration Status
 
@@ -69,12 +69,12 @@ This will:
 3. Display formatted search results
 4. Show search time
 
-### Method 4: Test with ZeroClaw Agent
+### Method 4: Test with Agent Agent
 
 If you have a Mistral AI agent configured:
 
 ```bash
-# Start ZeroClaw
+# Start Agent
 cargo run
 
 # In the agent prompt, ask:

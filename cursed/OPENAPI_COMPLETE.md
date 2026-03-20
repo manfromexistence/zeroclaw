@@ -24,7 +24,7 @@ Auth providers:        5 (all implemented)
 - Example: `stripe_create_customer`, `github_get_user`, `slack_post_message`
 
 **Tools** = Internal capabilities (different system)
-- Tools are ZeroClaw's built-in functions
+- Tools are Agent's built-in functions
 - Tools don't call external APIs
 - Examples: file operations, text processing, code execution
 
@@ -67,19 +67,19 @@ Auth providers:        5 (all implemented)
 ### CLI Commands
 ```bash
 # Harvest all specs from APIs.guru
-zeroclaw openapi harvest
+agent openapi harvest
 
 # List all loaded specs (1,913)
-zeroclaw openapi list
+agent openapi list
 
 # List connects for a specific spec
-zeroclaw openapi connects stripe_v1
+agent openapi connects stripe_v1
 
 # Test a connect with arguments
-zeroclaw openapi test stripe_create_customer --args '{"email": "test@example.com"}'
+agent openapi test stripe_create_customer --args '{"email": "test@example.com"}'
 
 # Search across 78,989 connects
-zeroclaw openapi search "payment"
+agent openapi search "payment"
 ```
 
 ### Code Integration

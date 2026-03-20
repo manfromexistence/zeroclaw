@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/zeroclaw.png" alt="ZeroClaw" width="200" />
+  <img src="docs/assets/agent.png" alt="Agent" width="200" />
 </p>
 
-<h1 align="center">ZeroClaw 🦀</h1>
+<h1 align="center">Agent 🦀</h1>
 
 <p align="center">
   <strong>Zero overhead. Zero compromise. 100% Rust. 100% Agnostic.</strong><br>
@@ -11,14 +11,14 @@
 
 <p align="center">
   <a href="LICENSE-APACHE"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache%202.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
-  <a href="https://github.com/zeroclaw-labs/zeroclaw/graphs/contributors"><img src="https://img.shields.io/github/contributors/zeroclaw-labs/zeroclaw?color=green" alt="Contributors" /></a>
+  <a href="https://github.com/agent-labs/agent/graphs/contributors"><img src="https://img.shields.io/github/contributors/agent-labs/agent?color=green" alt="Contributors" /></a>
   <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=flat&logo=buy-me-a-coffee" alt="Buy Me a Coffee" /></a>
-  <a href="https://x.com/zeroclawlabs?s=21"><img src="https://img.shields.io/badge/X-%40zeroclawlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @zeroclawlabs" /></a>
-  <a href="https://www.facebook.com/groups/zeroclawlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
+  <a href="https://x.com/agentlabs?s=21"><img src="https://img.shields.io/badge/X-%40agentlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @agentlabs" /></a>
+  <a href="https://www.facebook.com/groups/agentlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
   <a href="https://discord.com/invite/wDshRVqRjx"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord" /></a>
-  <a href="https://www.tiktok.com/@zeroclawlabs"><img src="https://img.shields.io/badge/TikTok-%40zeroclawlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @zeroclawlabs" /></a>
+  <a href="https://www.tiktok.com/@agentlabs"><img src="https://img.shields.io/badge/TikTok-%40agentlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @agentlabs" /></a>
   <a href="https://www.rednote.com/user/profile/69b735e6000000002603927e"><img src="https://img.shields.io/badge/RedNote-Official-FF2442?style=flat" alt="RedNote" /></a>
-  <a href="https://www.reddit.com/r/zeroclawlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fzeroclawlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/zeroclawlabs" /></a>
+  <a href="https://www.reddit.com/r/agentlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fagentlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/agentlabs" /></a>
 </p>
 <p align="center">
 Built by students and members of the Harvard, MIT, and Sundai.Club communities.
@@ -61,7 +61,7 @@ Built by students and members of the Harvard, MIT, and Sundai.Club communities.
 
 <p align="center">
   <a href="#quick-start">Getting Started</a> |
-  <a href="https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh">One-Click Setup</a> |
+  <a href="https://raw.githubusercontent.com/agent-labs/agent/master/install.sh">One-Click Setup</a> |
   <a href="docs/README.md">Docs Hub</a> |
   <a href="docs/SUMMARY.md">Docs TOC</a>
 </p>
@@ -82,7 +82,7 @@ Built by students and members of the Harvard, MIT, and Sundai.Club communities.
 </p>
 
 <p align="center">
-  ZeroClaw is the <strong>runtime operating system</strong> for agentic workflows — infrastructure that abstracts models, tools, memory, and execution so agents can be built once and run anywhere.
+  Agent is the <strong>runtime operating system</strong> for agentic workflows — infrastructure that abstracts models, tools, memory, and execution so agents can be built once and run anywhere.
 </p>
 
 <p align="center"><code>Trait-driven architecture · secure-by-default runtime · provider/channel/tool swappable · pluggable everything</code></p>
@@ -96,8 +96,8 @@ Use this board for important notices (breaking changes, security advisories, mai
 
 | Date (UTC) | Level       | Notice                                                                                                                                                                                                                                                                                                                                                 | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-19 | _Critical_  | We are **not affiliated** with `openagen/zeroclaw`, `zeroclaw.org` or `zeroclaw.net`. The `zeroclaw.org` and `zeroclaw.net` domains currently points to the `openagen/zeroclaw` fork, and that domain/repository are impersonating our official website/project.                                                                                       | Do not trust information, binaries, fundraising, or announcements from those sources. Use only [this repository](https://github.com/zeroclaw-labs/zeroclaw) and our verified social accounts.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 2026-02-21 | _Important_ | Our official website is now live: [zeroclawlabs.ai](https://zeroclawlabs.ai). Thanks for your patience while we prepared the launch. We are still seeing impersonation attempts, so do **not** join any investment or fundraising activity claiming the ZeroClaw name unless it is published through our official channels.                            | Use [this repository](https://github.com/zeroclaw-labs/zeroclaw) as the single source of truth. Follow [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Facebook (Group)](https://www.facebook.com/groups/zeroclawlabs), and [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/) for official updates. |
+| 2026-02-19 | _Critical_  | We are **not affiliated** with `openagen/agent`, `agent.org` or `agent.net`. The `agent.org` and `agent.net` domains currently points to the `openagen/agent` fork, and that domain/repository are impersonating our official website/project.                                                                                       | Do not trust information, binaries, fundraising, or announcements from those sources. Use only [this repository](https://github.com/agent-labs/agent) and our verified social accounts.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 2026-02-21 | _Important_ | Our official website is now live: [agentlabs.ai](https://agentlabs.ai). Thanks for your patience while we prepared the launch. We are still seeing impersonation attempts, so do **not** join any investment or fundraising activity claiming the Agent name unless it is published through our official channels.                            | Use [this repository](https://github.com/agent-labs/agent) as the single source of truth. Follow [X (@agentlabs)](https://x.com/agentlabs?s=21), [Facebook (Group)](https://www.facebook.com/groups/agentlabs), and [Reddit (r/agentlabs)](https://www.reddit.com/r/agentlabs/) for official updates. |
 | 2026-02-19 | _Important_ | Anthropic updated the Authentication and Credential Use terms on 2026-02-19. Claude Code OAuth tokens (Free, Pro, Max) are intended exclusively for Claude Code and Claude.ai; using OAuth tokens from Claude Free/Pro/Max in any other product, tool, or service (including Agent SDK) is not permitted and may violate the Consumer Terms of Service. | Please temporarily avoid Claude Code OAuth integrations to prevent potential loss. Original clause: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ### ✨ Features
@@ -107,18 +107,18 @@ Use this board for important notices (breaking changes, security advisories, mai
 - ⚡ **Fast Cold Starts:** Single-binary Rust runtime keeps command and daemon startup near-instant for daily operations.
 - 🌍 **Portable Architecture:** One binary-first workflow across ARM, x86, and RISC-V with swappable providers/channels/tools.
 
-### Why teams pick ZeroClaw
+### Why teams pick Agent
 
 - **Lean by default:** small Rust binary, fast startup, low memory footprint.
 - **Secure by design:** pairing, strict sandboxing, explicit allowlists, workspace scoping.
 - **Fully swappable:** core systems are traits (providers, channels, tools, memory, tunnels).
 - **No lock-in:** OpenAI-compatible provider support + pluggable custom endpoints.
 
-## Benchmark Snapshot (ZeroClaw vs OpenClaw, Reproducible)
+## Benchmark Snapshot (Agent vs OpenClaw, Reproducible)
 
 Local machine quick benchmark (macOS arm64, Feb 2026) normalized for 0.8GHz edge hardware.
 
-|                           | OpenClaw      | NanoBot        | PicoClaw        | ZeroClaw 🦀          |
+|                           | OpenClaw      | NanoBot        | PicoClaw        | Agent 🦀          |
 | ------------------------- | ------------- | -------------- | --------------- | -------------------- |
 | **Language**              | TypeScript    | Python         | Go              | **Rust**             |
 | **RAM**                   | > 1GB         | > 100MB        | < 10MB          | **< 5MB**            |
@@ -126,10 +126,10 @@ Local machine quick benchmark (macOS arm64, Feb 2026) normalized for 0.8GHz edge
 | **Binary Size**           | ~28MB (dist)  | N/A (Scripts)  | ~8MB            | **~8.8 MB**          |
 | **Cost**                  | Mac Mini $599 | Linux SBC ~$50 | Linux Board $10 | **Any hardware $10** |
 
-> Notes: ZeroClaw results are measured on release builds using `/usr/bin/time -l`. OpenClaw requires Node.js runtime (typically ~390MB additional memory overhead), while NanoBot requires Python runtime. PicoClaw and ZeroClaw are static binaries. The RAM figures above are runtime memory; build-time compilation requirements are higher.
+> Notes: Agent results are measured on release builds using `/usr/bin/time -l`. OpenClaw requires Node.js runtime (typically ~390MB additional memory overhead), while NanoBot requires Python runtime. PicoClaw and Agent are static binaries. The RAM figures above are runtime memory; build-time compilation requirements are higher.
 
 <p align="center">
-  <img src="docs/assets/zeroclaw-comparison.jpeg" alt="ZeroClaw vs OpenClaw Comparison" width="800" />
+  <img src="docs/assets/agent-comparison.jpeg" alt="Agent vs OpenClaw Comparison" width="800" />
 </p>
 
 ### Reproducible local measurement
@@ -138,17 +138,17 @@ Benchmark claims can drift as code and toolchains evolve, so always measure your
 
 ```bash
 cargo build --release
-ls -lh target/release/zeroclaw
+ls -lh target/release/agent
 
-/usr/bin/time -l target/release/zeroclaw --help
-/usr/bin/time -l target/release/zeroclaw status
+/usr/bin/time -l target/release/agent --help
+/usr/bin/time -l target/release/agent status
 ```
 
 Example sample (macOS arm64, measured on February 18, 2026):
 
 - Release binary size: `8.8MB`
-- `zeroclaw --help`: about `0.02s` real time, ~`3.9MB` peak memory footprint
-- `zeroclaw status`: about `0.01s` real time, ~`4.1MB` peak memory footprint
+- `agent --help`: about `0.02s` real time, ~`3.9MB` peak memory footprint
+- `agent status`: about `0.01s` real time, ~`4.1MB` peak memory footprint
 
 ## Prerequisites
 
@@ -211,10 +211,10 @@ Example sample (macOS arm64, measured on February 18, 2026):
 
 #### One-Line Installer
 
-Or skip the steps above and install everything (system deps, Rust, ZeroClaw) in a single command:
+Or skip the steps above and install everything (system deps, Rust, Agent) in a single command:
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh | bash
+curl -LsSf https://raw.githubusercontent.com/agent-labs/agent/master/install.sh | bash
 ```
 
 #### Compilation resource requirements
@@ -251,15 +251,15 @@ To require binary-only install with no source fallback:
 ### Homebrew (macOS/Linuxbrew)
 
 ```bash
-brew install zeroclaw
+brew install agent
 ```
 
 ### One-click bootstrap
 
 ```bash
 # Recommended: clone then run local bootstrap script
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 ./install.sh
 
 # Optional: bootstrap dependencies + Rust on fresh machines
@@ -278,7 +278,7 @@ cd zeroclaw
 ./install.sh --docker
 
 # Optional: force Podman as container CLI
-ZEROCLAW_CONTAINER_CLI=podman ./install.sh --docker
+AGENT_CONTAINER_CLI=podman ./install.sh --docker
 
 # Optional: in --docker mode, skip local image build and use local tag or pull fallback image
 ./install.sh --docker --skip-build
@@ -287,7 +287,7 @@ ZEROCLAW_CONTAINER_CLI=podman ./install.sh --docker
 Remote one-liner (review first in security-sensitive environments):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/agent-labs/agent/master/install.sh | bash
 ```
 
 Details: [`docs/setup-guides/one-click-bootstrap.md`](docs/setup-guides/one-click-bootstrap.md) (toolchain mode may request `sudo` for system packages).
@@ -301,19 +301,19 @@ Release assets are published for:
 - Windows: `x86_64`
 
 Download the latest assets from:
-<https://github.com/zeroclaw-labs/zeroclaw/releases/latest>
+<https://github.com/agent-labs/agent/releases/latest>
 
 Example (ARM64 Linux):
 
 ```bash
-curl -fsSLO https://github.com/zeroclaw-labs/zeroclaw/releases/latest/download/zeroclaw-aarch64-unknown-linux-gnu.tar.gz
-tar xzf zeroclaw-aarch64-unknown-linux-gnu.tar.gz
-install -m 0755 zeroclaw "$HOME/.cargo/bin/zeroclaw"
+curl -fsSLO https://github.com/agent-labs/agent/releases/latest/download/agent-aarch64-unknown-linux-gnu.tar.gz
+tar xzf agent-aarch64-unknown-linux-gnu.tar.gz
+install -m 0755 agent "$HOME/.cargo/bin/agent"
 ```
 
 ```bash
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 cargo build --release --locked
 cargo install --path . --force --locked
 
@@ -321,110 +321,110 @@ cargo install --path . --force --locked
 export PATH="$HOME/.cargo/bin:$PATH"
 
 # Quick setup (no prompts, optional model specification)
-zeroclaw onboard --api-key sk-... --provider openrouter [--model "openrouter/auto"]
+agent onboard --api-key sk-... --provider openrouter [--model "openrouter/auto"]
 
 # Or guided wizard
-zeroclaw onboard
+agent onboard
 
 # If config.toml already exists and you intentionally want to overwrite it
-zeroclaw onboard --force
+agent onboard --force
 
 # Or quickly repair channels/allowlists only
-zeroclaw onboard --channels-only
+agent onboard --channels-only
 
 # Chat
-zeroclaw agent -m "Hello, ZeroClaw!"
+agent agent -m "Hello, Agent!"
 
 # Interactive mode
-zeroclaw agent
+agent agent
 
 # Start the gateway (webhook server)
-zeroclaw gateway                # default: 127.0.0.1:42617
-zeroclaw gateway --port 0       # random port (security hardened)
+agent gateway                # default: 127.0.0.1:42617
+agent gateway --port 0       # random port (security hardened)
 
 # Start full autonomous runtime
-zeroclaw daemon
+agent daemon
 
 # Check status
-zeroclaw status
-zeroclaw auth status
+agent status
+agent auth status
 
 # Generate shell completions (stdout only, safe to source directly)
-source <(zeroclaw completions bash)
-zeroclaw completions zsh > ~/.zfunc/_zeroclaw
+source <(agent completions bash)
+agent completions zsh > ~/.zfunc/_agent
 
 # Run system diagnostics
-zeroclaw doctor
+agent doctor
 
 # Check channel health
-zeroclaw channel doctor
+agent channel doctor
 
 # Bind a Telegram identity into allowlist
-zeroclaw channel bind-telegram 123456789
+agent channel bind-telegram 123456789
 
 # Get integration setup details
-zeroclaw integrations info Telegram
+agent integrations info Telegram
 
 # Note: Channels (Telegram, Discord, Slack) require daemon to be running
-# zeroclaw daemon
+# agent daemon
 
 # Manage background service
-zeroclaw service install
-zeroclaw service status
-zeroclaw service restart
+agent service install
+agent service status
+agent service restart
 
-# On Alpine (OpenRC): sudo zeroclaw service install
+# On Alpine (OpenRC): sudo agent service install
 
 # Migrate memory from OpenClaw (safe preview first)
-zeroclaw migrate openclaw --dry-run
-zeroclaw migrate openclaw
+agent migrate openclaw --dry-run
+agent migrate openclaw
 ```
 
 > **Dev fallback (no global install):** prefix commands with `cargo run --release --` (example: `cargo run --release -- status`).
 
 ## Subscription Auth (OpenAI Codex / Claude Code)
 
-ZeroClaw now supports subscription-native auth profiles (multi-account, encrypted at rest).
+Agent now supports subscription-native auth profiles (multi-account, encrypted at rest).
 
-- Store file: `~/.zeroclaw/auth-profiles.json`
-- Encryption key: `~/.zeroclaw/.secret_key`
+- Store file: `~/.agent/auth-profiles.json`
+- Encryption key: `~/.agent/.secret_key`
 - Profile id format: `<provider>:<profile_name>` (example: `openai-codex:work`)
 
 OpenAI Codex OAuth (ChatGPT subscription):
 
 ```bash
 # Recommended on servers/headless
-zeroclaw auth login --provider openai-codex --device-code
+agent auth login --provider openai-codex --device-code
 
 # Browser/callback flow with paste fallback
-zeroclaw auth login --provider openai-codex --profile default
-zeroclaw auth paste-redirect --provider openai-codex --profile default
+agent auth login --provider openai-codex --profile default
+agent auth paste-redirect --provider openai-codex --profile default
 
 # Check / refresh / switch profile
-zeroclaw auth status
-zeroclaw auth refresh --provider openai-codex --profile default
-zeroclaw auth use --provider openai-codex --profile work
+agent auth status
+agent auth refresh --provider openai-codex --profile default
+agent auth use --provider openai-codex --profile work
 ```
 
 Claude Code / Anthropic setup-token:
 
 ```bash
 # Paste subscription/setup token (Authorization header mode)
-zeroclaw auth paste-token --provider anthropic --profile default --auth-kind authorization
+agent auth paste-token --provider anthropic --profile default --auth-kind authorization
 
 # Alias command
-zeroclaw auth setup-token --provider anthropic --profile default
+agent auth setup-token --provider anthropic --profile default
 ```
 
 Run the agent with subscription auth:
 
 ```bash
-zeroclaw agent --provider openai-codex -m "hello"
-zeroclaw agent --provider openai-codex --auth-profile openai-codex:work -m "hello"
+agent agent --provider openai-codex -m "hello"
+agent agent --provider openai-codex --auth-profile openai-codex:work -m "hello"
 
 # Anthropic supports both API key and auth token env vars:
 # ANTHROPIC_AUTH_TOKEN, ANTHROPIC_OAUTH_TOKEN, ANTHROPIC_API_KEY
-zeroclaw agent --provider anthropic -m "hello"
+agent agent --provider anthropic -m "hello"
 ```
 
 ## Collaboration & Docs
@@ -459,9 +459,9 @@ For deployment and runtime operations:
 - Network deployment guide: [docs/ops/network-deployment.md](docs/ops/network-deployment.md)
 - Proxy agent playbook: [docs/ops/proxy-agent-playbook.md](docs/ops/proxy-agent-playbook.md)
 
-## Support ZeroClaw
+## Support Agent
 
-If ZeroClaw helps your work and you want to support ongoing development, you can donate here:
+If Agent helps your work and you want to support ongoing development, you can donate here:
 
 <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy Me a Coffee" /></a>
 
@@ -481,19 +481,19 @@ We're building in the open because the best ideas come from everywhere. If you'r
 
 ## ⚠️ Official Repository & Impersonation Warning
 
-**This is the only official ZeroClaw repository:**
+**This is the only official Agent repository:**
 
-> https://github.com/zeroclaw-labs/zeroclaw
+> https://github.com/agent-labs/agent
 
-Any other repository, organization, domain, or package claiming to be "ZeroClaw" or implying affiliation with ZeroClaw Labs is **unauthorized and not affiliated with this project**. Known unauthorized forks will be listed in [TRADEMARK.md](docs/maintainers/trademark.md).
+Any other repository, organization, domain, or package claiming to be "Agent" or implying affiliation with Agent Labs is **unauthorized and not affiliated with this project**. Known unauthorized forks will be listed in [TRADEMARK.md](docs/maintainers/trademark.md).
 
-If you encounter impersonation or trademark misuse, please [open an issue](https://github.com/zeroclaw-labs/zeroclaw/issues).
+If you encounter impersonation or trademark misuse, please [open an issue](https://github.com/agent-labs/agent/issues).
 
 ---
 
 ## License
 
-ZeroClaw is dual-licensed for maximum openness and contributor protection:
+Agent is dual-licensed for maximum openness and contributor protection:
 
 | License | Use case |
 |---|---|
@@ -504,7 +504,7 @@ You may choose either license. **Contributors automatically grant rights under b
 
 ### Trademark
 
-The **ZeroClaw** name and logo are trademarks of ZeroClaw Labs. This license does not grant permission to use them to imply endorsement or affiliation. See [TRADEMARK.md](docs/maintainers/trademark.md) for permitted and prohibited uses.
+The **Agent** name and logo are trademarks of Agent Labs. This license does not grant permission to use them to imply endorsement or affiliation. See [TRADEMARK.md](docs/maintainers/trademark.md) for permitted and prohibited uses.
 
 ### Contributor Protections
 
@@ -515,7 +515,7 @@ The **ZeroClaw** name and logo are trademarks of ZeroClaw Labs. This license doe
 
 ## Contributing
 
-New to ZeroClaw? Look for issues labeled [`good first issue`](https://github.com/zeroclaw-labs/zeroclaw/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — see our [Contributing Guide](CONTRIBUTING.md#first-time-contributors) for how to get started.
+New to Agent? Look for issues labeled [`good first issue`](https://github.com/agent-labs/agent/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — see our [Contributing Guide](CONTRIBUTING.md#first-time-contributors) for how to get started.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](docs/contributing/cla.md). Implement a trait, submit a PR:
 
@@ -526,26 +526,26 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](docs/contributing/cla.md). I
 - New `Tool` → `src/tools/`
 - New `Memory` → `src/memory/`
 - New `Tunnel` → `src/tunnel/`
-- New `Skill` → `~/.zeroclaw/workspace/skills/<name>/`
+- New `Skill` → `~/.agent/workspace/skills/<name>/`
 
 ---
 
-**ZeroClaw** — Zero overhead. Zero compromise. Deploy anywhere. Swap anything. 🦀
+**Agent** — Zero overhead. Zero compromise. Deploy anywhere. Swap anything. 🦀
 
 ## Contributors
 
-<a href="https://github.com/zeroclaw-labs/zeroclaw/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=zeroclaw-labs/zeroclaw" alt="ZeroClaw contributors" />
+<a href="https://github.com/agent-labs/agent/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=agent-labs/agent" alt="Agent contributors" />
 </a>
 
 ## Star History
 
 <p align="center">
-  <a href="https://www.star-history.com/#zeroclaw-labs/zeroclaw&type=date&legend=top-left">
+  <a href="https://www.star-history.com/#agent-labs/agent&type=date&legend=top-left">
     <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&theme=dark&legend=top-left" />
-     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
-     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
+     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&theme=dark&legend=top-left" />
+     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
+     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
     </picture>
   </a>
 </p>

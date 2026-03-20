@@ -1,6 +1,6 @@
-# ZeroClaw 命令参考文档
+# Agent 命令参考文档
 
-本参考文档派生自当前 CLI 界面（`zeroclaw --help`）。
+本参考文档派生自当前 CLI 界面（`agent --help`）。
 
 最后验证时间：**2026年2月21日**。
 
@@ -32,13 +32,13 @@
 
 ### `onboard`
 
-- `zeroclaw onboard`
-- `zeroclaw onboard --channels-only`
-- `zeroclaw onboard --force`
-- `zeroclaw onboard --reinit`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --memory <sqlite|lucid|markdown|none>`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none>`
-- `zeroclaw onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none> --force`
+- `agent onboard`
+- `agent onboard --channels-only`
+- `agent onboard --force`
+- `agent onboard --reinit`
+- `agent onboard --api-key <KEY> --provider <ID> --memory <sqlite|lucid|markdown|none>`
+- `agent onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none>`
+- `agent onboard --api-key <KEY> --provider <ID> --model <MODEL_ID> --memory <sqlite|lucid|markdown|none> --force`
 
 `onboard` 安全行为：
 
@@ -46,15 +46,15 @@
   - 完整引导（覆盖 `config.toml`）
   - 仅更新提供商（更新提供商/模型/API 密钥，同时保留现有渠道、隧道、内存、钩子和其他设置）
 - 在非交互式环境中，现有 `config.toml` 会导致安全拒绝，除非传递 `--force`。
-- 当你只需要轮换渠道令牌/白名单时，使用 `zeroclaw onboard --channels-only`。
-- 使用 `zeroclaw onboard --reinit` 重新开始。这会备份现有配置目录并添加时间戳后缀，然后从头创建新配置。
+- 当你只需要轮换渠道令牌/白名单时，使用 `agent onboard --channels-only`。
+- 使用 `agent onboard --reinit` 重新开始。这会备份现有配置目录并添加时间戳后缀，然后从头创建新配置。
 
 ### `agent`
 
-- `zeroclaw agent`
-- `zeroclaw agent -m \"Hello\"`
-- `zeroclaw agent --provider <ID> --model <MODEL> --temperature <0.0-2.0>`
-- `zeroclaw agent --peripheral <board:path>`
+- `agent agent`
+- `agent agent -m \"Hello\"`
+- `agent agent --provider <ID> --model <MODEL> --temperature <0.0-2.0>`
+- `agent agent --peripheral <board:path>`
 
 提示：
 
@@ -62,21 +62,21 @@
 
 ### `gateway` / `daemon`
 
-- `zeroclaw gateway [--host <HOST>] [--port <PORT>]`
-- `zeroclaw daemon [--host <HOST>] [--port <PORT>]`
+- `agent gateway [--host <HOST>] [--port <PORT>]`
+- `agent daemon [--host <HOST>] [--port <PORT>]`
 
 ### `estop`
 
-- `zeroclaw estop`（启动 `kill-all`）
-- `zeroclaw estop --level network-kill`
-- `zeroclaw estop --level domain-block --domain \"*.chase.com\" [--domain \"*.paypal.com\"]`
-- `zeroclaw estop --level tool-freeze --tool shell [--tool browser]`
-- `zeroclaw estop status`
-- `zeroclaw estop resume`
-- `zeroclaw estop resume --network`
-- `zeroclaw estop resume --domain \"*.chase.com\"`
-- `zeroclaw estop resume --tool shell`
-- `zeroclaw estop resume --otp <123456>`
+- `agent estop`（启动 `kill-all`）
+- `agent estop --level network-kill`
+- `agent estop --level domain-block --domain \"*.chase.com\" [--domain \"*.paypal.com\"]`
+- `agent estop --level tool-freeze --tool shell [--tool browser]`
+- `agent estop status`
+- `agent estop resume`
+- `agent estop resume --network`
+- `agent estop resume --domain \"*.chase.com\"`
+- `agent estop resume --tool shell`
+- `agent estop resume --otp <123456>`
 
 注意事项：
 
@@ -86,23 +86,23 @@
 
 ### `service`
 
-- `zeroclaw service install`
-- `zeroclaw service start`
-- `zeroclaw service stop`
-- `zeroclaw service restart`
-- `zeroclaw service status`
-- `zeroclaw service uninstall`
+- `agent service install`
+- `agent service start`
+- `agent service stop`
+- `agent service restart`
+- `agent service status`
+- `agent service uninstall`
 
 ### `cron`
 
-- `zeroclaw cron list`
-- `zeroclaw cron add <expr> [--tz <IANA_TZ>] <command>`
-- `zeroclaw cron add-at <rfc3339_timestamp> <command>`
-- `zeroclaw cron add-every <every_ms> <command>`
-- `zeroclaw cron once <delay> <command>`
-- `zeroclaw cron remove <id>`
-- `zeroclaw cron pause <id>`
-- `zeroclaw cron resume <id>`
+- `agent cron list`
+- `agent cron add <expr> [--tz <IANA_TZ>] <command>`
+- `agent cron add-at <rfc3339_timestamp> <command>`
+- `agent cron add-every <every_ms> <command>`
+- `agent cron once <delay> <command>`
+- `agent cron remove <id>`
+- `agent cron pause <id>`
+- `agent cron resume <id>`
 
 注意事项：
 
@@ -111,29 +111,29 @@
 
 ### `models`
 
-- `zeroclaw models refresh`
-- `zeroclaw models refresh --provider <ID>`
-- `zeroclaw models refresh --force`
+- `agent models refresh`
+- `agent models refresh --provider <ID>`
+- `agent models refresh --force`
 
 `models refresh` 当前支持以下提供商 ID 的实时目录刷新：`openrouter`、`openai`、`anthropic`、`groq`、`mistral`、`deepseek`、`xai`、`together-ai`、`gemini`、`ollama`、`llamacpp`、`sglang`、`vllm`、`astrai`、`venice`、`fireworks`、`cohere`、`moonshot`、`glm`、`zai`、`qwen` 和 `nvidia`。
 
 ### `doctor`
 
-- `zeroclaw doctor`
-- `zeroclaw doctor models [--provider <ID>] [--use-cache]`
-- `zeroclaw doctor traces [--limit <N>] [--event <TYPE>] [--contains <TEXT>]`
-- `zeroclaw doctor traces --id <TRACE_ID>`
+- `agent doctor`
+- `agent doctor models [--provider <ID>] [--use-cache]`
+- `agent doctor traces [--limit <N>] [--event <TYPE>] [--contains <TEXT>]`
+- `agent doctor traces --id <TRACE_ID>`
 
 `doctor traces` 从 `observability.runtime_trace_path` 读取运行时工具/模型诊断信息。
 
 ### `channel`
 
-- `zeroclaw channel list`
-- `zeroclaw channel start`
-- `zeroclaw channel doctor`
-- `zeroclaw channel bind-telegram <IDENTITY>`
-- `zeroclaw channel add <type> <json>`
-- `zeroclaw channel remove <name>`
+- `agent channel list`
+- `agent channel start`
+- `agent channel doctor`
+- `agent channel bind-telegram <IDENTITY>`
+- `agent channel add <type> <json>`
+- `agent channel remove <name>`
 
 运行时聊天内命令（渠道服务器运行时的 Telegram/Discord）：
 
@@ -154,14 +154,14 @@
 
 ### `integrations`
 
-- `zeroclaw integrations info <name>`
+- `agent integrations info <name>`
 
 ### `skills`
 
-- `zeroclaw skills list`
-- `zeroclaw skills audit <source_or_name>`
-- `zeroclaw skills install <source>`
-- `zeroclaw skills remove <name>`
+- `agent skills list`
+- `agent skills audit <source_or_name>`
+- `agent skills install <source>`
+- `agent skills remove <name>`
 
 `<source>` 接受 git 远程地址（`https://...`、`http://...`、`ssh://...` 和 `git@host:owner/repo.git`）或本地文件系统路径。
 
@@ -177,43 +177,43 @@
 
 ### `migrate`
 
-- `zeroclaw migrate openclaw [--source <path>] [--dry-run]`
+- `agent migrate openclaw [--source <path>] [--dry-run]`
 
 ### `config`
 
-- `zeroclaw config schema`
+- `agent config schema`
 
 `config schema` 将完整 `config.toml` 契约的 JSON Schema（草案 2020-12）打印到 stdout。
 
 ### `completions`
 
-- `zeroclaw completions bash`
-- `zeroclaw completions fish`
-- `zeroclaw completions zsh`
-- `zeroclaw completions powershell`
-- `zeroclaw completions elvish`
+- `agent completions bash`
+- `agent completions fish`
+- `agent completions zsh`
+- `agent completions powershell`
+- `agent completions elvish`
 
 `completions` 设计为仅输出到 stdout，因此脚本可以直接被 source 而不会被日志/警告污染。
 
 ### `hardware`
 
-- `zeroclaw hardware discover`
-- `zeroclaw hardware introspect <path>`
-- `zeroclaw hardware info [--chip <chip_name>]`
+- `agent hardware discover`
+- `agent hardware introspect <path>`
+- `agent hardware info [--chip <chip_name>]`
 
 ### `peripheral`
 
-- `zeroclaw peripheral list`
-- `zeroclaw peripheral add <board> <path>`
-- `zeroclaw peripheral flash [--port <serial_port>]`
-- `zeroclaw peripheral setup-uno-q [--host <ip_or_host>]`
-- `zeroclaw peripheral flash-nucleo`
+- `agent peripheral list`
+- `agent peripheral add <board> <path>`
+- `agent peripheral flash [--port <serial_port>]`
+- `agent peripheral setup-uno-q [--host <ip_or_host>]`
+- `agent peripheral flash-nucleo`
 
 ## 验证提示
 
 要快速针对当前二进制文件验证文档：
 
 ```bash
-zeroclaw --help
-zeroclaw <command> --help
+agent --help
+agent <command> --help
 ```

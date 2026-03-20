@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="zeroclaw.png" alt="ZeroClaw" width="200" />
+  <img src="agent.png" alt="Agent" width="200" />
 </p>
 
-<h1 align="center">ZeroClaw 🦀</h1>
+<h1 align="center">Agent 🦀</h1>
 
 <p align="center">
   <strong>Sıfırı aşırı yok. Sıfır ödün ver yok. %100 Rust. %100 Agnostik.</strong><br>
@@ -13,15 +13,15 @@
   <a href="LICENSE-APACHE"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache%202.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
   <a href="NOTICE"><img src="https://img.shields.io/badge/contributors-27+-green.svg" alt="Contributors" /></a>
   <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=flat&logo=buy-me-a-coffee" alt="Buy Me a Coffee" /></a>
-  <a href="https://x.com/zeroclawlabs?s=21"><img src="https://img.shields.io/badge/X-%40zeroclawlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @zeroclawlabs" /></a>
-  <a href="https://zeroclawlabs.cn/group.jpg"><img src="https://img.shields.io/badge/WeChat-Group-B7D7A8?logo=wechat&logoColor=white" alt="WeChat Group" /></a>
+  <a href="https://x.com/agentlabs?s=21"><img src="https://img.shields.io/badge/X-%40agentlabs-000000?style=flat&logo=x&logoColor=white" alt="X: @agentlabs" /></a>
+  <a href="https://agentlabs.cn/group.jpg"><img src="https://img.shields.io/badge/WeChat-Group-B7D7A8?logo=wechat&logoColor=white" alt="WeChat Group" /></a>
   <a href="https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search"><img src="https://img.shields.io/badge/Xiaohongshu-Official-FF2442?style=flat" alt="Xiaohongshu: Official" /></a>
-  <a href="https://t.me/zeroclawlabs"><img src="https://img.shields.io/badge/Telegram-%40zeroclawlabs-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram: @zeroclawlabs" /></a>
-  <a href="https://www.facebook.com/groups/zeroclawlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
+  <a href="https://t.me/agentlabs"><img src="https://img.shields.io/badge/Telegram-%40agentlabs-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram: @agentlabs" /></a>
+  <a href="https://www.facebook.com/groups/agentlabs"><img src="https://img.shields.io/badge/Facebook-Group-1877F2?style=flat&logo=facebook&logoColor=white" alt="Facebook Group" /></a>
   <a href="https://discord.com/invite/wDshRVqRjx"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord" /></a>
-  <a href="https://www.tiktok.com/@zeroclawlabs"><img src="https://img.shields.io/badge/TikTok-%40zeroclawlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @zeroclawlabs" /></a>
+  <a href="https://www.tiktok.com/@agentlabs"><img src="https://img.shields.io/badge/TikTok-%40agentlabs-000000?style=flat&logo=tiktok&logoColor=white" alt="TikTok: @agentlabs" /></a>
   <a href="https://www.rednote.com/user/profile/69b735e6000000002603927e"><img src="https://img.shields.io/badge/RedNote-Official-FF2442?style=flat" alt="RedNote" /></a>
-  <a href="https://www.reddit.com/r/zeroclawlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fzeroclawlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/zeroclawlabs" /></a>
+  <a href="https://www.reddit.com/r/agentlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fagentlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/agentlabs" /></a>
 </p>
 <p align="center">
 Harvard, MIT ve Sundai.Club topluluklarının öğrencileri ve üyeleri tarafından inşa edilmiştir.
@@ -84,7 +84,7 @@ Harvard, MIT ve Sundai.Club topluluklarının öğrencileri ve üyeleri tarafın
 </p>
 
 <p align="center">
-  ZeroClaw, ajan iş akışları için <strong>çalışma zamanı işletim sistemidir</strong> — modelleri, araçları, belleği ve yürütmeyi soyutlayan, ajanları bir kez oluşturup ve her yerde çalıştıran bir altyapıdır.
+  Agent, ajan iş akışları için <strong>çalışma zamanı işletim sistemidir</strong> — modelleri, araçları, belleği ve yürütmeyi soyutlayan, ajanları bir kez oluşturup ve her yerde çalıştıran bir altyapıdır.
 </p>
 
 <p align="center"><code>Trait tabanlı mimari · varsayılan olarak güvenli çalışma zamanı · değiştirilebilir sağlayıcı/kanal/araç · her şey eklenebilir</code></p>
@@ -105,8 +105,8 @@ Harvard, MIT ve Sundai.Club topluluklarının öğrencileri ve üyeleri tarafın
 
 | Tarih (UTC) | Seviye      | Duyuru                                                                                                                                                                                                                                                                                                                                                                                                              | Eylem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-19 | _Kritik_  | **`openagen/zeroclaw` veya `zeroclaw.org` ile bağlantılı değiliz.** `zeroclaw.org` alanı şu anda `openagen/zeroclaw` fork'una işaret ediyor ve bu alan/depo taklitçiliğini yapıyor.                                                                                                                                                                                 | Bu kaynaklardan bilgi, ikili dosyalar, bağış toplama veya duyurulara güvenmeyin. Sadece [bu depoyu](https://github.com/zeroclaw-labs/zeroclaw) ve doğrulanmış sosyal medya hesaplarımızı kullanın.                                                                                                                                                                                                                                                                                                                                                          |
-| 2026-02-21 | _Önemli_ | Resmi web sitemiz artık çevrimiçi: [zeroclawlabs.ai](https://zeroclawlabs.ai). Bekleme sürecinde sabırlarınız için teşekkürler. Hala taklit girişimleri tespit ediyoruz: ZeroClaw adına resmi kanallarımız aracılığıyla yayınlanmayan herhangi bir yatırım/bağış faaliyetine katılmayın.                                                                                                                   | [Bu depoyu](https://github.com/zeroclaw-labs/zeroclaw) tek doğruluk kaynağı olarak kullanın. Resmi güncellemeler için [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Facebook (grup)](https://www.facebook.com/groups/zeroclawlabs), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/) ve [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search)'u takip edin. |
+| 2026-02-19 | _Kritik_  | **`openagen/agent` veya `agent.org` ile bağlantılı değiliz.** `agent.org` alanı şu anda `openagen/agent` fork'una işaret ediyor ve bu alan/depo taklitçiliğini yapıyor.                                                                                                                                                                                 | Bu kaynaklardan bilgi, ikili dosyalar, bağış toplama veya duyurulara güvenmeyin. Sadece [bu depoyu](https://github.com/agent-labs/agent) ve doğrulanmış sosyal medya hesaplarımızı kullanın.                                                                                                                                                                                                                                                                                                                                                          |
+| 2026-02-21 | _Önemli_ | Resmi web sitemiz artık çevrimiçi: [agentlabs.ai](https://agentlabs.ai). Bekleme sürecinde sabırlarınız için teşekkürler. Hala taklit girişimleri tespit ediyoruz: Agent adına resmi kanallarımız aracılığıyla yayınlanmayan herhangi bir yatırım/bağış faaliyetine katılmayın.                                                                                                                   | [Bu depoyu](https://github.com/agent-labs/agent) tek doğruluk kaynağı olarak kullanın. Resmi güncellemeler için [X (@agentlabs)](https://x.com/agentlabs?s=21), [Telegram (@agentlabs)](https://t.me/agentlabs), [Facebook (grup)](https://www.facebook.com/groups/agentlabs), [Reddit (r/agentlabs)](https://www.reddit.com/r/agentlabs/) ve [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search)'u takip edin. |
 | 2026-02-19 | _Önemli_ | Anthropic, 2026-02-19 tarihinde kimlik doğrulama ve kimlik bilgileri kullanım şartlarını güncelledi. OAuth kimlik doğrulaması (Free, Pro, Max) yalnızca Claude Code ve Claude.ai içindir; Claude Free/Pro/Max OAuth belirteçlerini başka herhangi bir ürün, araç veya hizmette (Agent SDK dahil) kullanmak yasaktır ve Tüketici Kullanım Şartlarını ihlal edebilir. | Olası kayıpları önlemek için lütfen geçici olarak Claude Code OAuth entegrasyonlarından kaçının. Orijinal madde: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).                                                                                                                                                                                                                                                                                                                      |
 
 ### ✨ Özellikler
@@ -116,18 +116,18 @@ Harvard, MIT ve Sundai.Club topluluklarının öğrencileri ve üyeleri tarafın
 - 💡 **Hızlı Soğuk Başlangıçlar:** Tek ikili Rust çalışma zamanı, komut ve arka plan programı başlatmalarını günlük operasyonlar için neredeyse anlık tutar.
 - 🌍 **Taşınabilir Mimari:** Değiştirilebilir sağlayıcı/kanal/araç ile ARM, x86 ve RISC-V üzerinde tek ikili iş akışı.
 
-### Neden ekipler ZeroClaw'ı seçiyor
+### Neden ekipler Agent'ı seçiyor
 
 - **Varsayılan hafif:** küçük Rust ikilisi, hızlı başlangıç, düşük bellek ayak izi.
 - **Tasarıma göre güvenli:** eşleştirme, katı kum alanı, açık izin listeleri, çalışma alanı kapsamı.
 - **Tamamen değiştirilebilir:** çekirdek sistemler trait'tir (sağlayıcılar, kanallar, araçlar, bellek, tüneller).
 - **Satıcı kilitlenmesi yok:** OpenAI uyumlu sağlayıcı desteği + eklenebilir özel uç noktalar.
 
-## Kıyaslama Anlık Görüntüsü (ZeroClaw vs OpenClaw, Tekrarlanabilir)
+## Kıyaslama Anlık Görüntüsü (Agent vs OpenClaw, Tekrarlanabilir)
 
 Yerel makinede hızlı kıyaslama (macOS arm64, Şub. 2026) 0.8 GHz uç donanımı için normalize edilmiş.
 
-|                              | OpenClaw      | NanoBot        | PicoClaw        | ZeroClaw 🦀           |
+|                              | OpenClaw      | NanoBot        | PicoClaw        | Agent 🦀           |
 | ---------------------------- | ------------- | -------------- | --------------- | --------------------- |
 | **Dil**                  | TypeScript    | Python         | Go              | **Rust**              |
 | **RAM**                      | > 1 GB        | > 100 MB       | < 10 MB         | **< 5 MB**            |
@@ -135,10 +135,10 @@ Yerel makinede hızlı kıyaslama (macOS arm64, Şub. 2026) 0.8 GHz uç donanım
 | **İkili Boyut**           | ~28 MB (dist) | Yok (Betikler)  | ~8 MB           | **3.4 MB**            |
 | **Maliyet**                     | Mac Mini $599 | Linux SBC ~$50 | Linux kart $10 | **Herhangi bir donanım $10** |
 
-> Notlar: ZeroClaw sonuçları `/usr/bin/time -l` kullanılarak üretim derlemelerinde ölçülür. OpenClaw Node.js çalışma zamanı gerektirir (tipik olarak ~390 MB ek bellek yükü), NanoBot ise Python çalışma zamanı gerektirir. PicoClaw ve ZeroClaw statik ikililerdir. Yukarıdaki RAM rakamları çalışma zamanı belleğidir; derleme zamanı derleme gereksinimleri daha yüksektir.
+> Notlar: Agent sonuçları `/usr/bin/time -l` kullanılarak üretim derlemelerinde ölçülür. OpenClaw Node.js çalışma zamanı gerektirir (tipik olarak ~390 MB ek bellek yükü), NanoBot ise Python çalışma zamanı gerektirir. PicoClaw ve Agent statik ikililerdir. Yukarıdaki RAM rakamları çalışma zamanı belleğidir; derleme zamanı derleme gereksinimleri daha yüksektir.
 
 <p align="center">
-  <img src="zero-claw.jpeg" alt="ZeroClaw vs OpenClaw Karşılaştırması" width="800" />
+  <img src="zero-claw.jpeg" alt="Agent vs OpenClaw Karşılaştırması" width="800" />
 </p>
 
 ### Tekrarlanabilir Yerel Ölçüm
@@ -147,17 +147,17 @@ Kıyaslama iddiaları kod ve araç zincirleri geliştikçe değişebilir, bu yü
 
 ```bash
 cargo build --release
-ls -lh target/release/zeroclaw
+ls -lh target/release/agent
 
-/usr/bin/time -l target/release/zeroclaw --help
-/usr/bin/time -l target/release/zeroclaw status
+/usr/bin/time -l target/release/agent --help
+/usr/bin/time -l target/release/agent status
 ```
 
 Örnek numune (macOS arm64, 18 Şubat 2026'da ölçüldü):
 
 - Sürüm ikili boyutu: `8.8M`
-- `zeroclaw --help`: gerçek süre yaklaşık `0.02s`, en büyük bellek ayak izi ~`3.9 MB`
-- `zeroclaw status`: gerçek süre yaklaşık `0.01s`, en büyük bellek ayak izi ~`4.1 MB`
+- `agent --help`: gerçek süre yaklaşık `0.02s`, en büyük bellek ayak izi ~`3.9 MB`
+- `agent status`: gerçek süre yaklaşık `0.01s`, en büyük bellek ayak izi ~`4.1 MB`
 
 ## Ön Koşullar
 
@@ -231,22 +231,22 @@ ls -lh target/release/zeroclaw
 
 ### Seçenek 1: Otomatik kurulum (önerilen)
 
-`bootstrap.sh` betiği Rust'u yükler, ZeroClaw'ı klonlar, derler ve ilk geliştirme ortamınızı ayarlar:
+`bootstrap.sh` betiği Rust'u yükler, Agent'ı klonlar, derler ve ilk geliştirme ortamınızı ayarlar:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/agent-labs/agent/master/bootstrap.sh | bash
 ```
 
 Bu işlem:
 
 1. Rust'u yükler (yoksa)
-2. ZeroClaw deposunu klonlar
-3. ZeroClaw'ı sürüm modunda derler
-4. `zeroclaw`'ı `~/.cargo/bin/`e yükler
-5. `~/.zeroclaw/workspace/` içinde varsayılan çalışma alanı yapısını oluşturur
-6. Başlangıç `~/.zeroclaw/workspace/config.toml` yapılandırma dosyasını üretir
+2. Agent deposunu klonlar
+3. Agent'ı sürüm modunda derler
+4. `agent`'ı `~/.cargo/bin/`e yükler
+5. `~/.agent/workspace/` içinde varsayılan çalışma alanı yapısını oluşturur
+6. Başlangıç `~/.agent/workspace/config.toml` yapılandırma dosyasını üretir
 
-Önyüklemeden sonra, `zeroclaw` komutunu global olarak kullanmak için kabuğunuzu yeniden yükleyin veya `source ~/.cargo/env` çalıştırın.
+Önyüklemeden sonra, `agent` komutunu global olarak kullanmak için kabuğunuzu yeniden yükleyin veya `source ~/.cargo/env` çalıştırın.
 
 ### Seçenek 2: Manuel kurulum
 
@@ -255,8 +255,8 @@ Bu işlem:
 
 ```bash
 # 1. Depoyu klonla
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
-cd zeroclaw
+git clone https://github.com/agent-labs/agent.git
+cd agent
 
 # 2. Sürüm olarak derle
 cargo build --release --locked
@@ -265,11 +265,11 @@ cargo build --release --locked
 cargo install --path . --locked
 
 # 4. Çalışma alanını başlat
-zeroclaw init
+agent init
 
 # 5. Kurulumu doğrula
-zeroclaw --version
-zeroclaw status
+agent --version
+agent status
 ```
 
 </details>
@@ -279,7 +279,7 @@ zeroclaw status
 Kurulumdan sonra (önyükleme veya manuel olarak), şunları görmelisiniz:
 
 ```
-~/.zeroclaw/workspace/
+~/.agent/workspace/
 ├── config.toml          # Ana yapılandırma
 ├── .pairing             # Eşleştirme sırları (ilk başlangıçta oluşturulur)
 ├── logs/                # Arka plan programı/ajan logları
@@ -289,14 +289,14 @@ Kurulumdan sonra (önyükleme veya manuel olarak), şunları görmelisiniz:
 
 **Sonraki adımlar:**
 
-1. AI sağlayıcılarınızı `~/.zeroclaw/workspace/config.toml` içinde yapılandırın
+1. AI sağlayıcılarınızı `~/.agent/workspace/config.toml` içinde yapılandırın
 2. Gelişmiş seçenekler için [yapılandırma referansına](docs/config-reference.md) bakın
-3. Ajanı başlatın: `zeroclaw agent start`
+3. Ajanı başlatın: `agent agent start`
 4. Tercih ettiğiniz kanal üzerinden test edin ([kanallar referansına](docs/channels-reference.md) bakın)
 
 ## Yapılandırma
 
-Sağlayıcıları, kanalları ve sistem davranışını yapılandırmak için `~/.zeroclaw/workspace/config.toml` dosyasını düzenleyin.
+Sağlayıcıları, kanalları ve sistem davranışını yapılandırmak için `~/.agent/workspace/config.toml` dosyasını düzenleyin.
 
 ### Hızlı Yapılandırma Referansı
 
@@ -335,7 +335,7 @@ kind = "native"    # veya "docker" (Docker gerektirir)
 
 ### Mevcut Çalışma Zamanı Desteği
 
-ZeroClaw iki kod yürütme arka ucu destekler:
+Agent iki kod yürütme arka ucu destekler:
 
 - **`native`** (varsayılan) — doğrudan süreç yürütme, en hızlı yol, güvenilir ortamlar için ideal
 - **`docker`** — tam konteyner yalıtımı. sertleştirilmiş güvenlik ilkeleri. Docker gerektirir
@@ -346,32 +346,32 @@ Katı kum alanı veya ağ yalıtımı gerekiyorsa `runtime.kind = "docker"` kull
 
 ```bash
 # Çalışma alanı yönetimi
-zeroclaw init                # Yeni bir çalışma alanı başlatır
-zeroclaw status              # Arka plan programı/ajan durumunu gösterir
-zeroclaw config validate     # config.toml sözdizimini ve değerlerini doğrular
+agent init                # Yeni bir çalışma alanı başlatır
+agent status              # Arka plan programı/ajan durumunu gösterir
+agent config validate     # config.toml sözdizimini ve değerlerini doğrular
 
 # Arka plan programı yönetimi
-zeroclaw daemon start        # Arka plan programını arka planda başlatır
-zeroclaw daemon stop         # Çalışan arka plan programını durdurur
-zeroclaw daemon restart      # Arka plan programını yeniden başlatır (yapılandırmayı yeniden yükler)
-zeroclaw daemon logs         # Arka plan programı loglarını gösterir
+agent daemon start        # Arka plan programını arka planda başlatır
+agent daemon stop         # Çalışan arka plan programını durdurur
+agent daemon restart      # Arka plan programını yeniden başlatır (yapılandırmayı yeniden yükler)
+agent daemon logs         # Arka plan programı loglarını gösterir
 
 # Ajan yönetimi
-zeroclaw agent start         # Ajanı başlatır (çalışan arka plan programı gerektirir)
-zeroclaw agent stop          # Ajanı durdurur
-zeroclaw agent restart       # Ajanı yeniden başlatır (yapılandırmayı yeniden yükler)
+agent agent start         # Ajanı başlatır (çalışan arka plan programı gerektirir)
+agent agent stop          # Ajanı durdurur
+agent agent restart       # Ajanı yeniden başlatır (yapılandırmayı yeniden yükler)
 
 # Eşleştirme operasyonları
-zeroclaw pairing init        # Yeni bir eşleştirme sırrı oluşturur
-zeroclaw pairing rotate      # Mevcut eşleştirme sırrını döndürür
+agent pairing init        # Yeni bir eşleştirme sırrı oluşturur
+agent pairing rotate      # Mevcut eşleştirme sırrını döndürür
 
 # Tünelleme (herkese açık kullanım için)
-zeroclaw tunnel start        # Yerel arka plan programına bir tünel başlatır
-zeroclaw tunnel stop         # Aktif tüneli durdurur
+agent tunnel start        # Yerel arka plan programına bir tünel başlatır
+agent tunnel stop         # Aktif tüneli durdurur
 
 # Teşhis
-zeroclaw doctor              # Sistem sağlık kontrollerini çalıştırır
-zeroclaw version             # Sürüm ve derleme bilgilerini gösterir
+agent doctor              # Sistem sağlık kontrollerini çalıştırır
+agent version             # Sürüm ve derleme bilgilerini gösterir
 ```
 
 Tam seçenekler ve örnekler için [Komutlar Referansına](docs/commands-reference.md) bakın.
@@ -409,9 +409,9 @@ Dağıtım ve çalışma zamanı operasyonları için:
 - Ağ Dağıtımı Kılavuzu: [docs/network-deployment.md](docs/network-deployment.md)
 - Proxy Agent Playbook'u: [docs/proxy-agent-playbook.md](docs/proxy-agent-playbook.md)
 
-## ZeroClaw'ı Destekleyin
+## Agent'ı Destekleyin
 
-ZeroClaw işinize yardımcı oluyorsa ve sürekli geliştirmeyi desteklemek istiyorsanız, buradan bağış yapabilirsiniz:
+Agent işinize yardımcı oluyorsa ve sürekli geliştirmeyi desteklemek istiyorsanız, buradan bağış yapabilirsiniz:
 
 <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee" alt="Bana Bir Kahve Ismarla" /></a>
 
@@ -442,19 +442,19 @@ Thank you to everyone who opened issues, reviewed PRs, translated docs, and help
 
 ## ⚠️ Resmi Depo ve Taklit Uyarısı
 
-**Bu tek resmi ZeroClaw deposudur:**
+**Bu tek resmi Agent deposudur:**
 
-> <https://github.com/zeroclaw-labs/zeroclaw>
+> <https://github.com/agent-labs/agent>
 
-ZeroClaw olduğunu iddia eden veya ZeroClaw Labs ile bağlantıyı ima eden başka herhangi bir depo, organizasyon, etki alanı veya paket **yetkisizdir ve bu projeyle bağlantılı değildir**. Bilinen yetkisiz forklar [TRADEMARK.md](TRADEMARK.md)'da listelenecektir.
+Agent olduğunu iddia eden veya Agent Labs ile bağlantıyı ima eden başka herhangi bir depo, organizasyon, etki alanı veya paket **yetkisizdir ve bu projeyle bağlantılı değildir**. Bilinen yetkisiz forklar [TRADEMARK.md](TRADEMARK.md)'da listelenecektir.
 
-Taklit veya marka kötüye kullanımıyla karşılaşırsanız, lütfen [bir sorun açın](https://github.com/zeroclaw-labs/zeroclaw/issues).
+Taklit veya marka kötüye kullanımıyla karşılaşırsanız, lütfen [bir sorun açın](https://github.com/agent-labs/agent/issues).
 
 ---
 
 ## Lisans
 
-ZeroClaw, maksimum açıklık ve katılımcı koruma için çift lisanslıdır:
+Agent, maksimum açıklık ve katılımcı koruma için çift lisanslıdır:
 
 | Lisans                      | Kullanım Durumları                                            |
 | ---------------------------- | ------------------------------------------------------------ |
@@ -465,7 +465,7 @@ Lisanslardan birini seçebilirsiniz. **Katılımcılar otomatik olarak her ikisi
 
 ### Marka
 
-**ZeroClaw** adı ve logosu, ZeroClaw Labs'ın tescilli markalarıdır. Bu lisans, onay veya bağlantı ima etmek için kullanım izni vermez. İzin verilen ve yasaklanan kullanımlar için [TRADEMARK.md](TRADEMARK.md)'e bakın.
+**Agent** adı ve logosu, Agent Labs'ın tescilli markalarıdır. Bu lisans, onay veya bağlantı ima etmek için kullanım izni vermez. İzin verilen ve yasaklanan kullanımlar için [TRADEMARK.md](TRADEMARK.md)'e bakın.
 
 ### Katılımcı Korumaları
 
@@ -485,20 +485,20 @@ Lisanslardan birini seçebilirsiniz. **Katılımcılar otomatik olarak her ikisi
 - Yeni `Tool` → `src/tools/`
 - Yeni `Memory` → `src/memory/`
 - Yeni `Tunnel` → `src/tunnel/`
-- Yeni `Skill` → `~/.zeroclaw/workspace/skills/<n>/`
+- Yeni `Skill` → `~/.agent/workspace/skills/<n>/`
 
 ---
 
-**ZeroClaw** — Sıfır yük. Sıfır ödün. Her yerde dağıtın. Her şeyi değiştirin. 🦀
+**Agent** — Sıfır yük. Sıfır ödün. Her yerde dağıtın. Her şeyi değiştirin. 🦀
 
 ## Yıldız Geçmişi
 
 <p align="center">
-  <a href="https://www.star-history.com/#zeroclaw-labs/zeroclaw&type=date&legend=top-left">
+  <a href="https://www.star-history.com/#agent-labs/agent&type=date&legend=top-left">
     <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&theme=dark&legend=top-left" />
-     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
-     <img alt="Yıldız Geçmişi Grafiği" src="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
+     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&theme=dark&legend=top-left" />
+     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
+     <img alt="Yıldız Geçmişi Grafiği" src="https://api.star-history.com/svg?repos=agent-labs/agent&type=date&legend=top-left" />
     </picture>
   </a>
 </p>

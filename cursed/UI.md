@@ -313,7 +313,7 @@ React + TypeScript web dashboard with Vite build system.
 ### For Terminal Onboarding UI:
 1. `onboard/src/lib.rs` - Main onboarding flow
 2. `onboard/src/prompts/*.rs` - Individual prompt components
-3. `src/onboard/wizard.rs` - ZeroClaw-specific wizard logic
+3. `src/onboard/wizard.rs` - Agent-specific wizard logic
 4. `onboard/theme.toml` - Visual theme
 
 ### For Command List/Help:
@@ -338,20 +338,20 @@ The on-board Rust project is a new Rust crate that I recently added here so plea
 $env:CARGO_BUILD_JOBS="1"; cargo run -j 1
 $env:CARGO_BUILD_JOBS="1"; cargo run -j 1 -- --help
 
-PS F:\zeroclaw> cargo run --release
+PS F:\agent> cargo run --release
 warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
-package:   F:\zeroclaw\onboard\Cargo.toml
-workspace: F:\zeroclaw\Cargo.toml
-warning: F:\zeroclaw\Cargo.toml: unused manifest key: lib.include
-   Compiling zeroclawlabs v0.5.0 (F:\zeroclaw)
+package:   F:\agent\onboard\Cargo.toml
+workspace: F:\agent\Cargo.toml
+warning: F:\agent\Cargo.toml: unused manifest key: lib.include
+   Compiling agentlabs v0.5.0 (F:\agent)
     Finished `release` profile [optimized] target(s) in 6m 25s
-     Running `target\release\zeroclaw.exe`
+     Running `target\release\agent.exe`
 No command provided.
-Try `zeroclaw onboard` to initialize your workspace.
+Try `agent onboard` to initialize your workspace.
 
 The fastest, smallest AI assistant.
 
-Usage: zeroclaw [OPTIONS] <COMMAND>
+Usage: agent [OPTIONS] <COMMAND>
 
 Commands:
   onboard       Initialize your workspace and configuration
@@ -389,7 +389,7 @@ Now about our root src folder, big project, please look for all of the places th
 
 Now here's the thing: as you can see our one go to root folder UI framework is quiet professional, production-ready code so you don't have to recreate it on our main project. You just have to copy them and reconfigure them to be used on our main project. Please start working on it and ask me a clarification question about where to work first!!!
 
-So I just forked the ZEROCLAW project. What AI slot is this project? It is like 7,000 plus lines of code in one file; that is the real AI slot.
+So I just forked the AGENT project. What AI slot is this project? It is like 7,000 plus lines of code in one file; that is the real AI slot.
 
 As you can see the wizard file is used and yet it is so bad UI plus bad coding practice all over the place. Learn from our root on boot productionary professional UI framework and there you can find a DX logo with a train animation, right? Use that and try to create the wizard fully with a backup so that it gets split into smaller files instead of all the things being in one file and making more than 7,000 lines of code. You understand? If not then ask me a clarification question.
 

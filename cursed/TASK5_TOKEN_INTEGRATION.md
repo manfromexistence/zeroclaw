@@ -54,7 +54,7 @@ Temporarily disabled (require dx_core integration):
 
 ### API
 ```rust
-use zeroclaw::token::rlm::RLM;
+use agent::token::rlm::RLM;
 
 let rlm = RLM::new(api_key, model)
     .with_fast_model(fast_model)

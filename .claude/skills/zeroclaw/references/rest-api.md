@@ -1,6 +1,6 @@
-# ZeroClaw REST API Reference
+# Agent REST API Reference
 
-Complete endpoint reference for the ZeroClaw gateway HTTP API.
+Complete endpoint reference for the Agent gateway HTTP API.
 
 ## Table of Contents
 
