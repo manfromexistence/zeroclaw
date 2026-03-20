@@ -1,365 +1,127 @@
-# UI Replacement Task - Help for Better AI
+# Help Needed - Module Import Issue
 
-## Task Overview
+**Date:** 2026-03-21
 
-Replace ALL old dialoguer-based UI in the ZeroClaw wizard with the beautiful onboard UI framework located in `/onboard`.
+## Problem: Cannot Import metasearch Module in web_search_tool.rs
 
-## Current Status
+### Task Description
+Attempting to import the `metasearch` module (located at `src/metasearch/`) into `src/tools/web_search_tool.rs` to use the integrated 215+ search engines.
 
-### ✅ Completed
-1. Split wizard.rs from 7,293 lines into maintainable modules:
-   - wizard.rs: 2,621 lines
-   - models.rs: 790 lines (NEW)
-   - provider_setup.rs: 745 lines
-   - channel_setup.rs: 1,742 lines
-   - test.rs: 1,475 lines
+### Current Error
+```
+error[E0432]: unresolved import `super::metasearch`
+  --> src\tools\web_search_tool.rs:10:12
+   |
+10 | use super::metasearch::{
+   |            ^^^^^^^^^^ could not find `metasearch` in `super`
+```
 
-2. Added onboard dependency to Cargo.toml:
-   ```toml
-   onboard = { path = "./onboard" }
-   ```
+### What Was Tried
 
-3. Integrated splash screen and intro/outro in wizard.rs:
-   - Added rainbow logo animation
-   - Added styled section boxes
-   - Replaced static banner
-
-4. Partially replaced prompts in wizard.rs:
-   - ✅ All `Confirm::new()` → `prompts::confirm()`
-   - ✅ Some `Select::new()` → `prompts::select()`
-   - ⚠️ Many `Input::new()` still remain
-   - ⚠️ Many `Select::new()` still remain
-   - ⚠️ Many plain `println!` still remain
-
-5. Added required import:
-   ```rust
-   use onboard::prompts::PromptInteraction;
-   ```
-
-### ❌ Remaining Work
-
-**Files that need UI replacement:**
-1. `src/onboard/wizard.rs` - Main wizard (partially done)
-2. `src/onboard/provider_setup.rs` - Provider selection (NOT STARTED)
-3. `src/onboard/channel_setup.rs` - Channel configuration (NOT STARTED)
-
----
-
-## Onboard UI Framework Reference
-
-### Location
-`/onboard` - Standalone UI framework with 24 prompt types
-
-### Key Files
-- `onboard/src/lib.rs` - Main API
-- `onboard/src/prompts/mod.rs` - All prompt types
-- `onboard/src/splash.rs` - ASCII art & animations
-- `onboard/src/effects.rs` - Rainbow colors
-
-### How to Use Onboard Prompts
-
-**CRITICAL:** Must import the trait:
+**Attempt 1: Using `crate::metasearch`**
 ```rust
-use onboard::prompts::PromptInteraction;
+use crate::metasearch::{SearchCategory, SearchQuery, ...};
 ```
+- Result: Works for `cargo check --lib` but fails for `cargo check --bin zeroclaw`
+- Error: "unresolved import `crate::metasearch`" when building binary
+- Reason: In binary context, `crate::` refers to the binary crate, not the library
 
-#### 1. Confirm (Yes/No)
+**Attempt 2: Using `zeroclawlabs::metasearch`**
 ```rust
-// OLD (dialoguer)
-let confirmed = Confirm::new()
-    .with_prompt("  Continue?")
-    .default(true)
-    .interact()?;
-
-// NEW (onboard)
-let confirmed = prompts::confirm("Continue?")
-    .initial_value(true)
-    .interact()?;
+use zeroclawlabs::metasearch::{SearchCategory, SearchQuery, ...};
 ```
+- Result: Works for binary but fails for library
+- Error: "use of unresolved module or unlinked crate `zeroclawlabs`"
+- Reason: Within the library, can't reference the library by its external name
 
-#### 2. Toggle (Boolean Switch)
+**Attempt 3: Using `super::metasearch`**
 ```rust
-// OLD (dialoguer - using Confirm)
-let enabled = Confirm::new()
-    .with_prompt("  Enable feature?")
-    .default(true)
-    .interact()?;
-
-// NEW (onboard - better for on/off switches)
-let enabled = prompts::toggle::toggle("Enable feature?")
-    .initial_value(true)
-    .interact()?;
+use super::metasearch::{SearchCategory, SearchQuery, ...};
 ```
+- Result: Fails for both lib and binary
+- Error: "could not find `metasearch` in `super`"
+- Reason: `super` from `tools/web_search_tool.rs` refers to the `tools` module, not crate root
 
-#### 3. Text Input
+**Attempt 4: Using `super::super::metasearch`**
 ```rust
-// OLD (dialoguer)
-let name: String = Input::new()
-    .with_prompt("  Your name")
-    .default("User".into())
-    .interact_text()?;
-
-// NEW (onboard)
-let name = prompts::input::input("Your name")
-    .placeholder("User")
-    .interact()?;
+use super::super::metasearch::{SearchCategory, SearchQuery, ...};
 ```
+- Result: Fails
+- Error: Similar unresolved import
+- Reason: Module path doesn't resolve correctly
 
-#### 4. Single Select
+**Attempt 5: Fully qualified paths inline**
 ```rust
-// OLD (dialoguer)
-let choice = Select::new()
-    .with_prompt("  Choose option")
-    .items(&["Option 1", "Option 2"])
-    .default(0)
-    .interact()?;
+let search_query = crate::metasearch::SearchQuery::new(query);
+```
+- Result: Same issue as Attempt 1
 
-// NEW (onboard)
-let choice = prompts::select("Choose option")
-    .item(0, "Option 1", "First option")
-    .item(1, "Option 2", "Second option")
-    .interact()?;
+### Module Structure
+
+```
+src/
+├── lib.rs                    # Declares: pub mod metasearch; pub mod tools;
+├── metasearch/
+│   ├── mod.rs               # Re-exports: SearchCategory, SearchQuery, etc.
+│   ├── category.rs
+│   ├── query.rs
+│   ├── ranking.rs
+│   └── engines/
+│       └── registry.rs
+└── tools/
+    ├── mod.rs               # Declares: pub mod web_search_tool;
+    └── web_search_tool.rs   # NEEDS TO IMPORT metasearch types
 ```
 
-#### 5. Multi Select
-```rust
-// OLD (dialoguer - not shown in code)
-// NEW (onboard)
-let choices = prompts::multiselect("Choose multiple")
-    .item("opt1".to_string(), "Option 1".to_string(), "First")
-    .item("opt2".to_string(), "Option 2".to_string(), "Second")
-    .interact()?;
-```
+### Key Facts
 
-#### 6. Status Messages
-```rust
-// OLD (plain println)
-println!("  {} Success!", style("✓").green().bold());
-println!("  {} Warning", style("⚠").yellow());
-println!("  {} Info", style("ℹ").dim());
+1. `metasearch` is declared as `pub mod metasearch;` in `src/lib.rs` (line 51)
+2. `tools` is declared as `pub mod tools;` in `src/lib.rs` (line 75)
+3. Both modules are siblings at the crate root level
+4. `cargo check --lib` succeeds when NOT importing metasearch
+5. The metasearch module itself compiles successfully
+6. All metasearch types are properly re-exported in `src/metasearch/mod.rs`
 
-// NEW (onboard)
-prompts::log::success("Success!")?;
-prompts::log::warning("Warning")?;
-prompts::log::info("Info")?;
-prompts::log::step("Step item")?;
-```
+### Environment Info
 
-#### 7. Sections with Boxes
-```rust
-// OLD (plain println)
-println!("Welcome to ZeroClaw");
-println!("This is a description");
+- Language: Rust edition 2024
+- Compiler: rustc 1.94.0
+- Project: Library + Binary in same crate
+- Crate name: `zeroclawlabs`
+- Binary name: `zeroclaw`
 
-// NEW (onboard)
-prompts::section_with_width("Welcome to ZeroClaw", 80, |lines| {
-    lines.push("This is a description".to_string());
-    lines.push("More information here".to_string());
-})?;
-```
+### What Needs to Work
 
-#### 8. Intro/Outro
-```rust
-// OLD (plain println with banner)
-println!("{}", style(BANNER).cyan().bold());
+The `web_search_tool.rs` needs to import and use these types:
+- `SearchCategory` (enum)
+- `SearchQuery` (struct)
+- `ResultAggregator` (struct)
+- `EngineRegistry` (struct)
+- `SearchEngine` (trait)
 
-// NEW (onboard)
-let rainbow = RainbowEffect::new();
-print!("\x1B[2J\x1B[H"); // Clear screen
-splash::render_dx_logo(&rainbow)?;
-prompts::intro("Title")?;
-// ... wizard content ...
-prompts::outro("🎉 Complete!")?;
-```
+### Suggested Solutions to Try
 
----
+1. **Check if there's a circular dependency** between tools and metasearch modules
+2. **Verify module visibility** - ensure all parent modules properly declare submodules
+3. **Try using `#[path]` attribute** to explicitly specify module location
+4. **Consider restructuring** - move web_search_tool to a different location
+5. **Check for name conflicts** - ensure no shadowing of module names
+6. **Verify Cargo.toml** - ensure no workspace issues affecting module resolution
+7. **Try explicit re-export** in tools/mod.rs: `pub use crate::metasearch;`
 
-## Remaining Replacements Needed
+### Additional Context
 
-### In `src/onboard/wizard.rs`
+This issue arose after successfully integrating:
+- Metasearch system (215+ engines) from `metasearch/` folder to `src/metasearch/`
+- Token-saving system (RLM) from `token/` folder to `src/token/`
+- 42 additional tools from `tools/` folder to `src/tools/`
 
-**Input::new() replacements (15+ occurrences):**
-- Line 1623: Serial port path input
-- Line 1649: Custom baud rate input
-- Line 1663: Target MCU chip input
-- Line 1722: User name input
-- Line 1746: Timezone input
-- Line 1760: Agent name input
-- Line 1788: Custom communication style input
-- Line 1933: Cloudflare tunnel token input
-- Line 1982: ngrok auth token input
-- Line 1989: ngrok custom domain input
-- Line 2017: Custom tunnel command input
+The metasearch integration itself was successful and compiles. The issue is purely with importing it into web_search_tool.
 
-**Select::new() replacements (5+ occurrences):**
-- Line 1596: Hardware interaction mode select
-- Line 1623: Serial port selection (multiple devices)
-- Line 1647: Baud rate selection
-- Line 1748: Timezone selection
-- Line 1784: Communication style selection
-- Line 1834: Memory backend selection
-- Line 1932: Tunnel provider selection
+### Files to Review
 
-**Plain println! replacements (100+ occurrences):**
-- Replace all status messages with `prompts::log::*`
-- Replace all success messages with `prompts::log::success()`
-- Replace all info messages with `prompts::log::info()`
-- Replace all warnings with `prompts::log::warning()`
-
-### In `src/onboard/provider_setup.rs`
-
-**Needs complete UI replacement:**
-- All `Confirm::new()` → `prompts::confirm()`
-- All `Input::new()` → `prompts::input::input()`
-- All `Select::new()` → `prompts::select()`
-- All `println!` → `prompts::log::*`
-- Add rainbow effects to model selection
-- Add progress bars for API calls
-
-### In `src/onboard/channel_setup.rs`
-
-**Needs complete UI replacement:**
-- All `Confirm::new()` → `prompts::confirm()` or `prompts::toggle::toggle()`
-- All `Input::new()` → `prompts::input::input()`
-- All `Select::new()` → `prompts::select()`
-- Channel selection → `prompts::multiselect()`
-- All `println!` → `prompts::log::*`
-- Add connection test progress bars
-
----
-
-## Code Examples from Current Implementation
-
-### Example 1: Confirm Replacement (DONE)
-```rust
-// BEFORE
-let launch: bool = Confirm::new()
-    .with_prompt(format!(
-        "  {} Launch channels now?",
-        style("🚀").cyan()
-    ))
-    .default(true)
-    .interact()?;
-
-// AFTER
-let launch = prompts::confirm("🚀 Launch channels now? (connected channels → AI → reply)")
-    .initial_value(true)
-    .interact()?;
-```
-
-### Example 2: Toggle Replacement (DONE)
-```rust
-// BEFORE
-let encrypt = Confirm::new()
-    .with_prompt("  Enable encrypted secret storage?")
-    .default(true)
-    .interact()?;
-
-// AFTER
-let encrypt = prompts::toggle::toggle("Enable encrypted secret storage?")
-    .initial_value(true)
-    .interact()?;
-```
-
-### Example 3: Select Replacement (DONE)
-```rust
-// BEFORE
-let mode = Select::new()
-    .with_prompt("  Select setup mode")
-    .items(options)
-    .default(1)
-    .interact()?;
-
-// AFTER
-let mode = prompts::select("Select setup mode")
-    .item(0, "Full onboarding", "Complete setup")
-    .item(1, "Update provider only", "Quick update")
-    .item(2, "Cancel", "Exit")
-    .interact()?;
-```
-
-### Example 4: Status Messages (DONE)
-```rust
-// BEFORE
-println!(
-    "  {} Workspace: {}",
-    style("✓").green().bold(),
-    style(workspace_dir.display()).green()
-);
-
-// AFTER
-prompts::log::success(format!("Workspace: {}", workspace_dir.display()))?;
-```
-
----
-
-## Testing
-
-After making changes, test with:
-```bash
-cargo check --lib
-cargo run -- onboard --help
-cargo run -- onboard
-```
-
----
-
-## Important Notes
-
-1. **DO NOT** remove the `dialoguer` import yet - it's still used in provider_setup.rs and channel_setup.rs
-2. **DO NOT** remove the `console::style` import yet - still used in some places
-3. **ALWAYS** import `use onboard::prompts::PromptInteraction;` when using onboard prompts
-4. **PREFER** `prompts::toggle::toggle()` over `prompts::confirm()` for on/off switches
-5. **USE** `prompts::log::*` instead of plain `println!` for all status messages
-6. **ADD** rainbow effects and animations where appropriate
-7. **KEEP** the code functional - don't break existing logic
-
----
-
-## Next Steps for Better AI
-
-1. **Phase 1:** Complete wizard.rs replacements
-   - Replace all remaining `Input::new()` calls
-   - Replace all remaining `Select::new()` calls
-   - Replace all `println!` with `prompts::log::*`
-
-2. **Phase 2:** Update provider_setup.rs
-   - Replace all dialoguer prompts
-   - Add rainbow effects to model selection
-   - Add spinners for API calls
-
-3. **Phase 3:** Update channel_setup.rs
-   - Replace all dialoguer prompts
-   - Use `prompts::multiselect()` for channel selection
-   - Add progress bars for connection tests
-
-4. **Phase 4:** Cleanup
-   - Remove unused `dialoguer` imports
-   - Remove unused `console::style` calls
-   - Add train animation on completion
-
----
-
-## Compilation Status
-
-✅ Currently compiles successfully
-✅ No errors
-⚠️ 3 warnings (unused imports - can be fixed later)
-
----
-
-## File Locations
-
-- Main wizard: `src/onboard/wizard.rs`
-- Provider setup: `src/onboard/provider_setup.rs`
-- Channel setup: `src/onboard/channel_setup.rs`
-- Models: `src/onboard/models.rs`
-- Onboard framework: `onboard/src/`
-
----
-
-## Summary
-
-The task is to systematically replace every old UI element with the beautiful onboard framework. The pattern is clear from the examples above. A better AI should be able to complete this by following the patterns and replacing all occurrences in all three files.
-
-**Estimated remaining work:** 150+ replacements across 3 files.
+- `src/lib.rs` - Module declarations
+- `src/tools/mod.rs` - Tools module structure
+- `src/tools/web_search_tool.rs` - File with import issue
+- `src/metasearch/mod.rs` - Metasearch exports
+- `Cargo.toml` - Crate configuration

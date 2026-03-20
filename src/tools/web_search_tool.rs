@@ -6,10 +6,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-// Import metasearch components (now integrated in src/metasearch)
+// Import metasearch components - metasearch is a crate-root sibling of tools
 use crate::metasearch::{
-    category::SearchCategory, query::SearchQuery, ranking::ResultAggregator,
-    engines::EngineRegistry,
+    SearchCategory, SearchQuery, ResultAggregator, 
+    EngineRegistry, SearchEngine
 };
 
 /// Web search tool for searching the internet.
@@ -174,16 +174,16 @@ impl WebSearchTool {
         }
 
         // Use top 5 engines for speed and reliability
-        let top_engines: Vec<_> = engines.into_iter().take(5).collect();
+        let top_engines: Vec<Arc<dyn SearchEngine>> = 
+            engines.into_iter().take(5).collect();
 
         // Parallel search across multiple engines
         let mut tasks = Vec::new();
         for engine in top_engines {
             let query_clone = search_query.clone();
-            let engine_clone = Arc::clone(&engine);
             let engine_name = engine.metadata().name.to_string();
             tasks.push(tokio::spawn(async move {
-                let results = engine_clone.search(&query_clone).await.ok()?;
+                let results = engine.search(&query_clone).await.ok()?;
                 Some((engine_name, results))
             }));
         }

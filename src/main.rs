@@ -94,6 +94,9 @@ mod i18n;
 mod identity;
 mod integrations;
 mod memory;
+mod metasearch {
+    pub use zeroclaw::metasearch::*;
+}
 mod migration;
 mod multimodal;
 mod observability;
