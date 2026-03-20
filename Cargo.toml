@@ -34,7 +34,17 @@ tokio-util = { version = "0.7", default-features = false }
 tokio-stream = { version = "0.1.18", default-features = false, features = ["fs", "sync"] }
 
 # HTTP client - minimal features
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking", "multipart", "stream", "socks"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking", "multipart", "stream", "socks", "gzip", "brotli", "deflate", "http2", "hickory-dns"] }
+
+# Metasearch dependencies (integrated into src/metasearch)
+scraper = "0.22"
+html-escape = "0.2"
+rayon = "1.10"
+compact_str = { version = "0.8", features = ["serde"] }
+ahash = "0.8"
+dashmap = "6.1"
+smallvec = { version = "1.13", features = ["union", "const_generics", "serde"] }
+url = "2.5"
 
 # Matrix client + E2EE decryption
 matrix-sdk = { version = "0.16", optional = true, default-features = false, features = ["e2e-encryption", "rustls-tls", "markdown", "sqlite"] }

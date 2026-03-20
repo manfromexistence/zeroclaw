@@ -3,10 +3,18 @@ use async_trait::async_trait;
 use regex::Regex;
 use serde_json::json;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Duration;
 
+// Import metasearch components (now integrated in src/metasearch)
+use crate::metasearch::{
+    category::SearchCategory, query::SearchQuery, ranking::ResultAggregator,
+    engines::EngineRegistry,
+};
+
 /// Web search tool for searching the internet.
-/// Supports multiple providers: DuckDuckGo (free), Brave (requires API key).
+/// By default uses metasearch with 215+ search engines for free, privacy-respecting search.
+/// Falls back to legacy providers (DuckDuckGo, Brave) if metasearch is disabled.
 ///
 /// The Brave API key is resolved lazily at execution time: if the boot-time key
 /// is missing or still encrypted, the tool re-reads `config.toml`, decrypts the
@@ -22,6 +30,10 @@ pub struct WebSearchTool {
     config_path: PathBuf,
     /// Whether secret encryption is enabled (needed to create a `SecretStore`).
     secrets_encrypt: bool,
+    /// Metasearch engine registry (215+ engines)
+    metasearch_registry: Option<Arc<EngineRegistry>>,
+    /// Use metasearch by default (true = metasearch, false = legacy providers)
+    use_metasearch: bool,
 }
 
 impl WebSearchTool {
@@ -31,6 +43,20 @@ impl WebSearchTool {
         max_results: usize,
         timeout_secs: u64,
     ) -> Self {
+        // Create HTTP client for metasearch
+        let client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(timeout_secs.max(1)))
+            .connect_timeout(Duration::from_secs(5))
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .gzip(true)
+            .brotli(true)
+            .pool_max_idle_per_host(10)
+            .build()
+            .ok();
+
+        // Initialize metasearch registry with 215+ engines
+        let metasearch_registry = client.map(|c| Arc::new(EngineRegistry::with_defaults(c)));
+
         Self {
             provider: provider.trim().to_lowercase(),
             boot_brave_api_key: brave_api_key,
@@ -38,6 +64,8 @@ impl WebSearchTool {
             timeout_secs: timeout_secs.max(1),
             config_path: PathBuf::new(),
             secrets_encrypt: false,
+            metasearch_registry,
+            use_metasearch: true, // Default to metasearch
         }
     }
 
@@ -54,6 +82,20 @@ impl WebSearchTool {
         config_path: PathBuf,
         secrets_encrypt: bool,
     ) -> Self {
+        // Create HTTP client for metasearch
+        let client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(timeout_secs.max(1)))
+            .connect_timeout(Duration::from_secs(5))
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .gzip(true)
+            .brotli(true)
+            .pool_max_idle_per_host(10)
+            .build()
+            .ok();
+
+        // Initialize metasearch registry with 215+ engines
+        let metasearch_registry = client.map(|c| Arc::new(EngineRegistry::with_defaults(c)));
+
         Self {
             provider: provider.trim().to_lowercase(),
             boot_brave_api_key: brave_api_key,
@@ -61,6 +103,8 @@ impl WebSearchTool {
             timeout_secs: timeout_secs.max(1),
             config_path,
             secrets_encrypt,
+            metasearch_registry,
+            use_metasearch: true, // Default to metasearch
         }
     }
 
@@ -112,6 +156,72 @@ impl WebSearchTool {
         } else {
             Ok(raw_key)
         }
+    }
+
+    /// Search using metasearch (215+ engines, privacy-respecting, free)
+    async fn search_metasearch(&self, query: &str) -> anyhow::Result<String> {
+        let registry = self.metasearch_registry.as_ref()
+            .ok_or_else(|| anyhow::anyhow!("Metasearch registry not initialized"))?;
+
+        // Create search query
+        let search_query = SearchQuery::new(query);
+
+        // Get engines for general web search
+        let engines = registry.engines_for_category(&SearchCategory::General);
+
+        if engines.is_empty() {
+            anyhow::bail!("No search engines available in metasearch registry");
+        }
+
+        // Use top 5 engines for speed and reliability
+        let top_engines: Vec<_> = engines.into_iter().take(5).collect();
+
+        // Parallel search across multiple engines
+        let mut tasks = Vec::new();
+        for engine in top_engines {
+            let query_clone = search_query.clone();
+            let engine_clone = Arc::clone(&engine);
+            let engine_name = engine.metadata().name.to_string();
+            tasks.push(tokio::spawn(async move {
+                let results = engine_clone.search(&query_clone).await.ok()?;
+                Some((engine_name, results))
+            }));
+        }
+
+        // Collect results
+        let mut all_results = Vec::new();
+        for task in tasks {
+            if let Ok(Some((engine_name, results))) = task.await {
+                all_results.push((engine_name, results));
+            }
+        }
+
+        if all_results.is_empty() {
+            return Ok(format!("No results found for: {}", query));
+        }
+
+        // Aggregate and deduplicate results
+        let weights = dashmap::DashMap::new();
+        weights.insert("google".to_string(), 1.5);
+        weights.insert("duckduckgo".to_string(), 1.2);
+        weights.insert("brave".to_string(), 1.0);
+        weights.insert("bing".to_string(), 1.0);
+
+        let aggregator = ResultAggregator::new(weights);
+        let search_response = aggregator.aggregate(query, all_results, 0);
+
+        // Format results
+        let mut lines = vec![format!("Search results for: {} (via Metasearch - 215+ engines)", query)];
+
+        for (i, result) in search_response.results.iter().take(self.max_results).enumerate() {
+            lines.push(format!("{}. {}", i + 1, result.title));
+            lines.push(format!("   {}", result.url));
+            if !result.content.is_empty() {
+                lines.push(format!("   {}", result.content));
+            }
+        }
+
+        Ok(lines.join("\n"))
     }
 
     async fn search_duckduckgo(&self, query: &str) -> anyhow::Result<String> {
@@ -271,7 +381,7 @@ impl Tool for WebSearchTool {
     }
 
     fn description(&self) -> &str {
-        "Search the web for information. Returns relevant search results with titles, URLs, and descriptions. Use this to find current information, news, or research topics."
+        "Search the web using metasearch (215+ engines including Google, DuckDuckGo, Brave, Bing, Yahoo, Qwant, and more). Searches 5 engines in parallel, aggregates and deduplicates results. Privacy-respecting and free. Returns relevant search results with titles, URLs, and descriptions. Use this to find current information, news, or research topics."
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -299,13 +409,33 @@ impl Tool for WebSearchTool {
 
         tracing::info!("Searching web for: {}", query);
 
-        let result = match self.provider.as_str() {
-            "duckduckgo" | "ddg" => self.search_duckduckgo(query).await?,
-            "brave" => self.search_brave(query).await?,
-            _ => anyhow::bail!(
-                "Unknown search provider: '{}'. Set tools.web_search.provider to 'duckduckgo' or 'brave' in config.toml",
-                self.provider
-            ),
+        // Default to metasearch (215+ engines, free, privacy-respecting)
+        let result = if self.use_metasearch && self.metasearch_registry.is_some() {
+            match self.search_metasearch(query).await {
+                Ok(res) => res,
+                Err(e) => {
+                    tracing::warn!("Metasearch failed: {}, falling back to legacy provider", e);
+                    // Fallback to legacy providers
+                    match self.provider.as_str() {
+                        "duckduckgo" | "ddg" => self.search_duckduckgo(query).await?,
+                        "brave" => self.search_brave(query).await?,
+                        _ => self.search_duckduckgo(query).await?,
+                    }
+                }
+            }
+        } else {
+            // Legacy provider mode
+            match self.provider.as_str() {
+                "duckduckgo" | "ddg" => self.search_duckduckgo(query).await?,
+                "brave" => self.search_brave(query).await?,
+                "metasearch" => {
+                    anyhow::bail!("Metasearch not available. Install metasearch dependencies.")
+                }
+                _ => anyhow::bail!(
+                    "Unknown search provider: '{}'. Set tools.web_search.provider to 'duckduckgo', 'brave', or 'metasearch' in config.toml",
+                    self.provider
+                ),
+            }
         };
 
         Ok(ToolResult {

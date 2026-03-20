@@ -1,8 +1,8 @@
 [package]
 name = "metasearch-engine"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
 description = "Search engine implementations translated from SearXNG Python to Rust"
 
 [features]
@@ -22,14 +22,14 @@ databases = ["sqlite", "postgres", "mysql", "mongodb_feature", "redis"]
 
 [dependencies]
 metasearch-core = { path = "../metasearch-core" }
-reqwest.workspace = true
-scraper.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-async-trait.workspace = true
-tracing.workspace = true
-url.workspace = true
-regex.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "brotli", "deflate", "http2", "hickory-dns"] }
+scraper = "0.22"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+url = "2.5"
+regex = "1.11"
 chrono = { version = "0.4", features = ["serde"] }
 urlencoding = "2.1"
 html-escape = "0.2"
@@ -37,14 +37,14 @@ base64 = "0.22"
 rand = "0.8"
 
 # Performance optimizations
-dashmap.workspace = true
-smallvec = { workspace = true, features = ["serde"] }
+dashmap = "6.1"
+smallvec = { version = "1.13", features = ["union", "const_generics", "serde"] }
 
 # Zero-copy strings
 # (std::borrow::Cow is in stdlib — no extra dep needed)
 
 # Optional database dependencies
-rusqlite = { version = "0.32", optional = true }
+rusqlite = { version = "0.37", features = ["bundled"], optional = true }
 tokio-postgres = { version = "0.7", optional = true }
 mysql_async = { version = "0.34", optional = true }
 mongodb = { version = "3.1", optional = true }
@@ -53,4 +53,4 @@ futures = { version = "0.3", optional = true }
 tokio = { version = "1", features = ["rt"], optional = true }
 
 [dev-dependencies]
-tokio.workspace = true
+tokio = { version = "1.48", features = ["full"] }

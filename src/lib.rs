@@ -48,6 +48,7 @@ pub(crate) mod cost;
 pub(crate) mod cron;
 pub(crate) mod daemon;
 pub(crate) mod doctor;
+pub mod metasearch;
 pub mod gateway;
 pub mod hands;
 pub(crate) mod hardware;
