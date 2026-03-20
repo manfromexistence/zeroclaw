@@ -10,6 +10,8 @@ use crate::providers::{
 use crate::runtime;
 use crate::security::SecurityPolicy;
 use crate::tools::{self, Tool};
+use crate::ui::effects::RainbowEffect;
+use crate::ui::splash;
 use crate::util::truncate_with_ellipsis;
 use anyhow::Result;
 use regex::{Regex, RegexSet};
@@ -33,6 +35,21 @@ const DEFAULT_MAX_TOOL_ITERATIONS: usize = 10;
 /// Minimum user-message length (in chars) for auto-save to memory.
 /// Matches the channel-side constant in `channels/mod.rs`.
 const AUTOSAVE_MIN_MESSAGE_CHARS: usize = 20;
+
+/// Show train animation on exit
+fn show_exit_train() {
+    let rainbow = RainbowEffect::new();
+    println!();
+    println!("Thanks for using Dx! Here's a farewell train!");
+    println!();
+    
+    for frame in 0..15 {
+        print!("\x1B[H"); // Move cursor to top
+        let _ = splash::render_train_animation(&rainbow, frame);
+        std::thread::sleep(std::time::Duration::from_millis(200));
+    }
+    println!();
+}
 
 /// Callback type for checking if model has been switched during tool execution.
 /// Returns Some((provider, model)) if a switch was requested, None otherwise.
@@ -3616,9 +3633,11 @@ pub async fn run(
         println!("{response}");
         observer.record_event(&ObserverEvent::TurnComplete);
     } else {
-        println!("🦀 ZeroClaw Interactive Mode");
-        println!("Type /help for commands.\n");
-        let cli = crate::channels::CliChannel::new();
+        // Clean Vercel-style header
+        println!("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        println!("│ Dx - Enhanced Development Experience                                        │");
+        println!("└─────────────────────────────────────────────────────────────────────────────┘");
+        println!("  Type /help for commands\n");
 
         // Persistent conversation history across turns
         let mut history = if let Some(path) = session_state_file.as_deref() {
@@ -3628,7 +3647,9 @@ pub async fn run(
         };
 
         loop {
-            print!("> ");
+            // Clean input prompt with full-width box
+            println!("┌─────────────────────────────────────────────────────────────────────────────┐");
+            print!("│ You: ");
             let _ = std::io::stdout().flush();
 
             // Read raw bytes to avoid UTF-8 validation errors when PTY
@@ -3636,21 +3657,30 @@ pub async fn run(
             // (e.g. CJK input with spaces over kubectl exec / SSH).
             let mut raw = Vec::new();
             match std::io::BufRead::read_until(&mut std::io::stdin().lock(), b'\n', &mut raw) {
-                Ok(0) => break,
+                Ok(0) => {
+                    show_exit_train();
+                    break;
+                }
                 Ok(_) => {}
                 Err(e) => {
                     eprintln!("\nError reading input: {e}\n");
+                    show_exit_train();
                     break;
                 }
             }
             let input = String::from_utf8_lossy(&raw).into_owned();
 
             let user_input = input.trim().to_string();
+            println!("└─────────────────────────────────────────────────────────────────────────────┘\n");
+            
             if user_input.is_empty() {
                 continue;
             }
             match user_input.as_str() {
-                "/quit" | "/exit" => break,
+                "/quit" | "/exit" => {
+                    show_exit_train();
+                    break;
+                }
                 "/help" => {
                     println!("Available commands:");
                     println!("  /help        Show this help message");
@@ -3659,11 +3689,9 @@ pub async fn run(
                     continue;
                 }
                 "/clear" | "/new" => {
-                    println!(
-                        "This will clear the current conversation and delete all session memory."
-                    );
+                    println!("This will clear the current conversation and delete all session memory.");
                     println!("Core memories (long-term facts/preferences) will be preserved.");
-                    print!("Continue? [y/N] ");
+                    print!("\nContinue? [y/N] ");
                     let _ = std::io::stdout().flush();
 
                     let mut confirm_raw = Vec::new();
@@ -3678,7 +3706,7 @@ pub async fn run(
                     }
                     let confirm = String::from_utf8_lossy(&confirm_raw);
                     if !matches!(confirm.trim().to_lowercase().as_str(), "y" | "yes") {
-                        println!("Cancelled.\n");
+                        println!("Cancelled\n");
                         continue;
                     }
 
@@ -3695,9 +3723,9 @@ pub async fn run(
                         }
                     }
                     if cleared > 0 {
-                        println!("Conversation cleared ({cleared} memory entries removed).\n");
+                        println!("Conversation cleared ({cleared} memory entries removed)\n");
                     } else {
-                        println!("Conversation cleared.\n");
+                        println!("Conversation cleared\n");
                     }
                     if let Some(path) = session_state_file.as_deref() {
                         save_interactive_session_history(path, &history)?;
@@ -3816,14 +3844,13 @@ pub async fn run(
                 }
             };
             final_output = response.clone();
-            if let Err(e) = crate::channels::Channel::send(
-                &cli,
-                &crate::channels::traits::SendMessage::new(format!("\n{response}\n"), "user"),
-            )
-            .await
-            {
-                eprintln!("\nError sending CLI response: {e}\n");
-            }
+            
+            // Clean assistant response with box
+            println!("┌─────────────────────────────────────────────────────────────────────────────┐");
+            println!("│ Assistant:");
+            println!("└─────────────────────────────────────────────────────────────────────────────┘");
+            println!("{response}\n");
+            
             observer.record_event(&ObserverEvent::TurnComplete);
 
             // Auto-compaction before hard trimming to preserve long-context signal.
@@ -3836,7 +3863,7 @@ pub async fn run(
             )
             .await
                 && compacted {
-                    println!("🧹 Auto-compaction complete");
+                    println!("Auto-compaction complete\n");
                 }
 
             // Hard cap as a safety net.

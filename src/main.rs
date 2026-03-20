@@ -50,7 +50,7 @@ fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
 
 fn print_no_command_help() -> Result<()> {
     println!("No command provided.");
-    println!("Try `zeroclaw onboard` to initialize your workspace.");
+    println!("Try `dx onboard` to initialize your workspace.");
     println!();
 
     let mut cmd = Cli::command();
@@ -154,9 +154,9 @@ enum EstopLevelArg {
     ToolFreeze,
 }
 
-/// `ZeroClaw` - Zero overhead. Zero compromise. 100% Rust.
+/// `Dx` - Enhanced Development Experience
 #[derive(Parser, Debug)]
-#[command(name = "zeroclaw")]
+#[command(name = "dx")]
 #[command(author = "theonlyhennygod")]
 #[command(version)]
 #[command(about = "The fastest, smallest AI assistant.", long_about = None)]
@@ -200,6 +200,7 @@ enum Commands {
     },
 
     /// Start the AI agent loop
+    #[command(hide = true)]  // Hidden from help - this is the default command
     #[command(long_about = "\
 Start the AI agent loop.
 
@@ -207,10 +208,10 @@ Launches an interactive chat session with the configured AI provider. \
 Use --message for single-shot queries without entering interactive mode.
 
 Examples:
-  zeroclaw agent                              # interactive session
-  zeroclaw agent -m \"Summarize today's logs\"  # single message
-  zeroclaw agent -p anthropic --model claude-sonnet-4-20250514
-  zeroclaw agent --peripheral nucleo-f401re:/dev/ttyACM0")]
+  dx agent                              # interactive session
+  dx agent -m \"Summarize today's logs\"  # single message
+  dx agent -p anthropic --model claude-sonnet-4-20250514
+  dx agent --peripheral nucleo-f401re:/dev/ttyACM0")]
     Agent {
         /// Single message mode (don't enter interactive mode)
         #[arg(short, long)]
@@ -245,9 +246,9 @@ Start, restart, or inspect the HTTP/WebSocket gateway that accepts \
 incoming webhook events and WebSocket connections.
 
 Examples:
-  zeroclaw gateway start              # start gateway
-  zeroclaw gateway restart            # restart gateway
-  zeroclaw gateway get-paircode       # show pairing code")]
+  dx gateway start              # start gateway
+  dx gateway restart            # restart gateway
+  dx gateway get-paircode       # show pairing code")]
     Gateway {
         #[command(subcommand)]
         gateway_command: Option<zeroclaw::GatewayCommands>,
@@ -257,18 +258,18 @@ Examples:
     #[command(long_about = "\
 Start the long-running autonomous daemon.
 
-Launches the full ZeroClaw runtime: gateway server, all configured \
+Launches the full Dx runtime: gateway server, all configured \
 channels (Telegram, Discord, Slack, etc.), heartbeat monitor, and \
-the cron scheduler. This is the recommended way to run ZeroClaw in \
+the cron scheduler. This is the recommended way to run Dx in \
 production or as an always-on assistant.
 
-Use 'zeroclaw service install' to register the daemon as an OS \
+Use 'dx service install' to register the daemon as an OS \
 service (systemd/launchd) for auto-start on boot.
 
 Examples:
-  zeroclaw daemon                   # use config defaults
-  zeroclaw daemon -p 9090           # gateway on port 9090
-  zeroclaw daemon --host 127.0.0.1  # localhost only")]
+  dx daemon                   # use config defaults
+  dx daemon -p 9090           # gateway on port 9090
+  dx daemon --host 127.0.0.1  # localhost only")]
     Daemon {
         /// Port to listen on (use 0 for random available port); defaults to config gateway.port
         #[arg(short, long)]
@@ -816,11 +817,22 @@ async fn main() -> Result<()> {
         eprintln!("Warning: Failed to install default crypto provider: {e:?}");
     }
 
-    if std::env::args_os().len() <= 1 {
-        return print_no_command_help();
-    }
-
-    let cli = Cli::parse();
+    // If no command provided, default to Agent command (interactive mode)
+    let cli = if std::env::args_os().len() <= 1 {
+        Cli {
+            config_dir: None,
+            command: Commands::Agent {
+                message: None,
+                session_state_file: None,
+                provider: None,
+                model: None,
+                temperature: None,
+                peripheral: Vec::new(),
+            },
+        }
+    } else {
+        Cli::parse()
+    };
 
     if let Some(config_dir) = &cli.config_dir {
         if config_dir.trim().is_empty() {
