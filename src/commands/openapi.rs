@@ -27,13 +27,13 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
     let mut harvester = SpecHarvester::new();
     harvester.add_source(Box::new(ApisGuruSource::new(source_dir.clone())));
 
-    println!("Harvesting OpenAPI specs from {}...", source_dir.display());
+    println!("Harvesting OpenAPI connects from {}...", source_dir.display());
     let specs = harvester.harvest_all().await?;
-    println!("Found {} specs", specs.len());
+    println!("Found {} connects", specs.len());
     
     println!("Deduplicating...");
     let unique = harvester.deduplicate(specs).await;
-    println!("Unique specs: {}", unique.len());
+    println!("Unique connects: {}", unique.len());
     
     println!("Building registry...");
     let mut entries = Vec::new();
@@ -66,10 +66,10 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
     // Write registry
     tokio::fs::create_dir_all(&specs_root)
         .await
-        .with_context(|| format!("failed to create specs dir {}", specs_root.display()))?;
+        .with_context(|| format!("failed to create connects dir {}", specs_root.display()))?;
     let registry_path = specs_root.join("registry.json");
     let registry_data = serde_json::json!({
-        "specs": entries,
+        "connects": entries,
         "harvested_at": chrono::Utc::now().to_rfc3339(),
         "total_specs": unique.len(),
     });
@@ -82,7 +82,7 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
     println!("  Source: {}", source_dir.display());
     println!("  Specs harvested: {}", unique.len());
     println!("  Registry: {}", registry_path.display());
-    println!("\nRun 'zeroclaw openapi list' to see available specs.");
+    println!("\nRun 'zeroclaw openapi list' to see available connects.");
     Ok(())
 }
 
@@ -94,16 +94,16 @@ pub async fn list_command(config: &Config) -> Result<()> {
     
     println!("OpenAPI Integration Status");
     println!("==========================");
-    println!("Specs loaded: {}", spec_count);
+    println!("Connects loaded: {}", spec_count);
     println!("Connects available: {}", connect_count);
     println!();
     
     if spec_count == 0 {
-        println!("No specs loaded. Run 'zeroclaw openapi harvest' to load specs.");
+        println!("No connects loaded. Run 'zeroclaw openapi harvest' to load connects.");
         return Ok(());
     }
     
-    println!("Available specs:");
+    println!("Available connects:");
     for spec_id in registry.list_specs() {
         if let Some(spec) = registry.get_spec(&spec_id) {
             let connect_count = registry.get_tools_for_spec(&spec_id).len();
