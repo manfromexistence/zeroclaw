@@ -814,6 +814,15 @@ enum MemoryCommands {
 #[tokio::main]
 #[allow(clippy::too_many_lines)]
 async fn main() -> Result<()> {
+    // Set up global Ctrl+C handler to show train animation on interrupt
+    if std::io::stdout().is_terminal() {
+        ctrlc::set_handler(move || {
+            util::show_exit_train();
+            std::process::exit(0);
+        })
+        .expect("Error setting Ctrl-C handler");
+    }
+
     // Register exit handler to show train animation on normal exit
     let result = main_impl().await;
 
@@ -892,18 +901,9 @@ async fn main_impl() -> Result<()> {
         memory,
     } = &cli.command
     {
-        // Set up Ctrl+C handler to show train animation on exit (only for interactive onboard)
         let is_tty = std::io::stdin().is_terminal() && std::io::stdout().is_terminal();
         let has_provider_flags =
             api_key.is_some() || provider.is_some() || model.is_some() || memory.is_some();
-
-        if is_tty && !has_provider_flags {
-            ctrlc::set_handler(move || {
-                util::show_exit_train();
-                std::process::exit(0);
-            })
-            .expect("Error setting Ctrl-C handler");
-        }
 
         let force = *force;
         let reinit = *reinit;
