@@ -280,8 +280,11 @@ strip = true          # Remove debug symbols
 panic = "abort"      # Reduce binary size
 
 [profile.dev]
-# Reduce codegen-units to prevent LLVM stack overflow on large projects
-codegen-units = 16   # Default is 256, reducing to 16 prevents stack overflow
+# Reduce codegen-units and debug info to prevent LLVM out-of-memory on large projects
+codegen-units = 8    # Reduced from 16 to lower memory usage
+debug = 1            # Line tables only (not full debug info) - saves significant memory
+incremental = true   # Enable incremental compilation to reduce memory pressure
+opt-level = 0        # No optimization in dev mode
 
 [profile.release-fast]
 inherits = "release"

@@ -5,15 +5,14 @@ Connect -> Connectivity
 Tool, Metasearch -> Ability
 Token -> Saving
 Serializer, Local Model -> Speed
-Any Software - Any
-
-Train animation on exit from the whole project and from all places!!!
 
 Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell ai model our about tool calling to use our serializer syntax instead of json for tool calling!!!
 
 -------------------------------------------------------------------------------------------------------------------------
 
-Now please look at the root onboard folder's local model running functionality and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA. I will be using LLaMA.cpp like that onboard local model running functionality. So learn from the root on board project and implement the local GGUF model running on our main project.
+Now please look at the root LOCAL.md file at the root and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA keep the ollama running functionality too just add the local model gguf running funcatinality add it and configure it correctly on our project!!!
+
+Train animation on exit from the whole project and from all places!!! So make sure that from anywhere we exit from our cli no matter its help or inside other place it always show the train animations that is currently showing when we are exiting onboard command!!!
 
 For the replacement of the crab the previous zeroclow logo symbols please use "◈" and instead of those emojis -use these:
 ✓ Build passed ✗ 3 tests failed △ Deprecated API usage ⚙ Compiled with Rust ⇒ Pipeline complete ✦ v2.0 released! ↯ 3ms response time
