@@ -62,8 +62,8 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
     std::thread::sleep(std::time::Duration::from_millis(800));
 
     // Welcome with onboard UI
-    prompts::intro("ZeroClaw Setup Wizard")?;
-    prompts::section_with_width("Welcome to ZeroClaw", 80, |lines: &mut Vec<String>| {
+    prompts::intro("Agent Setup Wizard")?;
+    prompts::section_with_width("Welcome to Agent", 80, |lines: &mut Vec<String>| {
         lines.push("The fastest, smallest AI assistant.".to_string());
         lines.push("100% Rust. 100% Agnostic. Zero compromise.".to_string());
         lines.push(String::new());
@@ -82,7 +82,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
     print_step(2, 9, "AI Provider & API Key")?;
     let (provider, api_key, model, provider_api_url) = setup_provider(&workspace_dir).await?;
 
-    print_step(3, 9, "Channels (How You Talk to ZeroClaw)")?;
+    print_step(3, 9, "Channels (How You Talk to Agent)")?;
     let channels_config = setup_channels()?;
 
     print_step(4, 9, "Tunnel (Expose to Internet)")?;
@@ -202,7 +202,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
             prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
             unsafe {
-                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+                std::env::set_var("AGENT_AUTOSTART_CHANNELS", "1");
             }
         }
     }
@@ -232,7 +232,7 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
 
     let mut config = Box::pin(Config::load_or_init()).await?;
 
-    print_step(1, 1, "Channels (How You Talk to ZeroClaw)")?;
+    print_step(1, 1, "Channels (How You Talk to Agent)")?;
     config.channels_config = setup_channels()?;
     config.save().await?;
     persist_workspace_selection(&config.config_path).await?;
@@ -253,7 +253,7 @@ pub async fn run_channels_repair_wizard() -> Result<Config> {
             prompts::log::info("Starting channel server...")?;
             // Signal to main.rs to call start_channels after wizard returns
             unsafe {
-                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+                std::env::set_var("AGENT_AUTOSTART_CHANNELS", "1");
             }
         }
     }
@@ -309,7 +309,7 @@ async fn run_provider_update_wizard(workspace_dir: &Path, config_path: &Path) ->
         if launch {
             prompts::log::info("Starting channel server...")?;
             unsafe {
-                std::env::set_var("ZEROCLAW_AUTOSTART_CHANNELS", "1");
+                std::env::set_var("AGENT_AUTOSTART_CHANNELS", "1");
             }
         }
     }
@@ -342,7 +342,7 @@ fn apply_provider_update(
 // ── Quick setup (zero prompts) ───────────────────────────────────
 
 /// Non-interactive setup: generates a sensible default config instantly.
-/// Use `zeroclaw onboard` or `zeroclaw onboard --api-key sk-... --provider openrouter --memory sqlite|lucid`.
+/// Use `agent onboard` or `agent onboard --api-key sk-... --provider openrouter --memory sqlite|lucid`.
 fn backend_key_from_choice(choice: usize) -> &'static str {
     selectable_memory_backends()
         .get(choice)
@@ -407,7 +407,7 @@ pub async fn run_quick_setup(
 }
 
 fn resolve_quick_setup_dirs_with_home(home: &Path) -> (PathBuf, PathBuf) {
-    if let Ok(custom_config_dir) = std::env::var("ZEROCLAW_CONFIG_DIR") {
+    if let Ok(custom_config_dir) = std::env::var("DX_CONFIG_DIR") {
         let trimmed = custom_config_dir.trim();
         if !trimmed.is_empty() {
             let config_dir = PathBuf::from(shellexpand::tilde(trimmed).as_ref());
@@ -415,7 +415,7 @@ fn resolve_quick_setup_dirs_with_home(home: &Path) -> (PathBuf, PathBuf) {
         }
     }
 
-    if let Ok(custom_workspace) = std::env::var("ZEROCLAW_WORKSPACE") {
+    if let Ok(custom_workspace) = std::env::var("AGENT_WORKSPACE") {
         let trimmed = custom_workspace.trim();
         if !trimmed.is_empty() {
             let expanded = shellexpand::tilde(trimmed);
@@ -425,7 +425,7 @@ fn resolve_quick_setup_dirs_with_home(home: &Path) -> (PathBuf, PathBuf) {
         }
     }
 
-    let config_dir = home.join(".zeroclaw");
+    let config_dir = home.join(".dx").join("agent");
     (config_dir.clone(), config_dir.join("workspace"))
 }
 
@@ -445,14 +445,14 @@ async fn run_quick_setup_with_home(
     println!();
     std::thread::sleep(std::time::Duration::from_millis(800));
 
-    prompts::intro("ZeroClaw Quick Setup")?;
+    prompts::intro("Agent Quick Setup")?;
     prompts::section_with_width("Quick Configuration", 80, |lines: &mut Vec<String>| {
         lines.push("Generating config with sensible defaults...".to_string());
-        lines.push("You can customize later with 'zeroclaw onboard'.".to_string());
+        lines.push("You can customize later with 'agent onboard'.".to_string());
     })?;
 
-    let (zeroclaw_dir, workspace_dir) = resolve_quick_setup_dirs_with_home(home);
-    let config_path = zeroclaw_dir.join("config.toml");
+    let (agent_dir, workspace_dir) = resolve_quick_setup_dirs_with_home(home);
+    let config_path = agent_dir.join("config.toml");
 
     ensure_onboard_overwrite_allowed(&config_path, force)?;
     fs::create_dir_all(&workspace_dir)
@@ -549,7 +549,7 @@ async fn run_quick_setup_with_home(
     let default_ctx = ProjectContext {
         user_name: std::env::var("USER").unwrap_or_else(|_| "User".into()),
         timezone: "UTC".into(),
-        agent_name: "ZeroClaw".into(),
+        agent_name: "Agent".into(),
         communication_style:
             "Be warm, natural, and clear. Use occasional relevant emojis (1-2 max) and avoid robotic phrasing."
                 .into(),
@@ -587,35 +587,35 @@ async fn run_quick_setup_with_home(
     prompts::log::step("Next steps:")?;
     if credential_override.is_none() {
         if provider_supports_keyless_local_usage(&provider_name) {
-            prompts::log::info("1. Chat:     zeroclaw agent -m \"Hello!\"")?;
-            prompts::log::info("2. Gateway:  zeroclaw gateway")?;
-            prompts::log::info("3. Status:   zeroclaw status")?;
+            prompts::log::info("1. Chat:     agent agent -m \"Hello!\"")?;
+            prompts::log::info("2. Gateway:  agent gateway")?;
+            prompts::log::info("3. Status:   agent status")?;
         } else if provider_supports_device_flow(&provider_name) {
             if canonical_provider_name(&provider_name) == "copilot" {
-                prompts::log::info("1. Chat:              zeroclaw agent -m \"Hello!\"")?;
+                prompts::log::info("1. Chat:              agent agent -m \"Hello!\"")?;
                 prompts::log::info("   (device / OAuth auth will prompt on first run)")?;
-                prompts::log::info("2. Gateway:           zeroclaw gateway")?;
-                prompts::log::info("3. Status:            zeroclaw status")?;
+                prompts::log::info("2. Gateway:           agent gateway")?;
+                prompts::log::info("3. Status:            agent status")?;
             } else {
                 prompts::log::info(format!(
-                    "1. Login:             zeroclaw auth login --provider {}",
+                    "1. Login:             agent auth login --provider {}",
                     provider_name
                 ))?;
-                prompts::log::info("2. Chat:              zeroclaw agent -m \"Hello!\"")?;
-                prompts::log::info("3. Gateway:           zeroclaw gateway")?;
-                prompts::log::info("4. Status:            zeroclaw status")?;
+                prompts::log::info("2. Chat:              agent agent -m \"Hello!\"")?;
+                prompts::log::info("3. Gateway:           agent gateway")?;
+                prompts::log::info("4. Status:            agent status")?;
             }
         } else {
             let env_var = provider_env_var(&provider_name);
             prompts::log::info(format!("1. Set your API key:  export {env_var}=\"sk-...\""))?;
-            prompts::log::info("2. Or edit:           ~/.zeroclaw/config.toml")?;
-            prompts::log::info("3. Chat:              zeroclaw agent -m \"Hello!\"")?;
-            prompts::log::info("4. Gateway:           zeroclaw gateway")?;
+            prompts::log::info("2. Or edit:           ~/.agent/config.toml")?;
+            prompts::log::info("3. Chat:              agent agent -m \"Hello!\"")?;
+            prompts::log::info("4. Gateway:           agent gateway")?;
         }
     } else {
-        prompts::log::info("1. Chat:     zeroclaw agent -m \"Hello!\"")?;
-        prompts::log::info("2. Gateway:  zeroclaw gateway")?;
-        prompts::log::info("3. Status:   zeroclaw status")?;
+        prompts::log::info("1. Chat:     agent agent -m \"Hello!\"")?;
+        prompts::log::info("2. Gateway:  agent gateway")?;
+        prompts::log::info("3. Status:   agent status")?;
     }
 
     Ok(config)
@@ -1415,7 +1415,7 @@ pub fn provider_supports_device_flow(provider_name: &str) -> bool {
 // ── Step 5: Tool Mode & Security ────────────────────────────────
 
 fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
-    prompts::log::info("Choose how ZeroClaw connects to external apps.")?;
+    prompts::log::info("Choose how Agent connects to external apps.")?;
     prompts::log::info("You can always change this later in config.toml.")?;
 
     let choice = prompts::select("Select tool mode")
@@ -1436,7 +1436,7 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
             "Composio Setup — 1000+ OAuth integrations (Gmail, Notion, GitHub, Slack, ...)",
         )?;
         prompts::log::info("Get your API key at: https://app.composio.dev/settings")?;
-        prompts::log::info("ZeroClaw uses Composio as a tool — your core agent stays local.")?;
+        prompts::log::info("Agent uses Composio as a tool — your core agent stays local.")?;
 
         let api_key = prompts::input::input("Composio API key (or Enter to skip)").interact()?;
 
@@ -1459,7 +1459,7 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
     };
 
     // ── Encrypted secrets ──
-    prompts::log::info("ZeroClaw can encrypt API keys stored in config.toml.")?;
+    prompts::log::info("Agent can encrypt API keys stored in config.toml.")?;
     prompts::log::info(
         "A local key file protects against plaintext exposure and accidental leaks.",
     )?;
@@ -1482,7 +1482,7 @@ fn setup_tool_mode() -> Result<(ComposioConfig, SecretsConfig)> {
 // ── Step 6: Hardware (Physical World) ───────────────────────────
 
 fn setup_hardware() -> Result<HardwareConfig> {
-    prompts::log::info("ZeroClaw can talk to physical hardware (LEDs, sensors, motors).")?;
+    prompts::log::info("Agent can talk to physical hardware (LEDs, sensors, motors).")?;
     prompts::log::info("Scanning for connected devices...")?;
 
     // ── Auto-discovery ──
@@ -1516,7 +1516,7 @@ fn setup_hardware() -> Result<HardwareConfig> {
 
     let recommended = hardware::recommended_wizard_default(&devices);
 
-    let choice = prompts::select("How should ZeroClaw interact with the physical world?")
+    let choice = prompts::select("How should Agent interact with the physical world?")
         .item(
             0,
             "🚀 Native — direct GPIO on this Linux board (Raspberry Pi, Orange Pi, etc.)",
@@ -1683,7 +1683,7 @@ fn setup_project_context() -> Result<ProjectContext> {
     };
 
     let agent_name = prompts::input::input("Agent name")
-        .placeholder("ZeroClaw")
+        .placeholder("Agent")
         .interact()?;
 
     let style_idx = prompts::select("Communication style")
@@ -1745,7 +1745,7 @@ fn setup_project_context() -> Result<ProjectContext> {
 // ── Step 6: Memory Configuration ───────────────────────────────
 
 fn setup_memory() -> Result<MemoryConfig> {
-    prompts::log::info("Choose how ZeroClaw stores and searches memories.")?;
+    prompts::log::info("Choose how Agent stores and searches memories.")?;
     prompts::log::info("You can always change this later in config.toml.")?;
 
     let backends = selectable_memory_backends();
@@ -1955,7 +1955,7 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
 #[allow(clippy::too_many_lines)]
 async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Result<()> {
     let agent = if ctx.agent_name.is_empty() {
-        "ZeroClaw"
+        "Agent"
     } else {
         &ctx.agent_name
     };
@@ -2333,12 +2333,12 @@ fn print_summary(config: &Config) -> Result<()> {
     if config.api_key.is_none() && !provider_supports_keyless_local_usage(provider) {
         if provider == "openai-codex" {
             prompts::log::info(format!("{}. Authenticate OpenAI Codex:", step))?;
-            prompts::log::info("   zeroclaw auth login --provider openai-codex --device-code")?;
+            prompts::log::info("   agent auth login --provider openai-codex --device-code")?;
         } else if provider == "anthropic" {
             prompts::log::info(format!("{}. Configure Anthropic auth:", step))?;
             prompts::log::info("   export ANTHROPIC_API_KEY=\"sk-ant-...\"")?;
             prompts::log::info(
-                "   or: zeroclaw auth paste-token --provider anthropic --auth-kind authorization",
+                "   or: agent auth paste-token --provider anthropic --auth-kind authorization",
             )?;
         } else {
             let env_var = provider_env_var(provider);
@@ -2354,20 +2354,20 @@ fn print_summary(config: &Config) -> Result<()> {
             "{}. Launch your channels (connected channels → AI → reply):",
             step
         ))?;
-        prompts::log::info("   zeroclaw channel start")?;
+        prompts::log::info("   agent channel start")?;
         step += 1;
     }
 
     prompts::log::info(format!("{}. Send a quick message:", step))?;
-    prompts::log::info("   zeroclaw agent -m \"Hello, ZeroClaw!\"")?;
+    prompts::log::info("   agent agent -m \"Hello, Agent!\"")?;
     step += 1;
 
     prompts::log::info(format!("{}. Start interactive CLI mode:", step))?;
-    prompts::log::info("   zeroclaw agent")?;
+    prompts::log::info("   agent agent")?;
     step += 1;
 
     prompts::log::info(format!("{}. Check full status:", step))?;
-    prompts::log::info("   zeroclaw status")?;
+    prompts::log::info("   agent status")?;
 
     prompts::log::success("⇒ Happy hacking!")?;
 

@@ -49,6 +49,7 @@ pub(crate) mod cron;
 pub(crate) mod daemon;
 pub(crate) mod doctor;
 pub mod metasearch;
+pub mod serializer;
 pub mod token;
 pub mod gateway;
 pub mod hands;

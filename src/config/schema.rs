@@ -6114,7 +6114,7 @@ fn default_config_dir() -> Result<PathBuf> {
     let home = UserDirs::new()
         .map(|u| u.home_dir().to_path_buf())
         .context("Could not find home directory")?;
-    Ok(home.join(".zeroclaw"))
+    Ok(home.join(".dx").join("agent"))
 }
 
 fn active_workspace_state_path(default_dir: &Path) -> PathBuf {
@@ -6279,7 +6279,7 @@ pub(crate) fn resolve_config_dir_for_workspace(workspace_dir: &Path) -> (PathBuf
 /// Resolve the current runtime config/workspace directories for onboarding flows.
 ///
 /// This mirrors the same precedence used by `Config::load_or_init()`:
-/// `ZEROCLAW_CONFIG_DIR` > `ZEROCLAW_WORKSPACE` > active workspace marker > defaults.
+/// `DX_CONFIG_DIR` > `DX_WORKSPACE` > active workspace marker > defaults.
 pub async fn resolve_runtime_dirs_for_onboarding() -> Result<(PathBuf, PathBuf)> {
     let (default_zeroclaw_dir, default_workspace_dir) = default_config_and_workspace_dirs()?;
     let (config_dir, workspace_dir, _) =
@@ -6298,8 +6298,8 @@ enum ConfigResolutionSource {
 impl ConfigResolutionSource {
     const fn as_str(self) -> &'static str {
         match self {
-            Self::EnvConfigDir => "ZEROCLAW_CONFIG_DIR",
-            Self::EnvWorkspace => "ZEROCLAW_WORKSPACE",
+            Self::EnvConfigDir => "DX_CONFIG_DIR",
+            Self::EnvWorkspace => "DX_WORKSPACE",
             Self::ActiveWorkspaceMarker => "active_workspace.toml",
             Self::DefaultConfigDir => "default",
         }
@@ -6310,7 +6310,7 @@ async fn resolve_runtime_config_dirs(
     default_zeroclaw_dir: &Path,
     default_workspace_dir: &Path,
 ) -> Result<(PathBuf, PathBuf, ConfigResolutionSource)> {
-    if let Ok(custom_config_dir) = std::env::var("ZEROCLAW_CONFIG_DIR") {
+    if let Ok(custom_config_dir) = std::env::var("DX_CONFIG_DIR") {
         let custom_config_dir = custom_config_dir.trim();
         if !custom_config_dir.is_empty() {
             let zeroclaw_dir = PathBuf::from(shellexpand::tilde(custom_config_dir).as_ref());

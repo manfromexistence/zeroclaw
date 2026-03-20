@@ -854,7 +854,7 @@ async fn main_impl() -> Result<()> {
             bail!("--config-dir cannot be empty");
         }
         unsafe {
-            std::env::set_var("ZEROCLAW_CONFIG_DIR", config_dir);
+            std::env::set_var("DX_CONFIG_DIR", config_dir);
         }
     }
 

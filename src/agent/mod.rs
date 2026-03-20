@@ -5,6 +5,7 @@ pub mod dispatcher;
 pub mod loop_;
 pub mod memory_loader;
 pub mod prompt;
+pub mod serializer_instructions;
 
 #[cfg(test)]
 mod tests;
@@ -13,3 +14,4 @@ mod tests;
 pub use agent::{Agent, AgentBuilder};
 #[allow(unused_imports)]
 pub use loop_::{process_message, run};
+pub use serializer_instructions::{get_serializer_instruction, is_serializer_format};
