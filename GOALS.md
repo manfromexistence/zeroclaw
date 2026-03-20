@@ -9,7 +9,7 @@ Any Software - Any
 
 Train animation on exit from the whole project and from all places!!!
 
-Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell our about tool calling
+Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell ai model our about tool calling to use our serializer syntax instead of json for tool calling!!!
 
 -------------------------------------------------------------------------------------------------------------------------
 

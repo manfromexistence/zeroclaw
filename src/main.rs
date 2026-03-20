@@ -121,7 +121,7 @@ mod util;
 use config::Config;
 
 // Re-export so binary modules can use crate::<CommandEnum> while keeping a single source of truth.
-pub use agent::{
+pub use ::agent::{
     ChannelCommands, CronCommands, GatewayCommands, HardwareCommands, IntegrationCommands,
     MigrateCommands, PeripheralCommands, ServiceCommands, SkillCommands,
 };
@@ -1583,7 +1583,7 @@ fn handle_estop_command(
                 }
                 if otp_code.is_none() {
                     let entered =
-                        agent::ui::prompts::password::password("Enter OTP code").interact()?;
+                        crate::ui::prompts::password::password("Enter OTP code").interact()?;
                     otp_code = Some(entered.to_string());
                 }
 
@@ -1929,12 +1929,12 @@ fn clear_pending_oauth_login(config: &Config, provider: &str) {
 }
 
 fn read_auth_input(prompt: &str) -> Result<String> {
-    let input = agent::ui::prompts::password::password(prompt).interact()?;
+    let input = crate::ui::prompts::password::password(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 
 fn read_plain_input(prompt: &str) -> Result<String> {
-    let input = agent::ui::prompts::input::input(prompt).interact()?;
+    let input = crate::ui::prompts::input::input(prompt).interact()?;
     Ok(input.trim().to_string())
 }
 
