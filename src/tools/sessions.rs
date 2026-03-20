@@ -12,7 +12,9 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::json;
 
-use crate::tools::definition::{ParameterType, Tool, ToolCall, ToolDefinition, ToolParameter, ToolResult};
+use crate::tools::definition::{
+    ParameterType, Tool, ToolCall, ToolDefinition, ToolParameter, ToolResult,
+};
 
 /// Tool to list active sessions
 pub struct SessionsListTool;
@@ -49,7 +51,11 @@ impl Tool for SessionsListTool {
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
         let _channel = call.arguments.get("channel").and_then(|v| v.as_str());
-        let limit = call.arguments.get("limit").and_then(|v| v.as_u64()).unwrap_or(20) as usize;
+        let limit = call
+            .arguments
+            .get("limit")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(20) as usize;
 
         // In production, this would query the SessionManager
         // For now, return a structured response showing the tool works
@@ -196,7 +202,11 @@ impl Tool for SessionsHistoryTool {
             .get("session_id")
             .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow::anyhow!("session_id is required"))?;
-        let limit = call.arguments.get("limit").and_then(|v| v.as_u64()).unwrap_or(50);
+        let limit = call
+            .arguments
+            .get("limit")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(50);
 
         let result = json!({
             "session_id": session_id,

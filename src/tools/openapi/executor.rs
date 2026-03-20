@@ -6,7 +6,7 @@ use crate::tools::traits::{Tool, ToolResult};
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
 use openapiv3::{Operation, Parameter, ParameterSchemaOrContent, ReferenceOr};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -224,7 +224,10 @@ impl OpenApiTool {
         let response = client.execute(req).await.context("HTTP request failed")?;
 
         let status = response.status();
-        let body = response.text().await.context("failed to read response body")?;
+        let body = response
+            .text()
+            .await
+            .context("failed to read response body")?;
 
         // Try to parse as JSON, fall back to text
         let result = if let Ok(json_value) = serde_json::from_str::<Value>(&body) {
@@ -267,7 +270,7 @@ impl Tool for OpenApiTool {
 
     async fn execute(&self, args: Value) -> Result<ToolResult> {
         let req = self.build_request(&args)?;
-        
+
         match self.execute_http(req).await {
             Ok(result) => Ok(ToolResult {
                 success: true,
@@ -292,9 +295,7 @@ fn value_to_string(value: &Value) -> String {
     }
 }
 
-fn parameter_data_to_schema(
-    parameter_data: &openapiv3::ParameterData,
-) -> Value {
+fn parameter_data_to_schema(parameter_data: &openapiv3::ParameterData) -> Value {
     let mut schema = json!({
         "description": parameter_data.description.as_deref().unwrap_or("")
     });

@@ -30,14 +30,25 @@ impl Tool for FormatTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("format");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("format");
         let file = call
             .arguments
             .get("file")
             .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow::anyhow!("Missing 'file'"))?;
-        let ext = std::path::Path::new(file).extension().and_then(|e| e.to_str()).unwrap_or("");
-        let lang = call.arguments.get("language").and_then(|v| v.as_str()).unwrap_or(ext);
+        let ext = std::path::Path::new(file)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("");
+        let lang = call
+            .arguments
+            .get("language")
+            .and_then(|v| v.as_str())
+            .unwrap_or(ext);
 
         let (formatter, args) = match lang {
             "rs" | "rust" => ("rustfmt", vec![file.to_string()]),
@@ -62,14 +73,24 @@ impl Tool for FormatTool {
             format!("{} {} {}", formatter, check_flag, args.join(" "))
         };
 
-        let output = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await?;
+        let output = tokio::process::Command::new(shell)
+            .arg(flag)
+            .arg(&cmd)
+            .output()
+            .await?;
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
 
         if output.status.success() {
-            Ok(ToolResult::success(call.id, format!("Formatted {} with {}", file, formatter)))
+            Ok(ToolResult::success(
+                call.id,
+                format!("Formatted {} with {}", file, formatter),
+            ))
         } else {
-            Ok(ToolResult::error(call.id, format!("{}\n{}", stdout, stderr)))
+            Ok(ToolResult::error(
+                call.id,
+                format!("{}\n{}", stdout, stderr),
+            ))
         }
     }
 }

@@ -4,8 +4,6 @@
 //! Website: https://www.reuters.com
 //! Features: Paging, Time Range
 
-use async_trait::async_trait;
-use chrono::Utc;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -13,6 +11,8 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
+use chrono::Utc;
 use reqwest::Client;
 use smallvec::smallvec;
 

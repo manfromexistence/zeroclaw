@@ -14,8 +14,7 @@ use std::sync::RwLock;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Complete theme configuration loaded from TOML
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct ThemeConfig {
     #[serde(default)]
     pub colors: ColorConfig,
@@ -24,7 +23,6 @@ pub struct ThemeConfig {
     #[serde(default)]
     pub rainbow: RainbowConfig,
 }
-
 
 /// Color configuration from TOML
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -183,9 +181,10 @@ fn find_theme_file() -> Option<PathBuf> {
 pub fn load_theme_config() -> ThemeConfig {
     if let Some(theme_path) = find_theme_file()
         && let Ok(content) = fs::read_to_string(&theme_path)
-            && let Ok(config) = toml::from_str::<ThemeConfig>(&content) {
-                return config;
-            }
+        && let Ok(config) = toml::from_str::<ThemeConfig>(&content)
+    {
+        return config;
+    }
 
     ThemeConfig::default()
 }
@@ -195,7 +194,8 @@ pub fn load_theme_config() -> ThemeConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Global theme configuration
-pub static THEME: std::sync::LazyLock<RwLock<ThemeConfig>> = std::sync::LazyLock::new(|| RwLock::new(load_theme_config()));
+pub static THEME: std::sync::LazyLock<RwLock<ThemeConfig>> =
+    std::sync::LazyLock::new(|| RwLock::new(load_theme_config()));
 
 /// Get the current theme configuration
 pub fn theme() -> ThemeConfig {

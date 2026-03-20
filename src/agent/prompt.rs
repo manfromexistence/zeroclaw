@@ -87,14 +87,15 @@ impl PromptSection for IdentitySection {
         let mut has_aieos = false;
         if let Some(config) = ctx.identity_config
             && identity::is_aieos_configured(config)
-                && let Ok(Some(aieos)) = identity::load_aieos_identity(config, ctx.workspace_dir) {
-                    let rendered = identity::aieos_to_system_prompt(&aieos);
-                    if !rendered.is_empty() {
-                        prompt.push_str(&rendered);
-                        prompt.push_str("\n\n");
-                        has_aieos = true;
-                    }
-                }
+            && let Ok(Some(aieos)) = identity::load_aieos_identity(config, ctx.workspace_dir)
+        {
+            let rendered = identity::aieos_to_system_prompt(&aieos);
+            if !rendered.is_empty() {
+                prompt.push_str(&rendered);
+                prompt.push_str("\n\n");
+                has_aieos = true;
+            }
+        }
 
         if !has_aieos {
             prompt.push_str(

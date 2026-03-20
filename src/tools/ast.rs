@@ -33,7 +33,11 @@ impl Tool for AstTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("parse");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("parse");
         let code = if let Some(c) = call.arguments.get("code").and_then(|v| v.as_str()) {
             c.to_string()
         } else if let Some(f) = call.arguments.get("file").and_then(|v| v.as_str()) {
@@ -62,7 +66,10 @@ impl Tool for AstTool {
                 Ok(ToolResult::success(call.id, format!("AST '{}' for {} ({} lines, ~{} functions) — connect tree-sitter for full AST", action, lang, line_count, fn_count))
                     .with_data(json!({"action": action, "language": lang, "lines": line_count, "estimated_functions": fn_count})))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

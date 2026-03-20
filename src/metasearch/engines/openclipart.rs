@@ -81,8 +81,8 @@ impl SearchEngine for Openclipart {
             .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
         let a_sel = Selector::parse("a[href]")
             .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
-        let img_sel = Selector::parse("a img")
-            .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
+        let img_sel =
+            Selector::parse("a img").map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
 
         let mut results = Vec::new();
 
@@ -108,20 +108,12 @@ impl SearchEngine for Openclipart {
                 None => continue,
             };
 
-            let title = img
-                .value()
-                .attr("alt")
-                .unwrap_or("Clipart")
-                .to_string();
+            let title = img.value().attr("alt").unwrap_or("Clipart").to_string();
 
             let thumbnail = img.value().attr("src").unwrap_or_default().to_string();
 
-            let mut result = SearchResult::new(
-                title,
-                item_url,
-                String::new(),
-                self.metadata.name.clone(),
-            );
+            let mut result =
+                SearchResult::new(title, item_url, String::new(), self.metadata.name.clone());
             result.engine_rank = (i + 1) as u32;
             result.category = SearchCategory::Images.to_string();
             if !thumbnail.is_empty() {

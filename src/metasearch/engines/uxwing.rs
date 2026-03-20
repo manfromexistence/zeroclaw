@@ -90,11 +90,7 @@ impl SearchEngine for Uxwing {
             };
 
             let img_src = img.value().attr("src").unwrap_or_default().to_string();
-            let title = img
-                .value()
-                .attr("alt")
-                .unwrap_or("Icon")
-                .to_string();
+            let title = img.value().attr("alt").unwrap_or("Icon").to_string();
 
             let mut result = SearchResult::new(
                 title,

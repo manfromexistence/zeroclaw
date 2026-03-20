@@ -3,7 +3,6 @@
 //! URL: https://presearch.com/search
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,10 +10,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Presearch {
     metadata: EngineMetadata,
@@ -62,8 +62,14 @@ impl SearchEngine for Presearch {
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
             )
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-            .header("Cookie", "b=1; presearch_session=; use_local_search_results=false; use_safe_search=true")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            )
+            .header(
+                "Cookie",
+                "b=1; presearch_session=; use_local_search_results=false; use_safe_search=true",
+            )
             .send()
             .await
         {

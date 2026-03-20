@@ -122,7 +122,7 @@ impl SearchEngine for ValkeyEngine {
 
             if self.exact_match_only {
                 // Try to get hash with exact key match
-                let hash_result: redis::RedisResult<std::collections::HashMap<String, String>> = 
+                let hash_result: redis::RedisResult<std::collections::HashMap<String, String>> =
                     conn.hgetall(search_term).await;
 
                 if let Ok(kvmap) = hash_result {
@@ -133,7 +133,8 @@ impl SearchEngine for ValkeyEngine {
                             .collect::<Vec<_>>()
                             .join(", ");
 
-                        let mut result = SearchResult::new(title, "", format!("Key: {search_term}"), "valkey");
+                        let mut result =
+                            SearchResult::new(title, "", format!("Key: {search_term}"), "valkey");
                         result.category = "general".to_string();
                         results.push(result);
                     }
@@ -143,7 +144,7 @@ impl SearchEngine for ValkeyEngine {
                 if search_term.contains(' ') {
                     if let Some((hash_key, pattern)) = search_term.split_once(' ') {
                         let pattern = format!("*{pattern}*");
-                        let scan_result: redis::RedisResult<(u64, Vec<(String, String)>)> = 
+                        let scan_result: redis::RedisResult<(u64, Vec<(String, String)>)> =
                             redis::cmd("HSCAN")
                                 .arg(hash_key)
                                 .arg(0)
@@ -167,25 +168,22 @@ impl SearchEngine for ValkeyEngine {
             } else {
                 // Scan for keys matching the pattern
                 let pattern = format!("*{search_term}*");
-                let scan_result: redis::RedisResult<Vec<String>> = 
-                    redis::cmd("KEYS")
-                        .arg(&pattern)
-                        .query_async(&mut conn)
-                        .await;
+                let scan_result: redis::RedisResult<Vec<String>> = redis::cmd("KEYS")
+                    .arg(&pattern)
+                    .query_async(&mut conn)
+                    .await;
 
                 if let Ok(keys) = scan_result {
                     for key in keys.into_iter().take(20) {
                         // Determine key type
-                        let key_type: redis::RedisResult<String> = 
-                            redis::cmd("TYPE")
-                                .arg(&key)
-                                .query_async(&mut conn)
-                                .await;
+                        let key_type: redis::RedisResult<String> =
+                            redis::cmd("TYPE").arg(&key).query_async(&mut conn).await;
 
                         let content = match key_type.as_deref() {
                             Ok("hash") => {
-                                let hash: redis::RedisResult<std::collections::HashMap<String, String>> = 
-                                    conn.hgetall(&key).await;
+                                let hash: redis::RedisResult<
+                                    std::collections::HashMap<String, String>,
+                                > = conn.hgetall(&key).await;
                                 hash.ok().map(|h| {
                                     h.iter()
                                         .map(|(k, v)| format!("{k}: {v}"))
@@ -194,7 +192,7 @@ impl SearchEngine for ValkeyEngine {
                                 })
                             }
                             Ok("list") => {
-                                let list: redis::RedisResult<Vec<String>> = 
+                                let list: redis::RedisResult<Vec<String>> =
                                     conn.lrange(&key, 0, -1).await;
                                 list.ok().map(|l| l.join(", "))
                             }
@@ -221,9 +219,7 @@ impl SearchEngine for ValkeyEngine {
         #[cfg(not(feature = "redis"))]
         {
             let _ = query; // Silence unused variable warning
-            tracing::warn!(
-                "Valkey engine requires the 'redis' feature. Returning empty results."
-            );
+            tracing::warn!("Valkey engine requires the 'redis' feature. Returning empty results.");
             Ok(Vec::new())
         }
     }

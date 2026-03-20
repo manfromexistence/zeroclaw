@@ -220,14 +220,16 @@ fn home_dir() -> Option<PathBuf> {
 
 fn expand_user_path(path: &str) -> PathBuf {
     if path == "~"
-        && let Some(home) = home_dir() {
-            return home;
-        }
+        && let Some(home) = home_dir()
+    {
+        return home;
+    }
 
     if let Some(stripped) = path.strip_prefix("~/")
-        && let Some(home) = home_dir() {
-            return home.join(stripped);
-        }
+        && let Some(home) = home_dir()
+    {
+        return home.join(stripped);
+    }
 
     PathBuf::from(path)
 }
@@ -957,7 +959,6 @@ impl SecurityPolicy {
         }
 
         // At least one command must be present
-        
 
         segments.iter().any(|s| {
             let s = skip_env_assignments(s.trim());
@@ -1014,9 +1015,10 @@ impl SecurityPolicy {
 
             // Cover inline forms like `cat</etc/passwd`.
             if let Some(target) = redirection_target(strip_wrapping_quotes(executable))
-                && let Some(blocked) = forbidden_candidate(target) {
-                    return Some(blocked);
-                }
+                && let Some(blocked) = forbidden_candidate(target)
+            {
+                return Some(blocked);
+            }
 
             for token in words {
                 let candidate = strip_wrapping_quotes(token).trim();
@@ -1025,20 +1027,23 @@ impl SecurityPolicy {
                 }
 
                 if let Some(target) = redirection_target(candidate)
-                    && let Some(blocked) = forbidden_candidate(target) {
-                        return Some(blocked);
-                    }
+                    && let Some(blocked) = forbidden_candidate(target)
+                {
+                    return Some(blocked);
+                }
 
                 // Handle option assignment forms like `--file=/etc/passwd`.
                 if candidate.starts_with('-') {
                     if let Some((_, value)) = candidate.split_once('=')
-                        && let Some(blocked) = forbidden_candidate(value) {
-                            return Some(blocked);
-                        }
+                        && let Some(blocked) = forbidden_candidate(value)
+                    {
+                        return Some(blocked);
+                    }
                     if let Some(value) = attached_short_option_value(candidate)
-                        && let Some(blocked) = forbidden_candidate(value) {
-                            return Some(blocked);
-                        }
+                        && let Some(blocked) = forbidden_candidate(value)
+                    {
+                        return Some(blocked);
+                    }
                     continue;
                 }
 

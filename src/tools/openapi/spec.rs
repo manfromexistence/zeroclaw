@@ -70,7 +70,7 @@ impl OpenApiSpec {
     pub fn from_file(path: &Path) -> Result<Self> {
         let contents = std::fs::read_to_string(path)
             .with_context(|| format!("failed to read OpenAPI file {}", path.display()))?;
-        
+
         // Try to parse as OpenAPI 3.0 first
         let spec_result: Result<OpenAPI, _> = if path
             .extension()
@@ -79,30 +79,41 @@ impl OpenApiSpec {
         {
             serde_json::from_str(&contents)
         } else {
-            serde_yaml::from_str(&contents)
-                .or_else(|_| serde_json::from_str(&contents))
+            serde_yaml::from_str(&contents).or_else(|_| serde_json::from_str(&contents))
         };
 
         let spec = match spec_result {
             Ok(spec) => spec,
             Err(_) => {
                 // Check if it's Swagger 2.0 by looking for "swagger": "2.0"
-                if contents.contains("\"swagger\"") && (contents.contains("\"2.0\"") || contents.contains("'2.0'")) {
+                if contents.contains("\"swagger\"")
+                    && (contents.contains("\"2.0\"") || contents.contains("'2.0'"))
+                {
                     // Try to convert using npx swagger2openapi
                     let output = std::process::Command::new("npx")
-                        .args(&["--yes", "swagger2openapi", path.to_str().unwrap(), "-o", "-"])
+                        .args(&[
+                            "--yes",
+                            "swagger2openapi",
+                            path.to_str().unwrap(),
+                            "-o",
+                            "-",
+                        ])
                         .output();
-                    
+
                     match output {
                         Ok(result) if result.status.success() => {
                             let converted = String::from_utf8_lossy(&result.stdout);
                             serde_json::from_str(&converted)
                                 .or_else(|_| serde_yaml::from_str(&converted))
-                                .with_context(|| format!("failed to parse converted OpenAPI {}", path.display()))?
+                                .with_context(|| {
+                                    format!("failed to parse converted OpenAPI {}", path.display())
+                                })?
                         }
                         _ => {
                             // Fallback: skip Swagger 2.0 specs for now
-                            anyhow::bail!("Swagger 2.0 spec detected but conversion failed (npx swagger2openapi not available)");
+                            anyhow::bail!(
+                                "Swagger 2.0 spec detected but conversion failed (npx swagger2openapi not available)"
+                            );
                         }
                     }
                 } else {

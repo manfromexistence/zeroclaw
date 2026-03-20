@@ -34,8 +34,16 @@ impl Tool for NotifyTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("send");
-        let message = call.arguments.get("message").and_then(|v| v.as_str()).unwrap_or("");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("send");
+        let message = call
+            .arguments
+            .get("message")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
         let title = call
             .arguments
             .get("title")
@@ -52,7 +60,11 @@ impl Tool for NotifyTool {
                         title.replace('\'', ""),
                         message.replace('\'', "")
                     );
-                    let _ = tokio::process::Command::new(shell).arg(flag).arg(&ps).output().await;
+                    let _ = tokio::process::Command::new(shell)
+                        .arg(flag)
+                        .arg(&ps)
+                        .output()
+                        .await;
                 }
                 Ok(ToolResult::success(
                     call.id,
@@ -68,14 +80,22 @@ impl Tool for NotifyTool {
                 let body = json!({"text": message, "title": title});
                 let client = reqwest::Client::new();
                 let resp = client.post(url).json(&body).send().await?;
-                Ok(ToolResult::success(call.id, format!("Webhook sent ({})", resp.status())))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Webhook sent ({})", resp.status()),
+                ))
             }
             "slack" => {
                 let url = call
                     .arguments
                     .get("url")
                     .and_then(|v| v.as_str())
-                    .or_else(|| std::env::var("SLACK_WEBHOOK_URL").ok().as_deref().map(|_| ""))
+                    .or_else(|| {
+                        std::env::var("SLACK_WEBHOOK_URL")
+                            .ok()
+                            .as_deref()
+                            .map(|_| "")
+                    })
                     .ok_or_else(|| anyhow::anyhow!("Missing 'url' or SLACK_WEBHOOK_URL env"))?;
                 let body = json!({"text": format!("*{}*\n{}", title, message)});
                 let client = reqwest::Client::new();

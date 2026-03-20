@@ -246,29 +246,29 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
                 tokio::time::sleep(check_interval).await;
                 let last_tick = dm_metrics.lock().last_tick_at;
                 if let Some(last) = last_tick
-                    && chrono::Utc::now() - last > timeout {
-                        let alert = format!(
-                            "⚠️ Heartbeat dead-man's switch: no tick in {deadman_timeout} minutes"
-                        );
-                        let (channel, target) =
-                            if let Some(ch) = &dm_config.heartbeat.deadman_channel {
-                                let to = dm_config
-                                    .heartbeat
-                                    .deadman_to
-                                    .as_deref()
-                                    .or(dm_config.heartbeat.to.as_deref())
-                                    .unwrap_or_default();
-                                (ch.clone(), to.to_string())
-                            } else if let Some((ch, to)) = &dm_delivery {
-                                (ch.clone(), to.clone())
-                            } else {
-                                continue;
-                            };
-                        let _ = crate::cron::scheduler::deliver_announcement(
-                            &dm_config, &channel, &target, &alert,
-                        )
-                        .await;
-                    }
+                    && chrono::Utc::now() - last > timeout
+                {
+                    let alert = format!(
+                        "⚠️ Heartbeat dead-man's switch: no tick in {deadman_timeout} minutes"
+                    );
+                    let (channel, target) = if let Some(ch) = &dm_config.heartbeat.deadman_channel {
+                        let to = dm_config
+                            .heartbeat
+                            .deadman_to
+                            .as_deref()
+                            .or(dm_config.heartbeat.to.as_deref())
+                            .unwrap_or_default();
+                        (ch.clone(), to.to_string())
+                    } else if let Some((ch, to)) = &dm_delivery {
+                        (ch.clone(), to.clone())
+                    } else {
+                        continue;
+                    };
+                    let _ = crate::cron::scheduler::deliver_announcement(
+                        &dm_config, &channel, &target, &alert,
+                    )
+                    .await;
+                }
             }
         });
     }
@@ -405,13 +405,13 @@ async fn run_heartbeat_worker(config: Config) -> Result<()> {
                             &announcement,
                         )
                         .await
-                        {
-                            crate::health::mark_component_error(
-                                "heartbeat",
-                                format!("delivery failed: {e}"),
-                            );
-                            tracing::warn!("Heartbeat delivery failed: {e}");
-                        }
+                    {
+                        crate::health::mark_component_error(
+                            "heartbeat",
+                            format!("delivery failed: {e}"),
+                        );
+                        tracing::warn!("Heartbeat delivery failed: {e}");
+                    }
                 }
                 Err(e) => {
                     tick_had_error = true;

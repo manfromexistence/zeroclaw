@@ -3,7 +3,6 @@
 //!
 //! Returns XML results parsed with regex.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,6 +10,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
 use smallvec::smallvec;
@@ -120,11 +120,7 @@ impl SearchEngine for Torznab {
                 "Size: {} | Seeders: {} | Leechers: {}",
                 size_display,
                 if seeders.is_empty() { "?" } else { &seeders },
-                if leechers.is_empty() {
-                    "?"
-                } else {
-                    &leechers
-                },
+                if leechers.is_empty() { "?" } else { &leechers },
             );
 
             let mut result = SearchResult::new(&title, &link, &content, "torznab");
@@ -160,9 +156,7 @@ fn extract_tag(xml: &str, tag: &str) -> Option<String> {
 
 /// Extract a torznab:attr value by name.
 fn extract_torznab_attr(xml: &str, name: &str) -> Option<String> {
-    let pattern = format!(
-        r#"torznab:attr\s+name=['"]{name}['"]\s+value=['"]([^'"]*?)['"]"#
-    );
+    let pattern = format!(r#"torznab:attr\s+name=['"]{name}['"]\s+value=['"]([^'"]*?)['"]"#);
     let re = Regex::new(&pattern).ok()?;
     re.captures(xml)
         .and_then(|caps| caps.get(1).map(|m| m.as_str().to_string()))

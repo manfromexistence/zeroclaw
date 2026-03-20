@@ -100,12 +100,12 @@ impl SearchEngine for Wordnik {
                 content: def,
                 engine: "wordnik".to_string(),
                 engine_rank: (i + 1) as u32,
-                    score: 0.0,
-                    thumbnail: None,
-                    published_date: None,
-                    category: String::new(),
-                    metadata: serde_json::Value::Null,
-                });
+                score: 0.0,
+                thumbnail: None,
+                published_date: None,
+                category: String::new(),
+                metadata: serde_json::Value::Null,
+            });
 
             if results.len() >= 10 {
                 break;

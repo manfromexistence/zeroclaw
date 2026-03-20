@@ -76,12 +76,13 @@ pub async fn consolidate_turn(
 
     // Phase 2: Write memory update to Core category (if present).
     if let Some(ref update) = result.memory_update
-        && !update.trim().is_empty() {
-            let mem_key = format!("core_{}", uuid::Uuid::new_v4());
-            memory
-                .store(&mem_key, update, MemoryCategory::Core, None)
-                .await?;
-        }
+        && !update.trim().is_empty()
+    {
+        let mem_key = format!("core_{}", uuid::Uuid::new_v4());
+        memory
+            .store(&mem_key, update, MemoryCategory::Core, None)
+            .await?;
+    }
 
     Ok(())
 }

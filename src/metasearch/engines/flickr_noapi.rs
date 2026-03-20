@@ -90,7 +90,11 @@ impl SearchEngine for FlickrNoapi {
         let mut results = Vec::new();
 
         for (i, item) in items.iter().enumerate() {
-            let title = item["title"].as_str().unwrap_or("Flickr photo").trim().to_string();
+            let title = item["title"]
+                .as_str()
+                .unwrap_or("Flickr photo")
+                .trim()
+                .to_string();
             let link = item["link"].as_str().unwrap_or_default();
             if link.is_empty() {
                 continue;
@@ -120,7 +124,11 @@ impl SearchEngine for FlickrNoapi {
             };
 
             let mut result = SearchResult::new(
-                if title.is_empty() { "Flickr photo" } else { &title },
+                if title.is_empty() {
+                    "Flickr photo"
+                } else {
+                    &title
+                },
                 link,
                 &content,
                 "flickr_noapi",
@@ -136,4 +144,3 @@ impl SearchEngine for FlickrNoapi {
         Ok(results)
     }
 }
-

@@ -57,13 +57,24 @@ impl Tool for WorkflowTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
 
         match action {
             "define" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
-                let trigger =
-                    call.arguments.get("trigger").and_then(|v| v.as_str()).unwrap_or("manual");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
+                let trigger = call
+                    .arguments
+                    .get("trigger")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("manual");
                 let steps: Vec<WorkflowStep> = call
                     .arguments
                     .get("steps")
@@ -110,36 +121,63 @@ impl Tool for WorkflowTool {
                     })
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("{} workflows:\n{}", wfs.len(), output)))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("{} workflows:\n{}", wfs.len(), output),
+                ))
             }
             "run" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 let mut wfs = self.workflows.lock().unwrap();
                 if let Some(wf) = wfs.get_mut(name) {
                     wf.status = "running".into();
-                    let steps: Vec<String> =
-                        wf.steps.iter().map(|s| format!("{}:{}", s.tool, s.action)).collect();
+                    let steps: Vec<String> = wf
+                        .steps
+                        .iter()
+                        .map(|s| format!("{}:{}", s.tool, s.action))
+                        .collect();
                     Ok(ToolResult::success(
                         call.id,
                         format!("Running workflow '{}': {}", name, steps.join(" → ")),
                     ))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Workflow '{name}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Workflow '{name}' not found"),
+                    ))
                 }
             }
             "cancel" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 let mut wfs = self.workflows.lock().unwrap();
                 if let Some(wf) = wfs.get_mut(name) {
                     wf.status = "cancelled".into();
-                    Ok(ToolResult::success(call.id, format!("Cancelled workflow '{name}'")))
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("Cancelled workflow '{name}'"),
+                    ))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Workflow '{name}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Workflow '{name}' not found"),
+                    ))
                 }
             }
             "pipeline" => {
                 // Pre-built CI/CD pipeline
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("ci");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("ci");
                 let steps = vec![
                     WorkflowStep {
                         name: "checkout".into(),
@@ -182,7 +220,10 @@ impl Tool for WorkflowTool {
                     format!("CI pipeline '{name}' created: checkout → build → test → lint"),
                 ))
             }
-            _ => Ok(ToolResult::success(call.id, format!("Workflow '{action}' completed"))),
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("Workflow '{action}' completed"),
+            )),
         }
     }
 }

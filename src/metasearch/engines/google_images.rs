@@ -4,7 +4,6 @@
 //! No API key required.
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,10 +11,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use serde::Deserialize;
-use tracing::{info, warn};
 use smallvec::smallvec;
+use tracing::{info, warn};
 
 pub struct GoogleImages {
     metadata: EngineMetadata,
@@ -175,11 +175,11 @@ impl SearchEngine for GoogleImages {
                         SearchResult::new(title, result_url, &full_content, "google_images");
                     r.engine_rank = (i + 1) as u32;
                     r.category = SearchCategory::General.to_string();
-                    
+
                     // Set thumbnail to the actual image URL for display
                     if !img_url.is_empty() {
                         r.thumbnail = Some(img_url.to_string());
-                        
+
                         // Store image metadata
                         if let Some(orig) = &item.original_image {
                             r.metadata = serde_json::json!({
@@ -190,7 +190,7 @@ impl SearchEngine for GoogleImages {
                             });
                         }
                     }
-                    
+
                     results.push(r);
                 }
             }

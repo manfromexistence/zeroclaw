@@ -4,7 +4,6 @@
 //! Website: https://github.com
 //! Features: Paging, optional auth token
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct GithubCode {
     metadata: EngineMetadata,
@@ -107,10 +107,7 @@ impl SearchEngine for GithubCode {
                 continue;
             }
 
-            let language = item
-                .get("language")
-                .and_then(|l| l.as_str())
-                .unwrap_or("");
+            let language = item.get("language").and_then(|l| l.as_str()).unwrap_or("");
 
             let description = item
                 .get("description")

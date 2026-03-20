@@ -90,12 +90,19 @@ impl Tool for SpawnTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
 
         match action {
             "spawn" => {
-                let task =
-                    call.arguments.get("task").and_then(|v| v.as_str()).unwrap_or("(no task)");
+                let task = call
+                    .arguments
+                    .get("task")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("(no task)");
                 let id = uuid::Uuid::new_v4().to_string()[..8].to_string();
                 let agent = SubAgent {
                     id: id.clone(),
@@ -104,8 +111,10 @@ impl Tool for SpawnTool {
                     created_at: chrono::Utc::now().to_rfc3339(),
                 };
                 self.agents.lock().unwrap().insert(id.clone(), agent);
-                Ok(ToolResult::success(call.id, format!("Spawned agent '{id}' for task: {task}"))
-                    .with_data(json!({"agent_id": id})))
+                Ok(
+                    ToolResult::success(call.id, format!("Spawned agent '{id}' for task: {task}"))
+                        .with_data(json!({"agent_id": id})),
+                )
             }
             "list" => {
                 let agents = self.agents.lock().unwrap();
@@ -115,33 +124,63 @@ impl Tool for SpawnTool {
                     .map(|a| format!("[{}] {} — {}", a.id, a.status, a.task))
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("{} agents:\n{}", list.len(), output))
-                    .with_data(json!(list)))
+                Ok(
+                    ToolResult::success(call.id, format!("{} agents:\n{}", list.len(), output))
+                        .with_data(json!(list)),
+                )
             }
             "join" => {
-                let agent_id =
-                    call.arguments.get("agent_id").and_then(|v| v.as_str()).unwrap_or("");
+                let agent_id = call
+                    .arguments
+                    .get("agent_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let mut agents = self.agents.lock().unwrap();
                 if let Some(agent) = agents.get_mut(agent_id) {
                     agent.status = "completed".into();
-                    Ok(ToolResult::success(call.id, format!("Joined agent '{agent_id}'")))
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("Joined agent '{agent_id}'"),
+                    ))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Agent '{agent_id}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Agent '{agent_id}' not found"),
+                    ))
                 }
             }
             "kill" => {
-                let agent_id =
-                    call.arguments.get("agent_id").and_then(|v| v.as_str()).unwrap_or("");
+                let agent_id = call
+                    .arguments
+                    .get("agent_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 self.agents.lock().unwrap().remove(agent_id);
-                Ok(ToolResult::success(call.id, format!("Killed agent '{agent_id}'")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Killed agent '{agent_id}'"),
+                ))
             }
             "send_message" => {
-                let agent_id =
-                    call.arguments.get("agent_id").and_then(|v| v.as_str()).unwrap_or("");
-                let message = call.arguments.get("message").and_then(|v| v.as_str()).unwrap_or("");
-                Ok(ToolResult::success(call.id, format!("Message sent to '{agent_id}': {message}")))
+                let agent_id = call
+                    .arguments
+                    .get("agent_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let message = call
+                    .arguments
+                    .get("message")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Message sent to '{agent_id}': {message}"),
+                ))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

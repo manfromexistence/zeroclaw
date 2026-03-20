@@ -1,6 +1,5 @@
 //! Photon — geocoding / map search via Komoot's Photon API.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use serde::Deserialize;
 use smallvec::smallvec;
@@ -156,12 +156,7 @@ impl SearchEngine for Photon {
                     name
                 };
 
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    snippet,
-                    "photon",
-                );
+                let mut result = SearchResult::new(title, result_url, snippet, "photon");
                 result.engine_rank = (i + 1) as u32;
                 Some(result)
             })

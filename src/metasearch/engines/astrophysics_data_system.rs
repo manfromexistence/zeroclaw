@@ -3,8 +3,6 @@
 //! JSON API: https://api.adsabs.harvard.edu/v1/search/query
 //! Features: Paging
 
-use async_trait::async_trait;
-use chrono::{NaiveDate, TimeZone, Utc};
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +10,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
+use chrono::{NaiveDate, TimeZone, Utc};
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct AstrophysicsDataSystem {
     metadata: EngineMetadata,
@@ -51,9 +51,8 @@ impl SearchEngine for AstrophysicsDataSystem {
         if key.is_empty() {
             return Err(MetasearchError::EngineError {
                 engine: "astrophysics_data_system".to_string(),
-                message:
-                    "No API key configured. Get one at https://ui.adsabs.harvard.edu/help/api"
-                        .to_string(),
+                message: "No API key configured. Get one at https://ui.adsabs.harvard.edu/help/api"
+                    .to_string(),
             });
         }
 
@@ -156,21 +155,14 @@ impl SearchEngine for AstrophysicsDataSystem {
             let content = content_parts.join(" | ");
 
             // Parse date if available (ADS format: YYYY-MM-DD or YYYY-MM-00)
-            let published_date = doc["date"]
-                .as_str()
-                .and_then(|d| {
-                    NaiveDate::parse_from_str(d, "%Y-%m-%d")
-                        .ok()
-                        .and_then(|nd| nd.and_hms_opt(0, 0, 0))
-                        .map(|ndt| Utc.from_utc_datetime(&ndt))
-                });
+            let published_date = doc["date"].as_str().and_then(|d| {
+                NaiveDate::parse_from_str(d, "%Y-%m-%d")
+                    .ok()
+                    .and_then(|nd| nd.and_hms_opt(0, 0, 0))
+                    .map(|ndt| Utc.from_utc_datetime(&ndt))
+            });
 
-            let mut r = SearchResult::new(
-                title,
-                &result_url,
-                &content,
-                "astrophysics_data_system",
-            );
+            let mut r = SearchResult::new(title, &result_url, &content, "astrophysics_data_system");
             r.engine_rank = (i + 1) as u32;
             r.category = SearchCategory::Science.to_string();
             r.published_date = published_date;

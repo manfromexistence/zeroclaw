@@ -31,7 +31,11 @@ impl Tool for DiagramTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("mermaid");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("mermaid");
         let description = call.arguments.get("description").and_then(|v| v.as_str());
 
         match action {
@@ -89,7 +93,10 @@ impl Tool for DiagramTool {
                     ),
                 ))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

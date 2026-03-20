@@ -96,24 +96,23 @@ impl ModelInfo {
 static MODEL_DATABASE: &str = include_str!("model_prices_and_context_window.json");
 
 /// Lazy-loaded model database
-static MODEL_DB: std::sync::LazyLock<HashMap<String, ModelInfo>> =
-    std::sync::LazyLock::new(|| {
-        let raw: HashMap<String, serde_json::Value> = serde_json::from_str(MODEL_DATABASE)
-            .unwrap_or_else(|e| {
-                eprintln!("Warning: Failed to parse model database: {}", e);
-                HashMap::new()
-            });
+static MODEL_DB: std::sync::LazyLock<HashMap<String, ModelInfo>> = std::sync::LazyLock::new(|| {
+    let raw: HashMap<String, serde_json::Value> = serde_json::from_str(MODEL_DATABASE)
+        .unwrap_or_else(|e| {
+            eprintln!("Warning: Failed to parse model database: {}", e);
+            HashMap::new()
+        });
 
-        // Filter out sample_spec and parse valid entries
-        raw.into_iter()
-            .filter(|(k, _)| k != "sample_spec")
-            .filter_map(|(k, v)| {
-                serde_json::from_value::<ModelInfo>(v)
-                    .ok()
-                    .map(|info| (k, info))
-            })
-            .collect()
-    });
+    // Filter out sample_spec and parse valid entries
+    raw.into_iter()
+        .filter(|(k, _)| k != "sample_spec")
+        .filter_map(|(k, v)| {
+            serde_json::from_value::<ModelInfo>(v)
+                .ok()
+                .map(|info| (k, info))
+        })
+        .collect()
+});
 
 /// Get model metadata by model name
 pub fn get_model_info(model_name: &str) -> Option<&ModelInfo> {

@@ -32,9 +32,16 @@ impl Tool for InfraTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action =
-            call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("cloud_status");
-        let dir = call.arguments.get("directory").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("cloud_status");
+        let dir = call
+            .arguments
+            .get("directory")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
         let (shell, flag) = if cfg!(windows) {
             ("cmd", "/C")
         } else {
@@ -53,8 +60,11 @@ impl Tool for InfraTool {
                 format!("ansible-playbook {playbook}")
             }
             "cloud_status" => {
-                let provider =
-                    call.arguments.get("provider").and_then(|v| v.as_str()).unwrap_or("aws");
+                let provider = call
+                    .arguments
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("aws");
                 match provider {
                     "aws" => "aws sts get-caller-identity".to_string(),
                     "gcp" => "gcloud config list".to_string(),

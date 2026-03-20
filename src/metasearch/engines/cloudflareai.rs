@@ -4,7 +4,6 @@
 //! Website: https://ai.cloudflare.com
 //! Features: No pagination, requires account_id and api_token
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct CloudflareAi {
     metadata: EngineMetadata,
@@ -86,9 +86,7 @@ impl SearchEngine for CloudflareAi {
         let data: serde_json::Value = resp
             .json()
             .await
-            .map_err(|e| {
-                MetasearchError::ParseError(format!("Cloudflare AI JSON error: {}", e))
-            })?;
+            .map_err(|e| MetasearchError::ParseError(format!("Cloudflare AI JSON error: {}", e)))?;
 
         let mut results = Vec::new();
 

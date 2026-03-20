@@ -2,7 +2,6 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use std::sync::Arc;
 use dx_agent::agent::agent::Agent;
 use dx_agent::agent::dispatcher::{NativeToolDispatcher, XmlToolDispatcher};
 use dx_agent::agent::memory_loader::MemoryLoader;
@@ -12,6 +11,7 @@ use dx_agent::memory::Memory;
 use dx_agent::observability::{NoopObserver, Observer};
 use dx_agent::providers::{ChatResponse, Provider, ToolCall};
 use dx_agent::tools::Tool;
+use std::sync::Arc;
 
 /// Create an in-memory "none" backend for tests.
 pub fn make_memory() -> Arc<dyn Memory> {

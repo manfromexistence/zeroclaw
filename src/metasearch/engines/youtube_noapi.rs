@@ -3,7 +3,6 @@
 //! URL: https://www.youtube.com/results?search_query={query}
 //! Features: No pagination (first page only)
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,10 +10,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct YoutubeNoapi {
     metadata: EngineMetadata,
@@ -85,8 +85,8 @@ impl SearchEngine for YoutubeNoapi {
         let mut results = Vec::new();
 
         // Navigate to video results
-        let contents = &data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]
-            ["sectionListRenderer"]["contents"];
+        let contents = &data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]
+            ["contents"];
 
         let sections = match contents.as_array() {
             Some(arr) => arr,
@@ -148,8 +148,7 @@ impl SearchEngine for YoutubeNoapi {
                         .and_then(|t| t["url"].as_str())
                         .map(|s| s.to_string());
 
-                    let mut r =
-                        SearchResult::new(title, &video_url, &content, "youtube_noapi");
+                    let mut r = SearchResult::new(title, &video_url, &content, "youtube_noapi");
                     r.engine_rank = (results.len() + 1) as u32;
                     r.category = SearchCategory::Videos.to_string();
                     r.thumbnail = thumbnail;

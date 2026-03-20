@@ -35,7 +35,11 @@ impl Tool for SandboxTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("run_code");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("run_code");
         match action {
             "run_code" => {
                 let code = call
@@ -43,9 +47,16 @@ impl Tool for SandboxTool {
                     .get("code")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| anyhow::anyhow!("Missing 'code'"))?;
-                let lang =
-                    call.arguments.get("language").and_then(|v| v.as_str()).unwrap_or("python");
-                let timeout = call.arguments.get("timeout").and_then(|v| v.as_u64()).unwrap_or(30);
+                let lang = call
+                    .arguments
+                    .get("language")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("python");
+                let timeout = call
+                    .arguments
+                    .get("timeout")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(30);
                 let (cmd, flag) = match lang {
                     "python" | "py" => ("python3", "-c"),
                     "node" | "javascript" | "js" => ("node", "-e"),
@@ -59,7 +70,10 @@ impl Tool for SandboxTool {
                 };
                 let output = tokio::time::timeout(
                     std::time::Duration::from_secs(timeout),
-                    tokio::process::Command::new(cmd).arg(flag).arg(code).output(),
+                    tokio::process::Command::new(cmd)
+                        .arg(flag)
+                        .arg(code)
+                        .output(),
                 )
                 .await
                 .map_err(|_| anyhow::anyhow!("Execution timed out"))??;
@@ -68,13 +82,18 @@ impl Tool for SandboxTool {
                 if output.status.success() {
                     Ok(ToolResult::success(call.id, stdout.to_string()))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("{}\n{}", stdout, stderr)))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("{}\n{}", stdout, stderr),
+                    ))
                 }
             }
             "checkpoint_save" => {
                 let id = uuid::Uuid::new_v4().to_string();
-                Ok(ToolResult::success(call.id, format!("Checkpoint saved: {id}"))
-                    .with_data(json!({"checkpoint_id": id})))
+                Ok(
+                    ToolResult::success(call.id, format!("Checkpoint saved: {id}"))
+                        .with_data(json!({"checkpoint_id": id})),
+                )
             }
             "checkpoint_list" => {
                 Ok(ToolResult::success(call.id, "[]".into()).with_data(json!({"checkpoints": []})))

@@ -137,11 +137,11 @@ impl SearchEngine for DuckDuckGoWeather {
             let condition = condition_label(condition_code);
 
             let mut result = SearchResult::new(
+                format!("Weather for {}: {:.1}°C — {}", query.query, temp, condition),
                 format!(
-                    "Weather for {}: {:.1}°C — {}",
-                    query.query, temp, condition
+                    "https://duckduckgo.com/?q=weather+{}",
+                    urlencoding::encode(&query.query)
                 ),
-                format!("https://duckduckgo.com/?q=weather+{}", urlencoding::encode(&query.query)),
                 format!(
                     "Temperature: {:.1}°C (feels like {:.1}°C) | Condition: {} | Humidity: {:.0}% | Wind: {:.1} km/h | Pressure: {:.0} hPa",
                     temp, feels_like, condition, humidity, wind_speed, pressure

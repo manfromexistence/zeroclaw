@@ -131,10 +131,7 @@ impl SearchEngine for PostgresEngine {
                 }
             });
 
-            let full_query = format!(
-                "{} LIMIT {} OFFSET {}",
-                self.query_str, self.limit, offset
-            );
+            let full_query = format!("{} LIMIT {} OFFSET {}", self.query_str, self.limit, offset);
 
             let rows: Vec<Row> = client
                 .query(&full_query, &[&wildcard])

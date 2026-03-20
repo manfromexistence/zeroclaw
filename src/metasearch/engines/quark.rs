@@ -5,7 +5,6 @@
 //! Website: https://quark.sm.cn
 //! Features: Paging, Time Range
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -13,11 +12,12 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
 use serde_json::Value;
-use tracing::{info, warn};
 use smallvec::smallvec;
+use tracing::{info, warn};
 
 pub struct Quark {
     metadata: EngineMetadata,

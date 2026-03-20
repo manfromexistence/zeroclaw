@@ -8,8 +8,8 @@
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::Deserialize;
-use std::collections::HashMap;
 use smallvec::smallvec;
+use std::collections::HashMap;
 
 use crate::metasearch::{
     category::SearchCategory,
@@ -138,12 +138,12 @@ impl SearchEngine for Discourse {
                 content,
                 engine: "Discourse".to_string(),
                 engine_rank: (i + 1) as u32,
-                    score: 0.0,
-                    thumbnail: None,
-                    published_date: None,
-                    category: String::new(),
-                    metadata: serde_json::Value::Null,
-                });
+                score: 0.0,
+                thumbnail: None,
+                published_date: None,
+                category: String::new(),
+                metadata: serde_json::Value::Null,
+            });
         }
         Ok(results)
     }

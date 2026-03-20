@@ -57,9 +57,10 @@ impl MemoryLoader for DefaultMemoryLoader {
                 continue;
             }
             if let Some(score) = entry.score
-                && score < self.min_relevance_score {
-                    continue;
-                }
+                && score < self.min_relevance_score
+            {
+                continue;
+            }
             let _ = writeln!(context, "- {}: {}", entry.key, entry.content);
         }
 

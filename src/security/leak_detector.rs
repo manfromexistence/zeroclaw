@@ -232,10 +232,11 @@ impl LeakDetector {
                 patterns.push(name.to_string());
                 // Redact the entire key block
                 if let Some(start_idx) = content.find(begin)
-                    && let Some(end_idx) = content.find(end) {
-                        let key_block = &content[start_idx..end_idx + end.len()];
-                        *redacted = redacted.replace(key_block, "[REDACTED_PRIVATE_KEY]");
-                    }
+                    && let Some(end_idx) = content.find(end)
+                {
+                    let key_block = &content[start_idx..end_idx + end.len()];
+                    *redacted = redacted.replace(key_block, "[REDACTED_PRIVATE_KEY]");
+                }
             }
         }
     }

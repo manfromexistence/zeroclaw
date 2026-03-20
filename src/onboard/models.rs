@@ -333,29 +333,28 @@ fn resolve_live_models_endpoint(
     if matches!(
         canonical_provider_name(provider_name),
         "llamacpp" | "sglang" | "vllm" | "osaurus"
-    )
-        && let Some(url) = provider_api_url
-            .map(str::trim)
-            .filter(|url| !url.is_empty())
-        {
-            let normalized = url.trim_end_matches('/');
-            if normalized.ends_with("/models") {
-                return Some(normalized.to_string());
-            }
-            return Some(format!("{normalized}/models"));
+    ) && let Some(url) = provider_api_url
+        .map(str::trim)
+        .filter(|url| !url.is_empty())
+    {
+        let normalized = url.trim_end_matches('/');
+        if normalized.ends_with("/models") {
+            return Some(normalized.to_string());
         }
+        return Some(format!("{normalized}/models"));
+    }
 
     if canonical_provider_name(provider_name) == "openai-codex"
         && let Some(url) = provider_api_url
             .map(str::trim)
             .filter(|url| !url.is_empty())
-        {
-            let normalized = url.trim_end_matches('/');
-            if normalized.ends_with("/models") {
-                return Some(normalized.to_string());
-            }
-            return Some(format!("{normalized}/models"));
+    {
+        let normalized = url.trim_end_matches('/');
+        if normalized.ends_with("/models") {
+            return Some(normalized.to_string());
         }
+        return Some(format!("{normalized}/models"));
+    }
 
     models_endpoint_for_provider(provider_name).map(str::to_string)
 }
@@ -579,19 +578,19 @@ pub async fn run_models_refresh(
             MODEL_CACHE_TTL_SECS,
         )
         .await?
-        {
-            prompts::log::info(format!(
-                "Using cached model list for '{}' (updated {} ago):",
-                provider_name,
-                humanize_age(cached.age_secs)
-            ))?;
-            print_model_preview(&cached.models);
-            prompts::log::info(format!(
-                "Tip: run `zeroclaw models refresh --force --provider {}` to fetch latest now.",
-                provider_name
-            ))?;
-            return Ok(());
-        }
+    {
+        prompts::log::info(format!(
+            "Using cached model list for '{}' (updated {} ago):",
+            provider_name,
+            humanize_age(cached.age_secs)
+        ))?;
+        print_model_preview(&cached.models);
+        prompts::log::info(format!(
+            "Tip: run `zeroclaw models refresh --force --provider {}` to fetch latest now.",
+            provider_name
+        ))?;
+        return Ok(());
+    }
 
     let api_key = config.api_key.clone().unwrap_or_default();
 

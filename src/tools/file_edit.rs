@@ -149,16 +149,17 @@ impl Tool for FileEditTool {
 
         // ── 7. Symlink check ───────────────────────────────────────
         if let Ok(meta) = tokio::fs::symlink_metadata(&resolved_target).await
-            && meta.file_type().is_symlink() {
-                return Ok(ToolResult {
-                    success: false,
-                    output: String::new(),
-                    error: Some(format!(
-                        "Refusing to edit through symlink: {}",
-                        resolved_target.display()
-                    )),
-                });
-            }
+            && meta.file_type().is_symlink()
+        {
+            return Ok(ToolResult {
+                success: false,
+                output: String::new(),
+                error: Some(format!(
+                    "Refusing to edit through symlink: {}",
+                    resolved_target.display()
+                )),
+            });
+        }
 
         // ── 8. Record action ───────────────────────────────────────
         if !self.security.record_action() {

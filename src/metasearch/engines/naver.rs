@@ -93,7 +93,8 @@ impl SearchEngine for Naver {
             Err(_) => return Ok(Vec::new()),
         };
         let title_sel = Selector::parse("[class*='sds-comps-profile-info-title']").ok();
-        let desc_sel = Selector::parse("[class*='fds-web-desc'], [class*='sds-comps-text-type-body3']").ok();
+        let desc_sel =
+            Selector::parse("[class*='fds-web-desc'], [class*='sds-comps-text-type-body3']").ok();
 
         let mut results = Vec::new();
         let mut seen_urls = std::collections::HashSet::new();

@@ -31,9 +31,16 @@ impl Tool for ComplianceTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action =
-            call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("license_check");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("license_check");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
 
         match action {
             "license_check" => {
@@ -56,13 +63,18 @@ impl Tool for ComplianceTool {
                         }
                     }
                 }
-                Ok(ToolResult::success(call.id, format!("{} license files found", licenses.len()))
-                    .with_data(json!({"licenses": licenses})))
+                Ok(
+                    ToolResult::success(call.id, format!("{} license files found", licenses.len()))
+                        .with_data(json!({"licenses": licenses})),
+                )
             }
             "gdpr_scan" => {
                 // Scan for PII patterns
                 let patterns = [
-                    (r"(?i)\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "email"),
+                    (
+                        r"(?i)\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+                        "email",
+                    ),
                     (r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", "phone"),
                     (r"\b\d{3}-\d{2}-\d{4}\b", "ssn"),
                     (r"(?i)(?:ip[_-]?address|remote[_-]?addr)", "ip_tracking"),
@@ -75,7 +87,11 @@ impl Tool for ComplianceTool {
                     .filter_map(|e| e.ok())
                     .filter(|e| e.file_type().is_file())
                 {
-                    let ext = entry.path().extension().and_then(|e| e.to_str()).unwrap_or("");
+                    let ext = entry
+                        .path()
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .unwrap_or("");
                     if ![
                         "rs", "ts", "js", "py", "json", "yaml", "yml", "toml", "env", "cfg",
                     ]
@@ -107,7 +123,11 @@ impl Tool for ComplianceTool {
                     .filter_map(|e| e.ok())
                     .filter(|e| e.file_type().is_file())
                 {
-                    let ext = entry.path().extension().and_then(|e| e.to_str()).unwrap_or("");
+                    let ext = entry
+                        .path()
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .unwrap_or("");
                     if !["html", "htm", "tsx", "jsx", "vue", "svelte"].contains(&ext) {
                         continue;
                     }
@@ -137,13 +157,21 @@ impl Tool for ComplianceTool {
                     format!(
                         "{} a11y issues:\n{}",
                         issues.len(),
-                        issues.iter().take(20).cloned().collect::<Vec<_>>().join("\n")
+                        issues
+                            .iter()
+                            .take(20)
+                            .cloned()
+                            .collect::<Vec<_>>()
+                            .join("\n")
                     ),
                 ))
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("Compliance '{}' — install specialized tools for deeper analysis", action),
+                format!(
+                    "Compliance '{}' — install specialized tools for deeper analysis",
+                    action
+                ),
             )),
         }
     }
@@ -183,7 +211,10 @@ mod tests {
     }
     #[test]
     fn test_detect_license() {
-        assert_eq!(detect_license("MIT License\nPermission is hereby granted..."), "MIT");
+        assert_eq!(
+            detect_license("MIT License\nPermission is hereby granted..."),
+            "MIT"
+        );
         assert_eq!(detect_license("Apache License Version 2.0"), "Apache-2.0");
     }
 }

@@ -7,9 +7,9 @@
 
 use async_trait::async_trait;
 use reqwest::Client;
+use smallvec::smallvec;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
-use smallvec::smallvec;
 
 use crate::metasearch::{
     category::SearchCategory,

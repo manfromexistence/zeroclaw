@@ -4,7 +4,6 @@
 //! Website: https://pixabay.com
 //! Features: Paging, Time range
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Pixabay {
     metadata: EngineMetadata,
@@ -105,8 +105,14 @@ impl SearchEngine for Pixabay {
         };
 
         for (i, item) in items.iter().enumerate() {
-            let href = item.get("href").and_then(|h| h.as_str()).unwrap_or_default();
-            let name = item.get("name").and_then(|n| n.as_str()).unwrap_or_default();
+            let href = item
+                .get("href")
+                .and_then(|h| h.as_str())
+                .unwrap_or_default();
+            let name = item
+                .get("name")
+                .and_then(|n| n.as_str())
+                .unwrap_or_default();
             let description = item
                 .get("description")
                 .and_then(|d| d.as_str())
@@ -128,10 +134,7 @@ impl SearchEngine for Pixabay {
                 .and_then(|s| s.as_array())
                 .and_then(|a| a.first())
                 .and_then(|s| s.as_str())
-                .or_else(|| {
-                    item.get("source")
-                        .and_then(|s| s.as_str())
-                })
+                .or_else(|| item.get("source").and_then(|s| s.as_str()))
                 .map(|s| s.to_string());
 
             let mut r = SearchResult::new(name, &result_url, description, "pixabay");
@@ -141,11 +144,7 @@ impl SearchEngine for Pixabay {
             results.push(r);
         }
 
-        info!(
-            engine = "pixabay",
-            count = results.len(),
-            "Search complete"
-        );
+        info!(engine = "pixabay", count = results.len(), "Search complete");
         Ok(results)
     }
 }

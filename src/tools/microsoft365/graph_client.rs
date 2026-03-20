@@ -379,7 +379,7 @@ pub async fn sharepoint_search(
 /// Returns `None` when the body is not a recognised Graph error envelope.
 fn extract_graph_error_code(body: &str) -> Option<String> {
     let parsed: serde_json::Value = serde_json::from_str(body).ok()?;
-    
+
     parsed
         .get("error")
         .and_then(|e| e.get("code"))

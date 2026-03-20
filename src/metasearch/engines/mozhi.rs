@@ -4,7 +4,6 @@
 //! Website: https://codeberg.org/aryak/mozhi
 //! Features: Translation via self-hosted Mozhi instance, no pagination
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -121,12 +121,8 @@ impl SearchEngine for Mozhi {
                     word.to_string()
                 };
 
-                let mut r = SearchResult::new(
-                    &title,
-                    format!("{}/", self.base_url),
-                    &content,
-                    "mozhi",
-                );
+                let mut r =
+                    SearchResult::new(&title, format!("{}/", self.base_url), &content, "mozhi");
                 r.engine_rank = (i + 2) as u32;
                 r.category = SearchCategory::General.to_string();
                 results.push(r);

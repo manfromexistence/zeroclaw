@@ -93,13 +93,14 @@ impl ScreenshotTool {
 
         // macOS region flags
         if cfg!(target_os = "macos")
-            && let Some(region) = args.get("region").and_then(|v| v.as_str()) {
-                match region {
-                    "selection" => cmd_args.insert(1, "-s".into()),
-                    "window" => cmd_args.insert(1, "-w".into()),
-                    _ => {} // ignore unknown regions
-                }
+            && let Some(region) = args.get("region").and_then(|v| v.as_str())
+        {
+            match region {
+                "selection" => cmd_args.insert(1, "-s".into()),
+                "window" => cmd_args.insert(1, "-w".into()),
+                _ => {} // ignore unknown regions
             }
+        }
 
         let program = cmd_args.remove(0);
         let result = tokio::time::timeout(
@@ -153,17 +154,18 @@ impl ScreenshotTool {
         // Check file size before reading to prevent OOM on large screenshots
         const MAX_RAW_BYTES: u64 = 1_572_864; // ~1.5 MB (base64 expands ~33%)
         if let Ok(meta) = tokio::fs::metadata(output_path).await
-            && meta.len() > MAX_RAW_BYTES {
-                return Ok(ToolResult {
-                    success: true,
-                    output: format!(
-                        "Screenshot saved to: {}\nSize: {} bytes (too large to base64-encode inline)",
-                        output_path.display(),
-                        meta.len(),
-                    ),
-                    error: None,
-                });
-            }
+            && meta.len() > MAX_RAW_BYTES
+        {
+            return Ok(ToolResult {
+                success: true,
+                output: format!(
+                    "Screenshot saved to: {}\nSize: {} bytes (too large to base64-encode inline)",
+                    output_path.display(),
+                    meta.len(),
+                ),
+                error: None,
+            });
+        }
 
         match tokio::fs::read(output_path).await {
             Ok(bytes) => {

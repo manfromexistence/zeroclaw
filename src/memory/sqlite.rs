@@ -578,9 +578,10 @@ impl Memory for SqliteMemory {
                             score: Some(f64::from(scored.final_score)),
                         };
                         if let Some(filter_sid) = session_ref
-                            && entry.session_id.as_deref() != Some(filter_sid) {
-                                continue;
-                            }
+                            && entry.session_id.as_deref() != Some(filter_sid)
+                        {
+                            continue;
+                        }
                         results.push(entry);
                     }
                 }
@@ -636,9 +637,10 @@ impl Memory for SqliteMemory {
                     for row in rows {
                         let entry = row?;
                         if let Some(sid) = session_ref
-                            && entry.session_id.as_deref() != Some(sid) {
-                                continue;
-                            }
+                            && entry.session_id.as_deref() != Some(sid)
+                        {
+                            continue;
+                        }
                         results.push(entry);
                     }
                 }
@@ -718,9 +720,10 @@ impl Memory for SqliteMemory {
                 for row in rows {
                     let entry = row?;
                     if let Some(sid) = session_ref
-                        && entry.session_id.as_deref() != Some(sid) {
-                            continue;
-                        }
+                        && entry.session_id.as_deref() != Some(sid)
+                    {
+                        continue;
+                    }
                     results.push(entry);
                 }
             } else {
@@ -732,9 +735,10 @@ impl Memory for SqliteMemory {
                 for row in rows {
                     let entry = row?;
                     if let Some(sid) = session_ref
-                        && entry.session_id.as_deref() != Some(sid) {
-                            continue;
-                        }
+                        && entry.session_id.as_deref() != Some(sid)
+                    {
+                        continue;
+                    }
                     results.push(entry);
                 }
             }

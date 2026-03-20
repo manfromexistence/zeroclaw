@@ -72,7 +72,11 @@ impl Tool for SystemTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("info");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("info");
         match action {
             "info" => {
                 let mut sys = System::new_all();
@@ -115,7 +119,10 @@ impl Tool for SystemTool {
                     proc_.kill();
                     Ok(ToolResult::success(call.id, format!("Killed PID {pid}")))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Process {pid} not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Process {pid} not found"),
+                    ))
                 }
             }
             "env_get" => {
@@ -126,7 +133,10 @@ impl Tool for SystemTool {
                     .ok_or_else(|| anyhow::anyhow!("Missing 'name'"))?;
                 match std::env::var(name) {
                     Ok(val) => Ok(ToolResult::success(call.id, val)),
-                    Err(_) => Ok(ToolResult::error(call.id, format!("Env var '{}' not set", name))),
+                    Err(_) => Ok(ToolResult::error(
+                        call.id,
+                        format!("Env var '{}' not set", name),
+                    )),
                 }
             }
             "env_set" => {
@@ -143,7 +153,10 @@ impl Tool for SystemTool {
                 unsafe {
                     std::env::set_var(name, value);
                 }
-                Ok(ToolResult::success(call.id, format!("Set {}={}", name, value)))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Set {}={}", name, value),
+                ))
             }
             "disk_usage" => {
                 let disks = sysinfo::Disks::new_with_refreshed_list();
@@ -159,13 +172,19 @@ impl Tool for SystemTool {
                         })
                     })
                     .collect();
-                Ok(ToolResult::success(call.id, format!("{} disks", data.len()))
-                    .with_data(json!({"disks": data})))
+                Ok(
+                    ToolResult::success(call.id, format!("{} disks", data.len()))
+                        .with_data(json!({"disks": data})),
+                )
             }
-            "network_interfaces" | "port_allocate" => {
-                Ok(ToolResult::success(call.id, format!("Action '{}' acknowledged", action)))
-            }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            "network_interfaces" | "port_allocate" => Ok(ToolResult::success(
+                call.id,
+                format!("Action '{}' acknowledged", action),
+            )),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

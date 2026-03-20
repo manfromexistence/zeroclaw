@@ -31,7 +31,11 @@ impl Tool for ProfileTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("time");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("time");
         let command = call.arguments.get("command").and_then(|v| v.as_str());
 
         match action {
@@ -43,8 +47,11 @@ impl Tool for ProfileTool {
                     } else {
                         ("sh", "-c")
                     };
-                    let output =
-                        tokio::process::Command::new(shell).arg(flag).arg(cmd).output().await?;
+                    let output = tokio::process::Command::new(shell)
+                        .arg(flag)
+                        .arg(cmd)
+                        .output()
+                        .await?;
                     let elapsed = start.elapsed();
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     Ok(ToolResult::success(call.id, format!("Completed in {:.3}s (exit: {})\n{}", elapsed.as_secs_f64(), output.status.code().unwrap_or(-1), stdout))
@@ -55,8 +62,11 @@ impl Tool for ProfileTool {
             }
             "benchmark" => {
                 if let Some(cmd) = command {
-                    let iterations =
-                        call.arguments.get("iterations").and_then(|v| v.as_u64()).unwrap_or(10);
+                    let iterations = call
+                        .arguments
+                        .get("iterations")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(10);
                     let mut times = Vec::new();
                     let (shell, flag) = if cfg!(windows) {
                         ("cmd", "/C")
@@ -65,8 +75,11 @@ impl Tool for ProfileTool {
                     };
                     for _ in 0..iterations.min(100) {
                         let start = std::time::Instant::now();
-                        let _ =
-                            tokio::process::Command::new(shell).arg(flag).arg(cmd).output().await;
+                        let _ = tokio::process::Command::new(shell)
+                            .arg(flag)
+                            .arg(cmd)
+                            .output()
+                            .await;
                         times.push(start.elapsed().as_secs_f64());
                     }
                     let avg = times.iter().sum::<f64>() / times.len() as f64;
@@ -82,7 +95,10 @@ impl Tool for ProfileTool {
                         json!({"iterations": iterations, "avg_s": avg, "min_s": min, "max_s": max}),
                     ))
                 } else {
-                    Ok(ToolResult::error(call.id, "Need 'command' to benchmark".into()))
+                    Ok(ToolResult::error(
+                        call.id,
+                        "Need 'command' to benchmark".into(),
+                    ))
                 }
             }
             "flamegraph" => Ok(ToolResult::success(

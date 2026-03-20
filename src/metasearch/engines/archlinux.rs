@@ -4,7 +4,6 @@
 //! The original SearXNG engine targets the wiki; the wiki now requires
 //! JavaScript for bot verification, so we switched to the packages API.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -81,18 +81,11 @@ impl SearchEngine for ArchLinux {
                     continue;
                 }
 
-                let pkg_url = format!(
-                    "https://archlinux.org/packages/{}/{}/{}/",
-                    repo, arch, name
-                );
+                let pkg_url = format!("https://archlinux.org/packages/{}/{}/{}/", repo, arch, name);
                 let snippet = format!("{} — {} [{}]", desc, version, repo);
 
-                let mut result = SearchResult::new(
-                    name.to_string(),
-                    pkg_url,
-                    snippet,
-                    "archlinux".to_string(),
-                );
+                let mut result =
+                    SearchResult::new(name.to_string(), pkg_url, snippet, "archlinux".to_string());
                 result.engine_rank = (i + 1) as u32;
                 result.category = SearchCategory::IT.to_string();
                 results.push(result);

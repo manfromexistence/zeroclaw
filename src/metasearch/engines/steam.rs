@@ -1,6 +1,5 @@
 //! Steam Store engine — search games via Steam Store API.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -99,12 +99,8 @@ impl SearchEngine for SteamStore {
 
                 let content = content_parts.join(" — ");
 
-                let mut result = SearchResult::new(
-                    name.to_string(),
-                    item_url,
-                    content,
-                    "steam".to_string(),
-                );
+                let mut result =
+                    SearchResult::new(name.to_string(), item_url, content, "steam".to_string());
                 result.engine_rank = (i + 1) as u32;
                 result.category = SearchCategory::General.to_string();
                 if let Some(thumb) = tiny_image {

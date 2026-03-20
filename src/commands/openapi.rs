@@ -27,29 +27,34 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
     let mut harvester = SpecHarvester::new();
     harvester.add_source(Box::new(ApisGuruSource::new(source_dir.clone())));
 
-    println!("Harvesting OpenAPI connects from {}...", source_dir.display());
+    println!(
+        "Harvesting OpenAPI connects from {}...",
+        source_dir.display()
+    );
     let specs = harvester.harvest_all().await?;
     println!("Found {} connects", specs.len());
-    
+
     println!("Deduplicating...");
     let unique = harvester.deduplicate(specs).await;
     println!("Unique connects: {}", unique.len());
-    
+
     println!("Building registry...");
     let mut entries = Vec::new();
     for (i, spec) in unique.iter().enumerate() {
         if i % 100 == 0 {
             println!("  Processing {}/{}", i, unique.len());
         }
-        
+
         let spec_id = spec.dedup_key();
-        
+
         // Use the original source path
-        let path = spec.metadata.source
+        let path = spec
+            .metadata
+            .source
             .strip_prefix("file://")
             .unwrap_or(&spec.metadata.source)
             .to_string();
-        
+
         entries.push(RegistryEntry {
             id: spec_id,
             provider: spec.metadata.provider.clone(),
@@ -88,21 +93,21 @@ pub async fn harvest_command(config: &Config, source: Option<&str>) -> Result<()
 
 pub async fn list_command(config: &Config) -> Result<()> {
     let registry = load_registry(config)?;
-    
+
     let spec_count = registry.spec_count();
     let connect_count = registry.tool_count();
-    
+
     println!("OpenAPI Integration Status");
     println!("==========================");
     println!("Connects loaded: {}", spec_count);
     println!("Connects available: {}", connect_count);
     println!();
-    
+
     if spec_count == 0 {
         println!("No connects loaded. Run 'zeroclaw openapi harvest' to load connects.");
         return Ok(());
     }
-    
+
     println!("Available connects:");
     for spec_id in registry.list_specs() {
         if let Some(spec) = registry.get_spec(&spec_id) {
@@ -115,49 +120,51 @@ pub async fn list_command(config: &Config) -> Result<()> {
             println!();
         }
     }
-    
+
     Ok(())
 }
 
 pub async fn tools_command(config: &Config, spec_id: &str) -> Result<()> {
     let registry = load_registry(config)?;
-    
-    let spec = registry.get_spec(spec_id)
+
+    let spec = registry
+        .get_spec(spec_id)
         .ok_or_else(|| anyhow::anyhow!("Spec not found: {}", spec_id))?;
-    
+
     let connects = registry.get_tools_for_spec(spec_id);
-    
+
     println!("Connects for spec: {}", spec_id);
     println!("Service: {}", spec.metadata.service);
     println!("Version: {}", spec.metadata.version);
     println!("Base URL: {}", spec.base_url);
     println!();
     println!("Available connects ({}):", connects.len());
-    
+
     for connect_name in connects {
         if let Some(connect) = registry.get_tool(&connect_name) {
             println!("  {}", connect.name());
             println!("    {}", connect.description());
         }
     }
-    
+
     Ok(())
 }
 
 pub async fn test_command(config: &Config, tool_name: &str, args: serde_json::Value) -> Result<()> {
     let registry = load_registry(config)?;
-    
-    let connect = registry.get_tool(tool_name)
+
+    let connect = registry
+        .get_tool(tool_name)
         .ok_or_else(|| anyhow::anyhow!("Connect not found: {}", tool_name))?;
-    
+
     println!("Testing connect: {}", connect.name());
     println!("Description: {}", connect.description());
     println!("Arguments: {}", serde_json::to_string_pretty(&args)?);
     println!();
     println!("Executing...");
-    
+
     let result = connect.execute(args).await?;
-    
+
     println!();
     if result.success {
         println!("✓ Success");
@@ -168,43 +175,43 @@ pub async fn test_command(config: &Config, tool_name: &str, args: serde_json::Va
             println!("Error: {}", error);
         }
     }
-    
+
     Ok(())
 }
 
 pub async fn search_command(config: &Config, query: &str) -> Result<()> {
     let registry = load_registry(config)?;
-    
+
     let results = registry.search_tools(query);
-    
+
     println!("Search results for '{}':", query);
     println!("Found {} connects:", results.len());
     println!();
-    
+
     for connect_name in results {
         if let Some(connect) = registry.get_tool(&connect_name) {
             println!("  {}", connect.name());
             println!("    {}", connect.description());
         }
     }
-    
+
     Ok(())
 }
 
 fn load_registry(config: &Config) -> Result<OpenApiRegistry> {
     let specs_root = expand_tilde(&config.openapi.specs_dir);
     let registry_path = specs_root.join("registry.json");
-    
+
     if !registry_path.exists() {
         anyhow::bail!(
             "Registry not found at {}. Run 'zeroclaw openapi harvest' first.",
             registry_path.display()
         );
     }
-    
+
     let registry = OpenApiRegistry::new();
     registry.load_from_disk(&registry_path)?;
-    
+
     Ok(registry)
 }
 

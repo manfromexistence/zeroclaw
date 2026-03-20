@@ -34,8 +34,16 @@ impl Tool for KubernetesTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("get");
-        let ns = call.arguments.get("namespace").and_then(|v| v.as_str()).unwrap_or("default");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("get");
+        let ns = call
+            .arguments
+            .get("namespace")
+            .and_then(|v| v.as_str())
+            .unwrap_or("default");
         let (shell, flag) = if cfg!(windows) {
             ("cmd", "/C")
         } else {
@@ -44,8 +52,11 @@ impl Tool for KubernetesTool {
 
         let cmd = match action {
             "get" => {
-                let resource =
-                    call.arguments.get("resource").and_then(|v| v.as_str()).unwrap_or("pods");
+                let resource = call
+                    .arguments
+                    .get("resource")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("pods");
                 format!("kubectl get {resource} -n {ns} -o wide")
             }
             "apply" => {
@@ -57,8 +68,11 @@ impl Tool for KubernetesTool {
                 format!("kubectl apply -f {file} -n {ns}")
             }
             "delete" => {
-                let resource =
-                    call.arguments.get("resource").and_then(|v| v.as_str()).unwrap_or("pod");
+                let resource = call
+                    .arguments
+                    .get("resource")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("pod");
                 let name = call
                     .arguments
                     .get("name")
@@ -75,8 +89,11 @@ impl Tool for KubernetesTool {
                 format!("kubectl logs --tail=100 {name} -n {ns}")
             }
             "describe" => {
-                let resource =
-                    call.arguments.get("resource").and_then(|v| v.as_str()).unwrap_or("pod");
+                let resource = call
+                    .arguments
+                    .get("resource")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("pod");
                 let name = call
                     .arguments
                     .get("name")
@@ -90,7 +107,11 @@ impl Tool for KubernetesTool {
                     .get("name")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| anyhow::anyhow!("Missing 'name'"))?;
-                let replicas = call.arguments.get("replicas").and_then(|v| v.as_u64()).unwrap_or(1);
+                let replicas = call
+                    .arguments
+                    .get("replicas")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(1);
                 format!("kubectl scale deployment {name} --replicas={replicas} -n {ns}")
             }
             "rollout" => {
@@ -105,13 +126,20 @@ impl Tool for KubernetesTool {
             _ => format!("kubectl {action}"),
         };
 
-        let output = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await?;
+        let output = tokio::process::Command::new(shell)
+            .arg(flag)
+            .arg(&cmd)
+            .output()
+            .await?;
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         if output.status.success() {
             Ok(ToolResult::success(call.id, stdout))
         } else {
-            Ok(ToolResult::error(call.id, if stderr.is_empty() { stdout } else { stderr }))
+            Ok(ToolResult::error(
+                call.id,
+                if stderr.is_empty() { stdout } else { stderr },
+            ))
         }
     }
 }

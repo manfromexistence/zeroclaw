@@ -4,14 +4,14 @@
 //! Website: https://wttr.in
 //! Features: Current weather conditions, no pagination
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
-    error::{Result},
+    error::Result,
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -127,10 +127,7 @@ impl SearchEngine for Wttr {
             return Ok(Vec::new());
         }
 
-        let data: serde_json::Value = match resp
-            .json()
-            .await
-        {
+        let data: serde_json::Value = match resp.json().await {
             Ok(v) => v,
             Err(_) => return Ok(Vec::new()),
         };
@@ -180,10 +177,7 @@ impl SearchEngine for Wttr {
             .and_then(|v| v.as_str())
             .unwrap_or_else(|| Self::weather_condition(weather_code));
 
-        let title = format!(
-            "Weather in {}: {}°C, {}",
-            query.query, temp_c, condition
-        );
+        let title = format!("Weather in {}: {}°C, {}", query.query, temp_c, condition);
         let content = format!(
             "Feels like {}°C | Wind: {} km/h | Humidity: {}% | Pressure: {} hPa",
             feels_like, wind_speed, humidity, pressure

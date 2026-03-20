@@ -60,15 +60,29 @@ impl Tool for ContextTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("window_info");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("window_info");
 
         match action {
             "add" => {
-                let content = call.arguments.get("content").and_then(|v| v.as_str()).unwrap_or("");
-                let source =
-                    call.arguments.get("source").and_then(|v| v.as_str()).unwrap_or("manual");
-                let priority =
-                    call.arguments.get("priority").and_then(|v| v.as_f64()).unwrap_or(0.5) as f32;
+                let content = call
+                    .arguments
+                    .get("content")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let source = call
+                    .arguments
+                    .get("source")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("manual");
+                let priority = call
+                    .arguments
+                    .get("priority")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.5) as f32;
                 // ~4 chars per token estimate
                 let tokens = content.len() / 4;
                 let id = uuid::Uuid::new_v4().to_string();
@@ -104,15 +118,25 @@ impl Tool for ContextTool {
                 ))
             }
             "remove" => {
-                let id = call.arguments.get("id").and_then(|v| v.as_str()).unwrap_or("");
+                let id = call
+                    .arguments
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let mut win = self.window.lock().unwrap();
                 if let Some(pos) = win.items.iter().position(|i| i.id == id) {
                     if let Some(removed) = win.items.remove(pos) {
                         win.current_tokens = win.current_tokens.saturating_sub(removed.tokens);
                     }
-                    Ok(ToolResult::success(call.id, format!("Removed context '{id}'")))
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("Removed context '{id}'"),
+                    ))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Context '{id}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Context '{id}' not found"),
+                    ))
                 }
             }
             "list" => {
@@ -144,7 +168,10 @@ impl Tool for ContextTool {
                     let mut win = self.window.lock().unwrap();
                     win.max_tokens = max as usize;
                 }
-                Ok(ToolResult::success(call.id, "Auto-management enabled".into()))
+                Ok(ToolResult::success(
+                    call.id,
+                    "Auto-management enabled".into(),
+                ))
             }
             _ => Ok(ToolResult::success(call.id, format!("Context '{action}'"))),
         }

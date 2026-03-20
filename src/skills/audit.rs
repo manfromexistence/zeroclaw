@@ -213,11 +213,12 @@ fn audit_manifest_file(root: &Path, path: &Path, report: &mut SkillAuditReport) 
     if let Some(prompts) = parsed.get("prompts").and_then(toml::Value::as_array) {
         for (idx, prompt) in prompts.iter().enumerate() {
             if let Some(prompt) = prompt.as_str()
-                && let Some(pattern) = detect_high_risk_snippet(prompt) {
-                    report.findings.push(format!(
-                        "{rel}: prompts[{idx}] contains high-risk pattern ({pattern})."
-                    ));
-                }
+                && let Some(pattern) = detect_high_risk_snippet(prompt)
+            {
+                report.findings.push(format!(
+                    "{rel}: prompts[{idx}] contains high-risk pattern ({pattern})."
+                ));
+            }
         }
     }
 
@@ -289,16 +290,17 @@ fn audit_markdown_link_target(
                 // Allow cross-skill markdown references that stay within the
                 // overall skills directory (e.g., ~/.zeroclaw/workspace/skills).
                 if let Some(skills_root) = skills_root_for(root)
-                    && canonical_target.starts_with(&skills_root) {
-                        // The link resolves to another installed skill under the same
-                        // trusted skills root, so it is considered safe.
-                        if !canonical_target.is_file() {
-                            report.findings.push(format!(
-                                "{rel}: markdown link must point to a file ({normalized})."
-                            ));
-                        }
-                        return;
+                    && canonical_target.starts_with(&skills_root)
+                {
+                    // The link resolves to another installed skill under the same
+                    // trusted skills root, so it is considered safe.
+                    if !canonical_target.is_file() {
+                        report.findings.push(format!(
+                            "{rel}: markdown link must point to a file ({normalized})."
+                        ));
                     }
+                    return;
+                }
 
                 report.findings.push(format!(
                     "{rel}: markdown link escapes skill root ({normalized})."

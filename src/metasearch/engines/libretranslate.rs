@@ -44,7 +44,8 @@ impl SearchEngine for LibreTranslate {
                 "https://libretranslate.com".to_string()
             } else {
                 self.base_url.clone()
-            }.into(),
+            }
+            .into(),
             categories: smallvec![SearchCategory::General],
             enabled: !self.base_url.is_empty(),
             timeout_ms: 5000,

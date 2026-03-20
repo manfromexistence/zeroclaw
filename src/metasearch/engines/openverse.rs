@@ -62,8 +62,16 @@ impl SearchEngine for Openverse {
             query.page
         );
 
-        let resp = self.client.get(&url).send().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
-        let data: ApiResponse = resp.json().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let data: ApiResponse = resp
+            .json()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
 
         let results = data
             .results
@@ -77,12 +85,7 @@ impl SearchEngine for Openverse {
                     Some(c) => format!("By {} — Creative Commons", c),
                     None => "Creative Commons licensed image".to_string(),
                 };
-                let mut result = SearchResult::new(
-                    title,
-                    url,
-                    content,
-                    "openverse",
-                );
+                let mut result = SearchResult::new(title, url, content, "openverse");
                 result.engine_rank = (i + 1) as u32;
                 result.thumbnail = Some(img_src);
                 Some(result)
@@ -92,4 +95,3 @@ impl SearchEngine for Openverse {
         Ok(results)
     }
 }
-

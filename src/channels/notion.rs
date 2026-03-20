@@ -303,9 +303,10 @@ impl Channel for NotionChannel {
 
         // Crash recovery
         if self.recover_stale
-            && let Err(e) = self.recover_stale().await {
-                tracing::error!("Notion stale task recovery failed: {e}");
-            }
+            && let Err(e) = self.recover_stale().await
+        {
+            tracing::error!("Notion stale task recovery failed: {e}");
+        }
 
         // Polling loop
         loop {

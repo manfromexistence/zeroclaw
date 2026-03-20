@@ -95,7 +95,11 @@ impl Tool for DockerTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("ps");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("ps");
         let (shell, flag) = if cfg!(windows) {
             ("cmd", "/C")
         } else {
@@ -109,10 +113,16 @@ impl Tool for DockerTool {
                 "docker images --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\"".into()
             }
             "build" => {
-                let file =
-                    call.arguments.get("file").and_then(|v| v.as_str()).unwrap_or("Dockerfile");
-                let image =
-                    call.arguments.get("image").and_then(|v| v.as_str()).unwrap_or("dx-app");
+                let file = call
+                    .arguments
+                    .get("file")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Dockerfile");
+                let image = call
+                    .arguments
+                    .get("image")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("dx-app");
                 format!("docker build -f {} -t {} .", file, image)
             }
             "run" => {
@@ -151,8 +161,11 @@ impl Tool for DockerTool {
                     .get("container")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| anyhow::anyhow!("Missing 'container'"))?;
-                let command =
-                    call.arguments.get("command").and_then(|v| v.as_str()).unwrap_or("sh");
+                let command = call
+                    .arguments
+                    .get("command")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("sh");
                 format!("docker exec {container} {command}")
             }
             "compose" => {
@@ -161,8 +174,11 @@ impl Tool for DockerTool {
                     .get("file")
                     .and_then(|v| v.as_str())
                     .unwrap_or("docker-compose.yml");
-                let command =
-                    call.arguments.get("command").and_then(|v| v.as_str()).unwrap_or("up -d");
+                let command = call
+                    .arguments
+                    .get("command")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("up -d");
                 format!("docker compose -f {file} {command}")
             }
             "inspect" => {
@@ -174,16 +190,28 @@ impl Tool for DockerTool {
                 format!("docker inspect {container}")
             }
             "prune" => "docker system prune -f".into(),
-            other => return Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => {
+                return Ok(ToolResult::error(
+                    call.id,
+                    format!("Unknown action: {other}"),
+                ));
+            }
         };
 
-        let output = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await?;
+        let output = tokio::process::Command::new(shell)
+            .arg(flag)
+            .arg(&cmd)
+            .output()
+            .await?;
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         if output.status.success() {
             Ok(ToolResult::success(call.id, stdout))
         } else {
-            Ok(ToolResult::error(call.id, if stderr.is_empty() { stdout } else { stderr }))
+            Ok(ToolResult::error(
+                call.id,
+                if stderr.is_empty() { stdout } else { stderr },
+            ))
         }
     }
 }

@@ -4,8 +4,8 @@
 //! Supports persistent KV cache, streaming, and context window management.
 
 use anyhow::{Context, Result};
-use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::context::LlamaContext;
+use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;
 use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::params::LlamaModelParams;
@@ -137,8 +137,7 @@ impl LocalGgufProvider {
         }
 
         let state = tokio::task::spawn_blocking(|| -> Result<InferenceState> {
-            let mut backend =
-                LlamaBackend::init().context("Failed to initialize llama backend")?;
+            let mut backend = LlamaBackend::init().context("Failed to initialize llama backend")?;
             backend.void_logs();
 
             let model_path = Self::model_path();
@@ -245,7 +244,8 @@ impl LocalGgufProvider {
         let new_tokens = if state.kv_cursor > 0 {
             let cached = state.kv_cursor as usize;
             if cached < all_tokens.len()
-                && all_tokens[..cached] == state.cached_tokens[..cached.min(state.cached_tokens.len())]
+                && all_tokens[..cached]
+                    == state.cached_tokens[..cached.min(state.cached_tokens.len())]
             {
                 &all_tokens[cached..]
             } else {
@@ -295,9 +295,8 @@ impl LocalGgufProvider {
 
         sampler.accept_many(all_tokens.iter().copied());
 
-        let max_gen = MAX_GENERATION_TOKENS.min(
-            (INFERENCE_CONTEXT_TOKENS as usize).saturating_sub(all_tokens.len()),
-        );
+        let max_gen = MAX_GENERATION_TOKENS
+            .min((INFERENCE_CONTEXT_TOKENS as usize).saturating_sub(all_tokens.len()));
         let max_loop = max_gen + SENTENCE_BOUNDARY_GRACE;
 
         let mut n_cur = state.kv_cursor;

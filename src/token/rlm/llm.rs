@@ -1,11 +1,11 @@
 use crate::token::rlm::error::{RLMError, Result};
-use serde::{Deserialize, Serialize};
-use reqwest::Client;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::hash::{Hash, Hasher};
-use std::collections::hash_map::DefaultHasher;
 use futures::stream::StreamExt;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -115,9 +115,9 @@ impl LLMClient {
         // Check last user message for task indicators
         if let Some(last_msg) = messages.iter().rev().find(|m| m.role == "user") {
             let content = last_msg.content.to_lowercase();
-            
+
             // Use fast model for search/exploration tasks
-            if content.contains("fast_find") 
+            if content.contains("fast_find")
                 || content.contains("fast_contains")
                 || content.contains("fast_find_all")
                 || content.contains("search")
@@ -125,17 +125,19 @@ impl LLMClient {
                 || content.contains("extract")
                 || content.contains("locate")
                 || content.contains("index_of")
-                || content.contains("sub_string") {
+                || content.contains("sub_string")
+            {
                 return fast_model.clone();
             }
-            
+
             // Use smart model for synthesis/reasoning tasks
             if content.contains("final(")
                 || content.contains("summarize")
                 || content.contains("analyze")
                 || content.contains("explain")
                 || content.contains("compare")
-                || content.contains("conclude") {
+                || content.contains("conclude")
+            {
                 return self.model.clone();
             }
         }
@@ -168,7 +170,7 @@ impl LLMClient {
     pub async fn complete(&self, messages: Vec<Message>) -> Result<String> {
         // Check cache first
         let cache_key = Self::hash_messages(&messages);
-        
+
         {
             let cache = self.response_cache.lock().unwrap();
             if let Some(cached_response) = cache.get(&cache_key) {
@@ -180,17 +182,17 @@ impl LLMClient {
 
         // Cache miss - make API call
         *self.cache_misses.lock().unwrap() += 1;
-        
+
         // Select appropriate model based on task
         let selected_model = self.select_model(&messages);
-        
+
         // Track model usage
         if self.fast_model.as_ref() == Some(&selected_model) {
             *self.fast_model_calls.lock().unwrap() += 1;
         } else {
             *self.smart_model_calls.lock().unwrap() += 1;
         }
-        
+
         let request = GroqRequest {
             model: selected_model,
             messages,
@@ -199,7 +201,8 @@ impl LLMClient {
             stream: None,
         };
 
-        let response = self.client
+        let response = self
+            .client
             .post("https://api.groq.com/openai/v1/chat/completions")
             .header("Authorization", format!("Bearer {}", self.api_key))
             .header("Content-Type", "application/json")
@@ -242,7 +245,7 @@ impl LLMClient {
 
         // Select appropriate model
         let selected_model = self.select_model(&messages);
-        
+
         // Track model usage
         if self.fast_model.as_ref() == Some(&selected_model) {
             *self.fast_model_calls.lock().unwrap() += 1;
@@ -258,7 +261,8 @@ impl LLMClient {
             stream: Some(true),
         };
 
-        let response = self.client
+        let response = self
+            .client
             .post("https://api.groq.com/openai/v1/chat/completions")
             .header("Authorization", format!("Bearer {}", self.api_key))
             .header("Content-Type", "application/json")
@@ -283,16 +287,16 @@ impl LLMClient {
             while let Some(chunk) = stream.next().await {
                 if let Ok(bytes) = chunk {
                     let text = String::from_utf8_lossy(&bytes);
-                    
+
                     // Parse SSE format: "data: {...}\n\n"
                     for line in text.lines() {
                         if line.starts_with("data: ") {
                             let json_str = &line[6..];
-                            
+
                             if json_str == "[DONE]" {
                                 break;
                             }
-                            
+
                             if let Ok(chunk) = serde_json::from_str::<StreamChunk>(json_str) {
                                 if let Some(choice) = chunk.choices.first() {
                                     if let Some(content) = &choice.delta.content {
@@ -308,5 +312,4 @@ impl LLMClient {
 
         Ok(rx)
     }
-
 }

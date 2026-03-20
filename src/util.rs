@@ -10,7 +10,7 @@ pub fn show_exit_train() {
     println!();
     println!("Thanks for using DX-Agent!");
     println!();
-    
+
     for frame in 0..15 {
         print!("\x1B[H"); // Move cursor to top
         let _ = splash::render_train_animation(&rainbow, frame);

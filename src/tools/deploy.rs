@@ -48,9 +48,21 @@ impl Tool for DeployTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("status");
-        let env = call.arguments.get("env").and_then(|v| v.as_str()).unwrap_or("staging");
-        let version = call.arguments.get("version").and_then(|v| v.as_str()).unwrap_or("latest");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("status");
+        let env = call
+            .arguments
+            .get("env")
+            .and_then(|v| v.as_str())
+            .unwrap_or("staging");
+        let version = call
+            .arguments
+            .get("version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("latest");
 
         match action {
             "deploy" => {
@@ -60,8 +72,11 @@ impl Tool for DeployTool {
                     } else {
                         ("sh", "-c")
                     };
-                    let output =
-                        tokio::process::Command::new(shell).arg(flag).arg(cmd).output().await?;
+                    let output = tokio::process::Command::new(shell)
+                        .arg(flag)
+                        .arg(cmd)
+                        .output()
+                        .await?;
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     if output.status.success() {
                         let dep = Deployment {
@@ -122,7 +137,10 @@ impl Tool for DeployTool {
                     .map(|d| format!("[{}] {} → {} ({})", d.id, d.version, d.env, d.status))
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("{} deployments:\n{}", deps.len(), output)))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("{} deployments:\n{}", deps.len(), output),
+                ))
             }
             "health" => {
                 let url = call
@@ -140,10 +158,16 @@ impl Tool for DeployTool {
                         Ok(ToolResult::success(call.id, format!("Health: {} ({:.0}ms)", resp.status(), elapsed.as_millis()))
                             .with_data(json!({"status": resp.status().as_u16(), "latency_ms": elapsed.as_millis()})))
                     }
-                    Err(e) => Ok(ToolResult::error(call.id, format!("Health check failed: {e}"))),
+                    Err(e) => Ok(ToolResult::error(
+                        call.id,
+                        format!("Health check failed: {e}"),
+                    )),
                 }
             }
-            _ => Ok(ToolResult::success(call.id, format!("Deploy '{}' for {env}", action))),
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("Deploy '{}' for {env}", action),
+            )),
         }
     }
 }

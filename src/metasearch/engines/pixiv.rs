@@ -3,7 +3,6 @@
 //!
 //! Reference: <https://www.pixiv.net>
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,6 +10,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -85,9 +85,10 @@ impl SearchEngine for Pixiv {
                 continue;
             }
 
-            let id = match item["id"].as_str().or_else(|| {
-                item["id"].as_u64().map(|_| "")
-            }) {
+            let id = match item["id"]
+                .as_str()
+                .or_else(|| item["id"].as_u64().map(|_| ""))
+            {
                 Some(s) if !s.is_empty() => s.to_string(),
                 _ => match item["id"].as_u64() {
                     Some(n) => n.to_string(),

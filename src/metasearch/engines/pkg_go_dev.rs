@@ -1,6 +1,5 @@
 //! pkg.go.dev — Go package search via HTML scraping.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;
@@ -99,12 +99,7 @@ impl SearchEngine for PkgGoDev {
                 .unwrap_or_default();
 
             if !title.is_empty() {
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    snippet,
-                    "pkg_go_dev",
-                );
+                let mut result = SearchResult::new(title, result_url, snippet, "pkg_go_dev");
                 result.engine_rank = (i + 1) as u32;
                 results.push(result);
             }

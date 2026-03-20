@@ -4,7 +4,6 @@
 //! Website: https://www.ebi.ac.uk/pdbe
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -106,10 +106,8 @@ impl SearchEngine for Pdbe {
                     }
                 }
                 if let Some(authors) = doc["entry_author_list"].as_array() {
-                    let author_strs: Vec<&str> = authors
-                        .iter()
-                        .filter_map(|a| a.as_str())
-                        .collect();
+                    let author_strs: Vec<&str> =
+                        authors.iter().filter_map(|a| a.as_str()).collect();
                     if !author_strs.is_empty() {
                         content_parts.push(author_strs.join(", "));
                     }

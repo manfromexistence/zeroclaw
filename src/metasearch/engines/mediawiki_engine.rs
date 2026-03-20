@@ -110,12 +110,7 @@ impl SearchEngine for MediaWikiEngine {
                 .map(strip_search_highlight)
                 .unwrap_or_default();
 
-            let mut result = SearchResult::new(
-                title,
-                page_url,
-                content,
-                "mediawiki",
-            );
+            let mut result = SearchResult::new(title, page_url, content, "mediawiki");
             result.engine_rank = (i + 1) as u32;
             results.push(result);
         }

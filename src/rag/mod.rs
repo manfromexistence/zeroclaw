@@ -77,9 +77,10 @@ fn parse_pin_aliases(content: &str) -> PinAliases {
                     continue;
                 }
                 if let Ok(pin) = pin_str.parse::<u32>()
-                    && !alias.is_empty() {
-                        aliases.insert(alias, pin);
-                    }
+                    && !alias.is_empty()
+                {
+                    aliases.insert(alias, pin);
+                }
             }
             continue;
         }
@@ -87,9 +88,10 @@ fn parse_pin_aliases(content: &str) -> PinAliases {
         if let Some((k, v)) = line.split_once(':').or_else(|| line.split_once('=')) {
             let alias = k.trim().to_lowercase().replace(' ', "_");
             if let Ok(pin) = v.trim().parse::<u32>()
-                && !alias.is_empty() {
-                    aliases.insert(alias, pin);
-                }
+                && !alias.is_empty()
+            {
+                aliases.insert(alias, pin);
+            }
         }
     }
 
@@ -193,9 +195,10 @@ impl HardwareRag {
             // Parse pin aliases from full content
             let aliases = parse_pin_aliases(&content);
             if let Some(ref b) = board
-                && !aliases.is_empty() {
-                    pin_aliases.insert(b.clone(), aliases);
-                }
+                && !aliases.is_empty()
+            {
+                pin_aliases.insert(b.clone(), aliases);
+            }
 
             for chunk in chunker::chunk_markdown(&content, max_tokens) {
                 chunks.push(DatasheetChunk {

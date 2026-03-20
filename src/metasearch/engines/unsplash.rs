@@ -4,7 +4,6 @@
 //! Uses the undocumented `napi/search/photos` endpoint (no API key needed).
 //! Strips the `ixid` tracking parameter from all returned URLs.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use url::Url;
 use smallvec::smallvec;
+use url::Url;
 
 pub struct Unsplash {
     metadata: EngineMetadata,

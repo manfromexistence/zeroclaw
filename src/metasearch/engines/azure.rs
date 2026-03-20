@@ -4,7 +4,6 @@
 //! Website: https://azure.microsoft.com/products/ai-services/cognitive-search
 //! Features: Pagination via skip/top
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Azure {
     metadata: EngineMetadata,
@@ -40,7 +40,8 @@ impl Azure {
                 name: "azure".to_string().into(),
                 display_name: "Azure Search".to_string().into(),
                 homepage: "https://azure.microsoft.com/products/ai-services/cognitive-search"
-                    .to_string().into(),
+                    .to_string()
+                    .into(),
                 categories: smallvec![SearchCategory::General],
                 enabled,
                 timeout_ms: 5000,
@@ -152,11 +153,7 @@ impl SearchEngine for Azure {
             results.push(r);
         }
 
-        info!(
-            engine = "azure",
-            count = results.len(),
-            "Search complete"
-        );
+        info!(engine = "azure", count = results.len(), "Search complete");
         Ok(results)
     }
 }

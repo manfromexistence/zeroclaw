@@ -33,7 +33,11 @@ impl Tool for ReviewTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("full_review");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("full_review");
         match action {
             "full_review" => {
                 if let Some(file) = call.arguments.get("file").and_then(|v| v.as_str()) {
@@ -44,7 +48,10 @@ impl Tool for ReviewTool {
                     Ok(ToolResult::success(call.id, format!("Review of {file}: {lines} lines, {todos} TODOs, {unwraps} unwraps — connect LLM for deep review"))
                         .with_data(json!({"file": file, "lines": lines, "todos": todos, "unwraps": unwraps})))
                 } else {
-                    Ok(ToolResult::success(call.id, "Provide 'file' or 'diff' for review".into()))
+                    Ok(ToolResult::success(
+                        call.id,
+                        "Provide 'file' or 'diff' for review".into(),
+                    ))
                 }
             }
             _ => Ok(ToolResult::success(

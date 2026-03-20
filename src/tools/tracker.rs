@@ -53,17 +53,28 @@ impl Tool for TrackerTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
 
         match action {
             "create" => {
-                let title =
-                    call.arguments.get("title").and_then(|v| v.as_str()).unwrap_or("Untitled");
+                let title = call
+                    .arguments
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Untitled");
                 let labels: Vec<String> = call
                     .arguments
                     .get("labels")
                     .and_then(|v| v.as_array())
-                    .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|v| v.as_str().map(String::from))
+                            .collect()
+                    })
                     .unwrap_or_default();
                 let id = format!("T-{}", self.tasks.lock().unwrap().len() + 1);
                 let task = TrackerTask {
@@ -76,7 +87,10 @@ impl Tool for TrackerTool {
                     time_spent_secs: 0,
                 };
                 self.tasks.lock().unwrap().push(task);
-                Ok(ToolResult::success(call.id, format!("Created task {id}: {title}")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Created task {id}: {title}"),
+                ))
             }
             "list" => {
                 let tasks = self.tasks.lock().unwrap();
@@ -85,10 +99,17 @@ impl Tool for TrackerTool {
                     .map(|t| format!("[{}] {} ({})", t.id, t.title, t.status))
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("{} tasks:\n{}", tasks.len(), output)))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("{} tasks:\n{}", tasks.len(), output),
+                ))
             }
             "close" => {
-                let id = call.arguments.get("id").and_then(|v| v.as_str()).unwrap_or("");
+                let id = call
+                    .arguments
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let mut tasks = self.tasks.lock().unwrap();
                 if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
                     task.status = "closed".into();
@@ -98,15 +119,26 @@ impl Tool for TrackerTool {
                 }
             }
             "time_start" => {
-                let id = call.arguments.get("id").and_then(|v| v.as_str()).unwrap_or("default");
+                let id = call
+                    .arguments
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 self.time_entries
                     .lock()
                     .unwrap()
                     .insert(id.to_string(), std::time::Instant::now());
-                Ok(ToolResult::success(call.id, format!("Timer started for {id}")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Timer started for {id}"),
+                ))
             }
             "time_stop" => {
-                let id = call.arguments.get("id").and_then(|v| v.as_str()).unwrap_or("default");
+                let id = call
+                    .arguments
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 let elapsed = self
                     .time_entries
                     .lock()
@@ -118,7 +150,10 @@ impl Tool for TrackerTool {
                 if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
                     task.time_spent_secs += elapsed;
                 }
-                Ok(ToolResult::success(call.id, format!("Timer stopped for {id}: +{elapsed}s")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Timer stopped for {id}: +{elapsed}s"),
+                ))
             }
             "time_report" => {
                 let tasks = self.tasks.lock().unwrap();
@@ -128,9 +163,15 @@ impl Tool for TrackerTool {
                     .map(|t| format!("{}: {}s", t.title, t.time_spent_secs))
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("Time report:\n{report}")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Time report:\n{report}"),
+                ))
             }
-            _ => Ok(ToolResult::success(call.id, format!("Tracker '{}' completed", action))),
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("Tracker '{}' completed", action),
+            )),
         }
     }
 }

@@ -67,11 +67,12 @@ pub fn url_decode(input: &str) -> String {
                 let hi = bytes[i + 1] as char;
                 let lo = bytes[i + 2] as char;
                 if let (Some(h), Some(l)) = (hi.to_digit(16), lo.to_digit(16))
-                    && let Ok(value) = u8::try_from(h * 16 + l) {
-                        out.push(value);
-                        i += 3;
-                        continue;
-                    }
+                    && let Ok(value) = u8::try_from(h * 16 + l)
+                {
+                    out.push(value);
+                    i += 3;
+                    continue;
+                }
                 out.push(bytes[i]);
                 i += 1;
             }

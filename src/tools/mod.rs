@@ -526,13 +526,14 @@ pub fn all_tools_with_runtime(
     }
 
     if let Some(key) = composio_key
-        && !key.is_empty() {
-            tool_arcs.push(Arc::new(ComposioTool::new(
-                key,
-                composio_entity_id,
-                security.clone(),
-            )));
-        }
+        && !key.is_empty()
+    {
+        tool_arcs.push(Arc::new(ComposioTool::new(
+            key,
+            composio_entity_id,
+            security.clone(),
+        )));
+    }
 
     // Microsoft 365 Graph API integration
     if root_config.microsoft365.enabled {
@@ -614,13 +615,14 @@ pub fn all_tools_with_runtime(
     // OpenAPI tools integration
     if root_config.openapi.enabled {
         let registry = Arc::new(crate::tools::openapi::OpenApiRegistry::new());
-        
+
         // Load specs from registry file
         let registry_path = if root_config.openapi.specs_dir.starts_with("~/") {
             let home = directories::UserDirs::new()
                 .map(|u| u.home_dir().to_path_buf())
                 .unwrap_or_else(|| std::path::PathBuf::from("."));
-            home.join(&root_config.openapi.specs_dir[2..]).join("registry.json")
+            home.join(&root_config.openapi.specs_dir[2..])
+                .join("registry.json")
         } else {
             std::path::PathBuf::from(&root_config.openapi.specs_dir).join("registry.json")
         };
@@ -635,14 +637,17 @@ pub fn all_tools_with_runtime(
                         tool_count,
                         spec_count
                     );
-                    
+
                     // Add all OpenAPI tools to the registry
                     for tool in registry.get_all_tools() {
                         tool_arcs.push(tool);
                     }
                 }
                 Err(e) => {
-                    tracing::warn!("Failed to load OpenAPI registry: {}. Run 'zeroclaw openapi harvest' to create it.", e);
+                    tracing::warn!(
+                        "Failed to load OpenAPI registry: {}. Run 'zeroclaw openapi harvest' to create it.",
+                        e
+                    );
                 }
             }
         }

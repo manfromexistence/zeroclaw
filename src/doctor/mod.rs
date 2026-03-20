@@ -574,14 +574,14 @@ fn check_config_semantics(config: &Config, items: &mut Vec<DiagItem>) {
             .embedding_routes
             .iter()
             .any(|route| route.hint.trim() == hint)
-        {
-            items.push(DiagItem::warn(
+    {
+        items.push(DiagItem::warn(
                 cat,
                 format!(
                     "memory.embedding_model uses hint \"{hint}\" but no matching [[embedding_routes]] entry exists"
                 ),
             ));
-        }
+    }
 
     // Channel: at least one configured
     let cc = &config.channels_config;

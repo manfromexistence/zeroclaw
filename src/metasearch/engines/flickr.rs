@@ -1,7 +1,6 @@
 //! Flickr engine — search images via Flickr web scraping.
 //! Translated from SearXNG `searx/engines/flickr_noapi.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +8,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 

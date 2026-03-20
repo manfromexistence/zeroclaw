@@ -49,12 +49,24 @@ impl Tool for MigrateTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or("migrations");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or("migrations");
 
         match action {
             "create" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("unnamed");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("unnamed");
                 let timestamp = chrono::Utc::now().format("%Y%m%d%H%M%S").to_string();
                 let id = format!("{timestamp}_{name}");
 
@@ -109,7 +121,10 @@ impl Tool for MigrateTool {
                         format!("{} migrations:\n{}", entries.len(), output),
                     ))
                 } else {
-                    Ok(ToolResult::success(call.id, format!("No migrations directory at '{path}'")))
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("No migrations directory at '{path}'"),
+                    ))
                 }
             }
             "up" => {
@@ -131,12 +146,21 @@ impl Tool for MigrateTool {
                 let mut migs = self.migrations.lock().unwrap();
                 if let Some(last) = migs.iter_mut().rev().find(|m| m.status == "applied") {
                     last.status = "rolled_back".into();
-                    Ok(ToolResult::success(call.id, format!("Rolled back: {}", last.id)))
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("Rolled back: {}", last.id),
+                    ))
                 } else {
-                    Ok(ToolResult::error(call.id, "No applied migrations to rollback".into()))
+                    Ok(ToolResult::error(
+                        call.id,
+                        "No applied migrations to rollback".into(),
+                    ))
                 }
             }
-            _ => Ok(ToolResult::success(call.id, format!("Migrate '{}' completed", action))),
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("Migrate '{}' completed", action),
+            )),
         }
     }
 }

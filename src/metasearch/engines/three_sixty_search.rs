@@ -3,7 +3,6 @@
 //!
 //! Reference: <https://www.so.com>
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,6 +10,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;
@@ -72,7 +72,10 @@ impl SearchEngine for ThreeSixtySearch {
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
             )
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            )
             .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
             .header("Referer", "https://www.so.com/")
             .send()
@@ -97,8 +100,8 @@ impl SearchEngine for ThreeSixtySearch {
 
         let item_sel =
             Selector::parse("li.res-list").unwrap_or_else(|_| Selector::parse("li").unwrap());
-        let title_sel = Selector::parse("h3.res-title a")
-            .unwrap_or_else(|_| Selector::parse("h3 a").unwrap());
+        let title_sel =
+            Selector::parse("h3.res-title a").unwrap_or_else(|_| Selector::parse("h3 a").unwrap());
         let content_sel = Selector::parse("p.res-desc, span.res-list-summary")
             .unwrap_or_else(|_| Selector::parse("p").unwrap());
 

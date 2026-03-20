@@ -2,18 +2,18 @@
 //!
 //! Tests the integrated metasearch functionality with 215+ search engines.
 
-use serde_json::json;
-use dx_agent::tools::web_search_tool::WebSearchTool;
 use dx_agent::tools::traits::Tool;
+use dx_agent::tools::web_search_tool::WebSearchTool;
+use serde_json::json;
 
 #[tokio::test]
 async fn test_metasearch_basic_query() {
     // Create web search tool with metasearch enabled (default)
     let tool = WebSearchTool::new(
         "metasearch".to_string(),
-        None,  // No Brave API key needed
-        5,     // Max 5 results
-        15,    // 15 second timeout
+        None, // No Brave API key needed
+        5,    // Max 5 results
+        15,   // 15 second timeout
     );
 
     // Test basic search
@@ -22,19 +22,25 @@ async fn test_metasearch_basic_query() {
     });
 
     let result = tool.execute(query).await;
-    
+
     assert!(result.is_ok(), "Metasearch should execute successfully");
-    
+
     let tool_result = result.unwrap();
     assert!(tool_result.success, "Search should succeed");
     assert!(!tool_result.output.is_empty(), "Should return results");
-    
+
     // Verify output contains expected elements
     let output = tool_result.output;
-    assert!(output.contains("Search results for:"), "Should have search header");
-    assert!(output.contains("Metasearch"), "Should indicate metasearch was used");
+    assert!(
+        output.contains("Search results for:"),
+        "Should have search header"
+    );
+    assert!(
+        output.contains("Metasearch"),
+        "Should indicate metasearch was used"
+    );
     assert!(output.contains("http"), "Should contain URLs");
-    
+
     println!("✅ Metasearch basic query test passed");
     println!("Output preview:\n{}", &output[..output.len().min(500)]);
 }
@@ -50,23 +56,33 @@ async fn test_metasearch_engine_registry() {
 
     // Verify engine count
     let count = registry.count();
-    assert!(count >= 200, "Should have at least 200 engines, got {}", count);
-    
+    assert!(
+        count >= 200,
+        "Should have at least 200 engines, got {}",
+        count
+    );
+
     println!("✅ Engine registry test passed: {} engines loaded", count);
 
     // Verify specific engines exist
-    assert!(registry.get("google").is_some(), "Google engine should exist");
-    assert!(registry.get("duckduckgo").is_some(), "DuckDuckGo engine should exist");
+    assert!(
+        registry.get("google").is_some(),
+        "Google engine should exist"
+    );
+    assert!(
+        registry.get("duckduckgo").is_some(),
+        "DuckDuckGo engine should exist"
+    );
     assert!(registry.get("brave").is_some(), "Brave engine should exist");
     assert!(registry.get("bing").is_some(), "Bing engine should exist");
-    
+
     println!("✅ Core engines verified");
 }
 
 #[tokio::test]
 async fn test_metasearch_categories() {
-    use dx_agent::metasearch::engines::EngineRegistry;
     use dx_agent::metasearch::category::SearchCategory;
+    use dx_agent::metasearch::engines::EngineRegistry;
     use reqwest::Client;
 
     let client = Client::new();
@@ -78,9 +94,18 @@ async fn test_metasearch_categories() {
     let video_engines = registry.engines_for_category(&SearchCategory::Videos);
     let news_engines = registry.engines_for_category(&SearchCategory::News);
 
-    assert!(!general_engines.is_empty(), "Should have general search engines");
-    assert!(!image_engines.is_empty(), "Should have image search engines");
-    assert!(!video_engines.is_empty(), "Should have video search engines");
+    assert!(
+        !general_engines.is_empty(),
+        "Should have general search engines"
+    );
+    assert!(
+        !image_engines.is_empty(),
+        "Should have image search engines"
+    );
+    assert!(
+        !video_engines.is_empty(),
+        "Should have video search engines"
+    );
     assert!(!news_engines.is_empty(), "Should have news search engines");
 
     println!("✅ Category test passed:");
@@ -92,9 +117,9 @@ async fn test_metasearch_categories() {
 
 #[tokio::test]
 async fn test_metasearch_parallel_search() {
+    use dx_agent::metasearch::category::SearchCategory;
     use dx_agent::metasearch::engines::EngineRegistry;
     use dx_agent::metasearch::query::SearchQuery;
-    use dx_agent::metasearch::category::SearchCategory;
     use reqwest::Client;
     use std::sync::Arc;
 
@@ -104,9 +129,9 @@ async fn test_metasearch_parallel_search() {
 
     // Take first 3 engines for quick test
     let test_engines: Vec<_> = engines.into_iter().take(3).collect();
-    
+
     let query = SearchQuery::new("rust");
-    
+
     // Search in parallel
     let mut tasks = Vec::new();
     for engine in test_engines {
@@ -132,27 +157,53 @@ async fn test_metasearch_parallel_search() {
         }
     }
 
-    assert!(success_count > 0, "At least one engine should return results");
-    println!("✅ Parallel search test passed: {}/3 engines succeeded", success_count);
+    assert!(
+        success_count > 0,
+        "At least one engine should return results"
+    );
+    println!(
+        "✅ Parallel search test passed: {}/3 engines succeeded",
+        success_count
+    );
 }
 
 #[tokio::test]
 async fn test_metasearch_result_aggregation() {
+    use dashmap::DashMap;
     use dx_agent::metasearch::ranking::ResultAggregator;
     use dx_agent::metasearch::result::SearchResult;
-    use dashmap::DashMap;
 
     // Create some test results
     let mut results1 = vec![
-        SearchResult::new("Rust Lang", "https://rust-lang.org", "Official site", "google"),
-        SearchResult::new("Rust Book", "https://doc.rust-lang.org/book", "Learn Rust", "google"),
+        SearchResult::new(
+            "Rust Lang",
+            "https://rust-lang.org",
+            "Official site",
+            "google",
+        ),
+        SearchResult::new(
+            "Rust Book",
+            "https://doc.rust-lang.org/book",
+            "Learn Rust",
+            "google",
+        ),
     ];
     results1[0].engine_rank = 1;
     results1[1].engine_rank = 2;
 
     let mut results2 = vec![
-        SearchResult::new("Rust Lang", "https://rust-lang.org", "Official site", "duckduckgo"),
-        SearchResult::new("Rust GitHub", "https://github.com/rust-lang/rust", "Source code", "duckduckgo"),
+        SearchResult::new(
+            "Rust Lang",
+            "https://rust-lang.org",
+            "Official site",
+            "duckduckgo",
+        ),
+        SearchResult::new(
+            "Rust GitHub",
+            "https://github.com/rust-lang/rust",
+            "Source code",
+            "duckduckgo",
+        ),
     ];
     results2[0].engine_rank = 1;
     results2[1].engine_rank = 2;
@@ -163,22 +214,31 @@ async fn test_metasearch_result_aggregation() {
     weights.insert("duckduckgo".to_string(), 1.2);
 
     let aggregator = ResultAggregator::new(weights);
-    
+
     // Aggregate results
     let all_results = vec![
         ("google".to_string(), results1),
         ("duckduckgo".to_string(), results2),
     ];
-    
+
     let response = aggregator.aggregate("rust", all_results, 100);
 
     // Verify aggregation
-    assert!(!response.results.is_empty(), "Should have aggregated results");
+    assert!(
+        !response.results.is_empty(),
+        "Should have aggregated results"
+    );
     assert_eq!(response.query, "rust", "Query should match");
-    assert!(response.results.len() <= 3, "Should deduplicate rust-lang.org");
-    
+    assert!(
+        response.results.len() <= 3,
+        "Should deduplicate rust-lang.org"
+    );
+
     println!("✅ Result aggregation test passed");
-    println!("  - Aggregated {} unique results from 2 engines", response.results.len());
+    println!(
+        "  - Aggregated {} unique results from 2 engines",
+        response.results.len()
+    );
     println!("  - Engines used: {:?}", response.engines_used);
 }
 
@@ -186,7 +246,7 @@ async fn test_metasearch_result_aggregation() {
 async fn test_metasearch_fallback_to_legacy() {
     // Create tool with invalid metasearch setup to test fallback
     let tool = WebSearchTool::new(
-        "duckduckgo".to_string(),  // Use legacy provider
+        "duckduckgo".to_string(), // Use legacy provider
         None,
         5,
         15,
@@ -197,12 +257,12 @@ async fn test_metasearch_fallback_to_legacy() {
     });
 
     let result = tool.execute(query).await;
-    
+
     assert!(result.is_ok(), "Legacy fallback should work");
-    
+
     let tool_result = result.unwrap();
     assert!(tool_result.success, "Legacy search should succeed");
-    
+
     println!("✅ Legacy fallback test passed");
 }
 
@@ -211,13 +271,8 @@ async fn test_metasearch_fallback_to_legacy() {
 async fn test_metasearch_live_search() {
     // This test actually queries real search engines
     // Run with: cargo test test_metasearch_live_search -- --ignored --nocapture
-    
-    let tool = WebSearchTool::new(
-        "metasearch".to_string(),
-        None,
-        10,
-        20,
-    );
+
+    let tool = WebSearchTool::new("metasearch".to_string(), None, 10, 20);
 
     let query = json!({
         "query": "rust programming language 2026"
@@ -225,17 +280,17 @@ async fn test_metasearch_live_search() {
 
     println!("🔍 Performing live metasearch...");
     let start = std::time::Instant::now();
-    
+
     let result = tool.execute(query).await;
-    
+
     let elapsed = start.elapsed();
     println!("⏱️  Search completed in {:.2}s", elapsed.as_secs_f64());
-    
+
     assert!(result.is_ok(), "Live search should succeed");
-    
+
     let tool_result = result.unwrap();
     assert!(tool_result.success, "Live search should return success");
-    
+
     println!("\n📊 Results:\n{}", tool_result.output);
     println!("\n✅ Live metasearch test passed");
 }

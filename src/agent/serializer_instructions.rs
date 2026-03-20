@@ -181,7 +181,7 @@ pub fn is_serializer_format(s: &str) -> bool {
     // Simple heuristic: serializer format typically has "key: value" patterns
     // and doesn't start with { or [
     let trimmed = s.trim();
-    !trimmed.starts_with('{') 
+    !trimmed.starts_with('{')
         && !trimmed.starts_with('[')
         && (trimmed.contains(": ") || trimmed.contains(":\n"))
 }

@@ -546,9 +546,10 @@ fn check_zeroclaw_user() -> Result<()> {
 fn ensure_zeroclaw_user() -> Result<()> {
     let output = Command::new("getent").args(["passwd", "zeroclaw"]).output();
     if let Ok(output) = output
-        && output.status.success() {
-            return check_zeroclaw_user();
-        }
+        && output.status.success()
+    {
+        return check_zeroclaw_user();
+    }
 
     let is_alpine = Path::new("/etc/alpine-release").exists();
 
@@ -692,13 +693,14 @@ fn resolve_invoking_user_config_dir() -> Option<PathBuf> {
 
     if let Some(user) = sudo_user
         && let Ok(output) = Command::new("getent").args(["passwd", &user]).output()
-            && output.status.success() {
-                let entry = String::from_utf8_lossy(&output.stdout);
-                let fields: Vec<&str> = entry.trim().split(':').collect();
-                if fields.len() >= 6 {
-                    return Some(PathBuf::from(fields[5]).join(".zeroclaw"));
-                }
-            }
+        && output.status.success()
+    {
+        let entry = String::from_utf8_lossy(&output.stdout);
+        let fields: Vec<&str> = entry.trim().split(':').collect();
+        if fields.len() >= 6 {
+            return Some(PathBuf::from(fields[5]).join(".zeroclaw"));
+        }
+    }
 
     std::env::var("HOME")
         .ok()

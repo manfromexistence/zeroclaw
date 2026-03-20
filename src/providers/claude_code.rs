@@ -239,9 +239,10 @@ impl Provider for ClaudeCodeProvider {
         // Format multi-turn conversation into a single prompt.
         let mut parts = Vec::new();
         if let Some(s) = system
-            && !s.is_empty() {
-                parts.push(format!("[system]\n{s}"));
-            }
+            && !s.is_empty()
+        {
+            parts.push(format!("[system]\n{s}"));
+        }
         for msg in &turns {
             let label = match msg.role.as_str() {
                 "user" => "[user]",

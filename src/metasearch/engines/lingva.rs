@@ -41,7 +41,8 @@ impl SearchEngine for Lingva {
                 "https://lingva.thedaviddelta.com".to_string()
             } else {
                 self.url.clone()
-            }.into(),
+            }
+            .into(),
             categories: smallvec![SearchCategory::General],
             enabled: !self.url.is_empty(),
             timeout_ms: 5000,

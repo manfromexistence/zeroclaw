@@ -90,15 +90,27 @@ impl Tool for ExperimentTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
         match action {
             "create" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 let variants: Vec<String> = call
                     .arguments
                     .get("variants")
                     .and_then(|v| v.as_array())
-                    .map(|a| a.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                            .collect()
+                    })
                     .unwrap_or_else(|| vec!["control".into(), "variant_a".into()]);
                 let exp = Experiment {
                     name: name.to_string(),
@@ -106,17 +118,34 @@ impl Tool for ExperimentTool {
                     variants: variants.clone(),
                     results: HashMap::new(),
                 };
-                self.experiments.lock().unwrap().insert(name.to_string(), exp);
+                self.experiments
+                    .lock()
+                    .unwrap()
+                    .insert(name.to_string(), exp);
                 Ok(ToolResult::success(
                     call.id,
-                    format!("Experiment '{name}' created with variants: {}", variants.join(", ")),
+                    format!(
+                        "Experiment '{name}' created with variants: {}",
+                        variants.join(", ")
+                    ),
                 ))
             }
             "run" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
-                let variant =
-                    call.arguments.get("variant").and_then(|v| v.as_str()).unwrap_or("control");
-                let metric = call.arguments.get("metric").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
+                let variant = call
+                    .arguments
+                    .get("variant")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("control");
+                let metric = call
+                    .arguments
+                    .get("metric")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.0);
                 let mut exps = self.experiments.lock().unwrap();
                 if let Some(exp) = exps.get_mut(name) {
                     exp.results.insert(variant.to_string(), metric);
@@ -125,11 +154,18 @@ impl Tool for ExperimentTool {
                         format!("Recorded {variant}={metric} for '{name}'"),
                     ))
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Experiment '{name}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Experiment '{name}' not found"),
+                    ))
                 }
             }
             "compare" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 let exps = self.experiments.lock().unwrap();
                 if let Some(exp) = exps.get(name) {
                     let summary: String = exp
@@ -138,10 +174,15 @@ impl Tool for ExperimentTool {
                         .map(|(k, v)| format!("{k}: {v:.4}"))
                         .collect::<Vec<_>>()
                         .join(", ");
-                    Ok(ToolResult::success(call.id, format!("Experiment '{}': {}", name, summary))
-                        .with_data(json!(exp)))
+                    Ok(
+                        ToolResult::success(call.id, format!("Experiment '{}': {}", name, summary))
+                            .with_data(json!(exp)),
+                    )
                 } else {
-                    Ok(ToolResult::error(call.id, format!("Experiment '{name}' not found")))
+                    Ok(ToolResult::error(
+                        call.id,
+                        format!("Experiment '{name}' not found"),
+                    ))
                 }
             }
             "list" => {
@@ -153,11 +194,21 @@ impl Tool for ExperimentTool {
                 ))
             }
             "rollback" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("default");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("default");
                 self.experiments.lock().unwrap().remove(name);
-                Ok(ToolResult::success(call.id, format!("Experiment '{name}' rolled back")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Experiment '{name}' rolled back"),
+                ))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

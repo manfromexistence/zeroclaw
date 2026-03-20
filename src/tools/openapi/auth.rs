@@ -116,8 +116,7 @@ impl AuthProvider for BearerAuth {
         let value = format!("Bearer {}", self.token);
         req.headers_mut().insert(
             reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&value)
-                .context("invalid bearer token")?,
+            reqwest::header::HeaderValue::from_str(&value).context("invalid bearer token")?,
         );
         Ok(())
     }
@@ -209,7 +208,11 @@ impl OAuth2Auth {
                     let now = Instant::now();
                     // Refresh 60 seconds before expiry
                     if let Some(expiry) = expiry {
-                        if now < expiry.checked_sub(Duration::from_secs(60)).unwrap_or(expiry) {
+                        if now
+                            < expiry
+                                .checked_sub(Duration::from_secs(60))
+                                .unwrap_or(expiry)
+                        {
                             return Ok(token.access_token.clone());
                         }
                     }
@@ -278,8 +281,7 @@ impl AuthProvider for OAuth2Auth {
         let value = format!("Bearer {}", token);
         req.headers_mut().insert(
             reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&value)
-                .context("invalid OAuth2 token")?,
+            reqwest::header::HeaderValue::from_str(&value).context("invalid OAuth2 token")?,
         );
         Ok(())
     }
@@ -371,10 +373,8 @@ mod tests {
     #[tokio::test]
     async fn no_auth_does_nothing() {
         let auth = NoAuth;
-        let mut req = reqwest::Request::new(
-            reqwest::Method::GET,
-            "https://example.com".parse().unwrap(),
-        );
+        let mut req =
+            reqwest::Request::new(reqwest::Method::GET, "https://example.com".parse().unwrap());
         auth.apply_auth(&mut req).await.unwrap();
         assert!(req.headers().get(reqwest::header::AUTHORIZATION).is_none());
     }
@@ -382,24 +382,17 @@ mod tests {
     #[tokio::test]
     async fn api_key_header() {
         let auth = ApiKeyAuth::header("test-key".to_string(), "X-API-Key".to_string());
-        let mut req = reqwest::Request::new(
-            reqwest::Method::GET,
-            "https://example.com".parse().unwrap(),
-        );
+        let mut req =
+            reqwest::Request::new(reqwest::Method::GET, "https://example.com".parse().unwrap());
         auth.apply_auth(&mut req).await.unwrap();
-        assert_eq!(
-            req.headers().get("X-API-Key").unwrap(),
-            "test-key"
-        );
+        assert_eq!(req.headers().get("X-API-Key").unwrap(), "test-key");
     }
 
     #[tokio::test]
     async fn api_key_query() {
         let auth = ApiKeyAuth::query("test-key".to_string(), "api_key".to_string());
-        let mut req = reqwest::Request::new(
-            reqwest::Method::GET,
-            "https://example.com".parse().unwrap(),
-        );
+        let mut req =
+            reqwest::Request::new(reqwest::Method::GET, "https://example.com".parse().unwrap());
         auth.apply_auth(&mut req).await.unwrap();
         assert!(req.url().query().unwrap().contains("api_key=test-key"));
     }
@@ -407,10 +400,8 @@ mod tests {
     #[tokio::test]
     async fn bearer_auth() {
         let auth = BearerAuth::new("test-token".to_string());
-        let mut req = reqwest::Request::new(
-            reqwest::Method::GET,
-            "https://example.com".parse().unwrap(),
-        );
+        let mut req =
+            reqwest::Request::new(reqwest::Method::GET, "https://example.com".parse().unwrap());
         auth.apply_auth(&mut req).await.unwrap();
         assert_eq!(
             req.headers().get(reqwest::header::AUTHORIZATION).unwrap(),
@@ -421,10 +412,8 @@ mod tests {
     #[tokio::test]
     async fn basic_auth() {
         let auth = BasicAuth::new("user".to_string(), "pass".to_string());
-        let mut req = reqwest::Request::new(
-            reqwest::Method::GET,
-            "https://example.com".parse().unwrap(),
-        );
+        let mut req =
+            reqwest::Request::new(reqwest::Method::GET, "https://example.com".parse().unwrap());
         auth.apply_auth(&mut req).await.unwrap();
         let header = req.headers().get(reqwest::header::AUTHORIZATION).unwrap();
         assert!(header.to_str().unwrap().starts_with("Basic "));

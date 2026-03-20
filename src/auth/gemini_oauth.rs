@@ -484,9 +484,10 @@ pub fn parse_code_from_redirect(input: &str, expected_state: Option<&str>) -> Re
         // Validate state if expected
         if let Some(expected) = expected_state
             && let Some(actual) = params.get("state")
-                && actual != expected {
-                    anyhow::bail!("OAuth state mismatch: expected {expected}, got {actual}");
-                }
+            && actual != expected
+        {
+            anyhow::bail!("OAuth state mismatch: expected {expected}, got {actual}");
+        }
         return Ok(code.clone());
     }
 

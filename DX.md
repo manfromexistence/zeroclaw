@@ -21,3 +21,31 @@ Now zeroclaw has maybe WhatsApp but by default it may not use it so please searc
 I wanna put a way so that we can send the data to not only Chat messaging but also to different operating systems and show a QR code so that different operating systems have pairing with each other. Like, use REST terminal trait and show that QR code so that we can scan it and then we can connect to the waste directly instead of using any third-party messaging app. The messaging app still be there, just we will add QR code scanner so that we have a good ecosystem. I will convert this to DX, which will have native apps for all possible operating systems. There we will need QR code pairing so that every user device can be synced with each other, much like Apple's ecosystem, so that it will all create a nice ecosystem of DX products. 
 
 Now please rename zeroclawlabs to dx-agent and zeroclaw to just agent. Now can you use search all files and folders? If so then please rename it from everywhere.
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+Now please lint and format all files on project and make sure that only used crates are preset in the cargo.toml file so that our binary can as less as possible!!!
+
+Please look at the root serializer crate and now merge it into our main project so that instead of using JSON file format we can use serializer to save tokens on tool calling and tell ai model our about tool calling to use our serializer syntax instead of json for tool calling!!!
+
+Now please look at the root LOCAL.md file at the root and copy that functionality on our agent main project so that we can run local GGUF models directly instead of using LLaMA keep the ollama running functionality too just add the local model gguf running funcatinality add it and configure it correctly on our project!!!
+
+Train animation on exit from the whole project and from all places!!! So make sure that from anywhere we exit from our cli no matter its help or inside other place it always show the train animations that is currently showing when we are exiting onboard command!!!
+
+For the replacement of the crab the previous zeroclow logo symbols please use "◈" and instead of those emojis -use these:
+✓ Build passed ✗ 3 tests failed △ Deprecated API usage ⚙ Compiled with Rust ⇒ Pipeline complete ✦ v2.0 released! ↯ 3ms response time
+
+Make the main ZeroClaw Labs to be DX-Agent, and ZeroClaw to just Agent. 
+
+Now as you merge the metasearch root folder or main crate to our src folder directly, please do that for the token folder to move every code from the root token so that between the ai having the response it have special types of token saving tools to save tokens and connect them to our main src folder correctly and mainly the token/crates/rlm as its has the most token savings
+
+Now in all of our tui instead of the crag and zeroclaw pleas show the "Dx - Enhanced Developmemnt Experince"
+in the tiltlt and whenever anything ends the program in any way they should the train animation like the animation in the onboard ui!!!
+
+Now as you can see from the current cli as its very bad so please just make it a little better don't overengineer it - just use vercel design system and shadcnui like design system by doing web search and make it beautiful while doing as less as possible
+
+So, I have fixed the problem now here is a new task!
+Now Zeroclaw has an agent command right? So please make the agent command Comment it out or just be there but don't show it in the main help command and make that functionality on the no hell in the Zeroclaw. So when we just run the Zeroclaw the current agent will run. The current agent command functionality will run. And in our agent command, currently just the 0 clock command. Please use good UI using Rata UI, like the creative box in the input box, using Data UI box. Generally, make the agent command input-output more better.
+
+git clone https://github.com/HKUDS/CLI-Anything any

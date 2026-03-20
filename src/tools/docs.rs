@@ -69,8 +69,16 @@ impl Tool for DocsTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("generate");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("generate");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
 
         match action {
             "rustdoc" => {
@@ -86,7 +94,10 @@ impl Tool for DocsTool {
                     .output()
                     .await?;
                 if output.status.success() {
-                    Ok(ToolResult::success(call.id, "Rustdoc generated in target/doc/".into()))
+                    Ok(ToolResult::success(
+                        call.id,
+                        "Rustdoc generated in target/doc/".into(),
+                    ))
                 } else {
                     Ok(ToolResult::error(
                         call.id,
@@ -116,7 +127,10 @@ impl Tool for DocsTool {
                     }
                     Ok(ToolResult::success(call.id, readme))
                 } else {
-                    Ok(ToolResult::success(call.id, "Provide 'file' to generate README for".into()))
+                    Ok(ToolResult::success(
+                        call.id,
+                        "Provide 'file' to generate README for".into(),
+                    ))
                 }
             }
             "changelog" => {
@@ -134,13 +148,20 @@ impl Tool for DocsTool {
                 let commits = String::from_utf8_lossy(&output.stdout);
                 let changelog = format!(
                     "# Changelog\n\n## Recent Changes\n\n{}",
-                    commits.lines().map(|l| format!("- {l}")).collect::<Vec<_>>().join("\n")
+                    commits
+                        .lines()
+                        .map(|l| format!("- {l}"))
+                        .collect::<Vec<_>>()
+                        .join("\n")
                 );
                 Ok(ToolResult::success(call.id, changelog))
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("Docs '{}' — connect LLM for intelligent documentation generation", action),
+                format!(
+                    "Docs '{}' — connect LLM for intelligent documentation generation",
+                    action
+                ),
             )),
         }
     }

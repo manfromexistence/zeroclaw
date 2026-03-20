@@ -259,9 +259,10 @@ fn normalize_names(value: Option<&Value>) -> Option<Names> {
     };
 
     if names.full.is_none()
-        && let (Some(first), Some(last)) = (&names.first, &names.last) {
-            names.full = Some(format!("{first} {last}"));
-        }
+        && let (Some(first), Some(last)) = (&names.first, &names.last)
+    {
+        names.full = Some(format!("{first} {last}"));
+    }
 
     if names.first.is_none()
         && names.last.is_none()
@@ -780,23 +781,25 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         }
 
         if let Some(ref matrix) = psych.neural_matrix
-            && !matrix.is_empty() {
-                prompt.push_str("\n**Neural Matrix (Cognitive Weights):**\n");
-                let mut sorted_keys: Vec<_> = matrix.keys().collect();
-                sorted_keys.sort();
-                for trait_name in sorted_keys {
-                    let weight = matrix.get(trait_name).unwrap();
-                    let _ = writeln!(prompt, "- {}: {:.2}", trait_name, weight);
-                }
+            && !matrix.is_empty()
+        {
+            prompt.push_str("\n**Neural Matrix (Cognitive Weights):**\n");
+            let mut sorted_keys: Vec<_> = matrix.keys().collect();
+            sorted_keys.sort();
+            for trait_name in sorted_keys {
+                let weight = matrix.get(trait_name).unwrap();
+                let _ = writeln!(prompt, "- {}: {:.2}", trait_name, weight);
             }
+        }
 
         if let Some(ref compass) = psych.moral_compass
-            && !compass.is_empty() {
-                prompt.push_str("\n**Moral Compass:**\n");
-                for principle in compass {
-                    let _ = writeln!(prompt, "- {}", principle);
-                }
+            && !compass.is_empty()
+        {
+            prompt.push_str("\n**Moral Compass:**\n");
+            for principle in compass {
+                let _ = writeln!(prompt, "- {}", principle);
             }
+        }
 
         prompt.push('\n');
     }
@@ -814,20 +817,22 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         }
 
         if let Some(ref phrases) = ling.catchphrases
-            && !phrases.is_empty() {
-                prompt.push_str("**Catchphrases:**\n");
-                for phrase in phrases {
-                    let _ = writeln!(prompt, "- \"{}\"", phrase);
-                }
+            && !phrases.is_empty()
+        {
+            prompt.push_str("**Catchphrases:**\n");
+            for phrase in phrases {
+                let _ = writeln!(prompt, "- \"{}\"", phrase);
             }
+        }
 
         if let Some(ref forbidden) = ling.forbidden_words
-            && !forbidden.is_empty() {
-                prompt.push_str("\n**Words/Phrases to Avoid:**\n");
-                for word in forbidden {
-                    let _ = writeln!(prompt, "- {}", word);
-                }
+            && !forbidden.is_empty()
+        {
+            prompt.push_str("\n**Words/Phrases to Avoid:**\n");
+            for word in forbidden {
+                let _ = writeln!(prompt, "- {}", word);
             }
+        }
 
         prompt.push('\n');
     }
@@ -841,28 +846,31 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         }
 
         if let Some(ref short) = mot.short_term_goals
-            && !short.is_empty() {
-                prompt.push_str("**Short-term Goals:**\n");
-                for goal in short {
-                    let _ = writeln!(prompt, "- {}", goal);
-                }
+            && !short.is_empty()
+        {
+            prompt.push_str("**Short-term Goals:**\n");
+            for goal in short {
+                let _ = writeln!(prompt, "- {}", goal);
             }
+        }
 
         if let Some(ref long) = mot.long_term_goals
-            && !long.is_empty() {
-                prompt.push_str("\n**Long-term Goals:**\n");
-                for goal in long {
-                    let _ = writeln!(prompt, "- {}", goal);
-                }
+            && !long.is_empty()
+        {
+            prompt.push_str("\n**Long-term Goals:**\n");
+            for goal in long {
+                let _ = writeln!(prompt, "- {}", goal);
             }
+        }
 
         if let Some(ref fears) = mot.fears
-            && !fears.is_empty() {
-                prompt.push_str("\n**Fears/Avoidances:**\n");
-                for fear in fears {
-                    let _ = writeln!(prompt, "- {}", fear);
-                }
+            && !fears.is_empty()
+        {
+            prompt.push_str("\n**Fears/Avoidances:**\n");
+            for fear in fears {
+                let _ = writeln!(prompt, "- {}", fear);
             }
+        }
 
         prompt.push('\n');
     }
@@ -872,20 +880,22 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         prompt.push_str("## Capabilities\n\n");
 
         if let Some(ref skills) = cap.skills
-            && !skills.is_empty() {
-                prompt.push_str("**Skills:**\n");
-                for skill in skills {
-                    let _ = writeln!(prompt, "- {}", skill);
-                }
+            && !skills.is_empty()
+        {
+            prompt.push_str("**Skills:**\n");
+            for skill in skills {
+                let _ = writeln!(prompt, "- {}", skill);
             }
+        }
 
         if let Some(ref tools) = cap.tools
-            && !tools.is_empty() {
-                prompt.push_str("\n**Tools Access:**\n");
-                for tool in tools {
-                    let _ = writeln!(prompt, "- {}", tool);
-                }
+            && !tools.is_empty()
+        {
+            prompt.push_str("\n**Tools Access:**\n");
+            for tool in tools {
+                let _ = writeln!(prompt, "- {}", tool);
             }
+        }
 
         prompt.push('\n');
     }
@@ -899,12 +909,13 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         }
 
         if let Some(ref education) = hist.education
-            && !education.is_empty() {
-                prompt.push_str("**Education:**\n");
-                for edu in education {
-                    let _ = writeln!(prompt, "- {}", edu);
-                }
+            && !education.is_empty()
+        {
+            prompt.push_str("**Education:**\n");
+            for edu in education {
+                let _ = writeln!(prompt, "- {}", edu);
             }
+        }
 
         if let Some(ref occupation) = hist.occupation {
             let _ = writeln!(prompt, "\n**Occupation:** {}", occupation);
@@ -933,23 +944,25 @@ pub fn aieos_to_system_prompt(identity: &AieosIdentity) -> String {
         prompt.push_str("## Interests\n\n");
 
         if let Some(ref hobbies) = interests.hobbies
-            && !hobbies.is_empty() {
-                prompt.push_str("**Hobbies:**\n");
-                for hobby in hobbies {
-                    let _ = writeln!(prompt, "- {}", hobby);
-                }
+            && !hobbies.is_empty()
+        {
+            prompt.push_str("**Hobbies:**\n");
+            for hobby in hobbies {
+                let _ = writeln!(prompt, "- {}", hobby);
             }
+        }
 
         if let Some(ref favorites) = interests.favorites
-            && !favorites.is_empty() {
-                prompt.push_str("\n**Favorites:**\n");
-                let mut sorted_keys: Vec<_> = favorites.keys().collect();
-                sorted_keys.sort();
-                for category in sorted_keys {
-                    let value = favorites.get(category).unwrap();
-                    let _ = writeln!(prompt, "- {}: {}", category, value);
-                }
+            && !favorites.is_empty()
+        {
+            prompt.push_str("\n**Favorites:**\n");
+            let mut sorted_keys: Vec<_> = favorites.keys().collect();
+            sorted_keys.sort();
+            for category in sorted_keys {
+                let value = favorites.get(category).unwrap();
+                let _ = writeln!(prompt, "- {}: {}", category, value);
             }
+        }
 
         if let Some(ref lifestyle) = interests.lifestyle {
             let _ = writeln!(prompt, "\n**Lifestyle:** {}", lifestyle);

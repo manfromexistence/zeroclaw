@@ -370,9 +370,10 @@ impl Channel for SignalChannel {
                                 Ok(sse) => {
                                     if let Some(ref envelope) = sse.envelope
                                         && let Some(msg) = self.process_envelope(envelope)
-                                            && tx.send(msg).await.is_err() {
-                                                return Ok(());
-                                            }
+                                        && tx.send(msg).await.is_err()
+                                    {
+                                        return Ok(());
+                                    }
                                 }
                                 Err(e) => {
                                     tracing::debug!("Signal SSE parse skip: {e}");
@@ -394,9 +395,10 @@ impl Channel for SignalChannel {
                 match serde_json::from_str::<SseEnvelope>(&current_data) {
                     Ok(sse) => {
                         if let Some(ref envelope) = sse.envelope
-                            && let Some(msg) = self.process_envelope(envelope) {
-                                let _ = tx.send(msg).await;
-                            }
+                            && let Some(msg) = self.process_envelope(envelope)
+                        {
+                            let _ = tx.send(msg).await;
+                        }
                     }
                     Err(e) => {
                         tracing::debug!("Signal SSE trailing parse skip: {e}");

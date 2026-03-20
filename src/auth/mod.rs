@@ -391,9 +391,10 @@ pub fn select_profile_id(
     }
 
     if let Some(active) = data.active_profiles.get(provider)
-        && data.profiles.contains_key(active) {
-            return Some(active.clone());
-        }
+        && data.profiles.contains_key(active)
+    {
+        return Some(active.clone());
+    }
 
     let default = default_profile_id(provider);
     if data.profiles.contains_key(&default) {

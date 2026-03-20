@@ -68,8 +68,16 @@ impl SearchEngine for PirateBay {
             urlencoding::encode(&query.query)
         );
 
-        let resp = self.client.get(&url).send().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
-        let data: Vec<TorrentResult> = resp.json().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let data: Vec<TorrentResult> = resp
+            .json()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
 
         let results = data
             .into_iter()
@@ -115,12 +123,7 @@ impl SearchEngine for PirateBay {
                     size_str, seeders, leechers, magnetlink
                 );
 
-                let mut result = SearchResult::new(
-                    name,
-                    link,
-                    content,
-                    "piratebay",
-                );
+                let mut result = SearchResult::new(name, link, content, "piratebay");
                 result.engine_rank = (i + 1) as u32;
                 Some(result)
             })
@@ -129,4 +132,3 @@ impl SearchEngine for PirateBay {
         Ok(results)
     }
 }
-

@@ -2,7 +2,6 @@
 //!
 //! Scrapes btdig.com for torrent metadata via HTML parsing.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -10,6 +9,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;
@@ -50,7 +50,10 @@ impl SearchEngine for Btdigg {
         let resp = match self
             .client
             .get(&url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0")
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
+            )
             .timeout(std::time::Duration::from_secs(7))
             .send()
             .await

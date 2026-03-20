@@ -197,9 +197,10 @@ impl RedditChannel {
         // If a subreddit filter is set, skip items from other subreddits
         if let Some(ref sub) = self.subreddit
             && let Some(ref item_sub) = item.subreddit
-                && !item_sub.eq_ignore_ascii_case(sub) {
-                    return None;
-                }
+            && !item_sub.eq_ignore_ascii_case(sub)
+        {
+            return None;
+        }
 
         // Determine reply target: for comment replies use the parent thing name,
         // for DMs reply to the author.
@@ -324,9 +325,10 @@ impl Channel for RedditChannel {
                     read_ids.push(name.clone());
                 }
                 if let Some(msg) = self.parse_item(&child.data)
-                    && tx.send(msg).await.is_err() {
-                        return Ok(());
-                    }
+                    && tx.send(msg).await.is_err()
+                {
+                    return Ok(());
+                }
             }
 
             if let Err(e) = self.mark_read(&read_ids).await {

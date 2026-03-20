@@ -511,15 +511,16 @@ fn format_line_output(
             "count" => {
                 // Format: path:count — filter out zero-count entries
                 if let Some((path, count)) = parse_count_line(&relativized)
-                    && count > 0 {
-                        file_set.insert(path.to_string());
-                        total_matches += count;
-                        lines.push(format!("{path}:{count}"));
-                        if lines.len() >= max_results {
-                            truncated = true;
-                            break;
-                        }
+                    && count > 0
+                {
+                    file_set.insert(path.to_string());
+                    total_matches += count;
+                    lines.push(format!("{path}:{count}"));
+                    if lines.len() >= max_results {
+                        truncated = true;
+                        break;
                     }
+                }
             }
             _ => {
                 // content mode: pass through with relativized paths

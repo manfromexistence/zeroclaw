@@ -49,14 +49,14 @@ impl RLMStats {
     pub fn cache_hit_rate(&self) -> f64 {
         let total_ast = self.ast_cache_hits + self.ast_cache_misses;
         let total_llm = self.llm_cache_hits + self.llm_cache_misses;
-        
+
         if total_ast + total_llm == 0 {
             return 0.0;
         }
-        
+
         let hits = self.ast_cache_hits + self.llm_cache_hits;
         let total = total_ast + total_llm;
-        
+
         ((hits as f64 / total as f64) * 100.0 * 100.0).round() / 100.0
     }
 
@@ -73,13 +73,13 @@ impl RLMStats {
         if total_calls == 0 {
             return 0.0;
         }
-        
+
         // Baseline: all calls use smart model (1.0x cost each)
         let baseline_cost = total_calls as f64;
-        
+
         // Actual: fast model = 0.1x, smart model = 1.0x
         let actual_cost = (self.fast_model_calls as f64 * 0.1) + (self.smart_model_calls as f64);
-        
+
         ((baseline_cost - actual_cost) / baseline_cost * 100.0 * 100.0).round() / 100.0
     }
 }
@@ -250,7 +250,7 @@ impl RLM {
     }
 
     /// Execute multiple queries in parallel (game-changer for recursive calls)
-    /// 
+    ///
     /// NOTE: Currently disabled due to Rhai's use of Rc which isn't Send.
     /// Rhai's Engine uses Rc internally which prevents spawning across threads.
     /// TODO: Investigate using sync feature or alternative approach
@@ -290,7 +290,11 @@ impl RLM {
         self.complete_with_arc(query, context_arc).await
     }
 
-    pub async fn complete_with_arc(&self, query: &str, context: Arc<String>) -> Result<(String, RLMStats)> {
+    pub async fn complete_with_arc(
+        &self,
+        query: &str,
+        context: Arc<String>,
+    ) -> Result<(String, RLMStats)> {
         let start = Instant::now();
 
         if self.current_depth >= self.max_depth {
@@ -332,12 +336,12 @@ impl RLM {
             if is_final(&response) {
                 if let Some(answer) = extract_final(&response) {
                     let elapsed_ms = start.elapsed().as_millis();
-                    
+
                     // Get cache stats
                     let (ast_hits, ast_misses) = self.repl.cache_stats();
                     let (llm_hits, llm_misses) = self.llm_client.cache_stats();
                     let (fast_calls, smart_calls) = self.llm_client.model_stats();
-                    
+
                     return Ok((
                         answer,
                         RLMStats {
@@ -453,7 +457,11 @@ Depth: {}
 impl RLM {
     /// Streaming execution (Phase 2 optimization)
     /// Executes code as LLM tokens arrive, reducing latency by 2-3 seconds
-    pub async fn complete_streaming(&self, query: &str, context: Arc<String>) -> Result<(String, RLMStats)> {
+    pub async fn complete_streaming(
+        &self,
+        query: &str,
+        context: Arc<String>,
+    ) -> Result<(String, RLMStats)> {
         let start = Instant::now();
 
         if self.current_depth >= self.max_depth {
@@ -511,7 +519,7 @@ impl RLM {
                         let (ast_hits, ast_misses) = self.repl.cache_stats();
                         let (llm_hits, llm_misses) = self.llm_client.cache_stats();
                         let (fast_calls, smart_calls) = self.llm_client.model_stats();
-                        
+
                         return Ok((
                             answer,
                             RLMStats {
@@ -548,5 +556,4 @@ impl RLM {
 
         Err(RLMError::MaxIterations(self.max_iterations))
     }
-
 }

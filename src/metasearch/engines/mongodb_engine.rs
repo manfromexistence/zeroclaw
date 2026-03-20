@@ -55,17 +55,9 @@ impl MongoDbEngine {
     /// * `collection` - Collection name to search
     /// * `key` - Document key to search in
     #[must_use]
-    pub fn new(
-        host: &str,
-        port: u16,
-        database: &str,
-        collection: &str,
-        key: &str,
-    ) -> Self {
-        let enabled = !host.is_empty()
-            && !database.is_empty()
-            && !collection.is_empty()
-            && !key.is_empty();
+    pub fn new(host: &str, port: u16, database: &str, collection: &str, key: &str) -> Self {
+        let enabled =
+            !host.is_empty() && !database.is_empty() && !collection.is_empty() && !key.is_empty();
 
         Self {
             metadata: EngineMetadata {
@@ -129,19 +121,16 @@ impl SearchEngine for MongoDbEngine {
 
         #[cfg(feature = "mongodb")]
         {
-            use mongodb::{
-                bson::{doc, Bson, Document, Regex as BsonRegex},
-                options::ClientOptions,
-                Client,
-            };
             use futures::stream::TryStreamExt;
+            use mongodb::{
+                Client,
+                bson::{Bson, Document, Regex as BsonRegex, doc},
+                options::ClientOptions,
+            };
 
             // Build connection string
             let conn_str = if let (Some(user), Some(pass)) = (&self.username, &self.password) {
-                format!(
-                    "mongodb://{}:{}@{}:{}",
-                    user, pass, self.host, self.port
-                )
+                format!("mongodb://{}:{}@{}:{}", user, pass, self.host, self.port)
             } else {
                 format!("mongodb://{}:{}", self.host, self.port)
             };

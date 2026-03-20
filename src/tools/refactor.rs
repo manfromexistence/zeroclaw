@@ -35,7 +35,11 @@ impl Tool for RefactorTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("extract");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("extract");
 
         match action {
             "regex" => {
@@ -47,8 +51,10 @@ impl Tool for RefactorTool {
                 match regex::Regex::new(pattern) {
                     Ok(re) => {
                         let mut results = Vec::new();
-                        if let Some(tests) =
-                            call.arguments.get("test_strings").and_then(|v| v.as_array())
+                        if let Some(tests) = call
+                            .arguments
+                            .get("test_strings")
+                            .and_then(|v| v.as_array())
                         {
                             for t in tests {
                                 if let Some(s) = t.as_str() {
@@ -83,7 +89,10 @@ impl Tool for RefactorTool {
                     ),
                 ))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

@@ -3,7 +3,6 @@
 //! Scrapes Google's web search results page. Based on SearXNG's `google.py`.
 //! Uses async API with arc_id for better bot detection avoidance.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,10 +10,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Google {
     metadata: EngineMetadata,
@@ -50,7 +50,7 @@ impl SearchEngine for Google {
             "https://www.google.com/search",
             &[
                 ("q", query.query.as_str()),
-                ("nfpr", "1"),   // no autocorrect
+                ("nfpr", "1"), // no autocorrect
                 ("filter", "0"),
                 ("start", "0"),
             ],
@@ -80,9 +80,12 @@ impl SearchEngine for Google {
 
         // metasearch2 selectors
         let result_sel = Selector::parse("[jscontroller=SC7lYd]").unwrap();
-        let title_sel  = Selector::parse("h3").unwrap();
-        let link_sel   = Selector::parse("a[href]").unwrap();
-        let desc_sel   = Selector::parse("div[data-sncf='2'], div[data-sncf='1,2'], div[style='-webkit-line-clamp:2']").unwrap();
+        let title_sel = Selector::parse("h3").unwrap();
+        let link_sel = Selector::parse("a[href]").unwrap();
+        let desc_sel = Selector::parse(
+            "div[data-sncf='2'], div[data-sncf='1,2'], div[style='-webkit-line-clamp:2']",
+        )
+        .unwrap();
 
         for (i, element) in document.select(&result_sel).enumerate() {
             let title = element

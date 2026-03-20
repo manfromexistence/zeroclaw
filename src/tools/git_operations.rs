@@ -99,16 +99,17 @@ impl GitOperationsTool {
                 // Ordinary changed entry
                 let mut parts = rest.splitn(3, ' ');
                 if let (Some(staging), Some(path)) = (parts.next(), parts.next())
-                    && !staging.is_empty() {
-                        let status_char = staging.chars().next().unwrap_or(' ');
-                        if status_char != '.' && status_char != ' ' {
-                            staged.push(json!({"path": path, "status": status_char}));
-                        }
-                        let status_char = staging.chars().nth(1).unwrap_or(' ');
-                        if status_char != '.' && status_char != ' ' {
-                            unstaged.push(json!({"path": path, "status": status_char}));
-                        }
+                    && !staging.is_empty()
+                {
+                    let status_char = staging.chars().next().unwrap_or(' ');
+                    if status_char != '.' && status_char != ' ' {
+                        staged.push(json!({"path": path, "status": status_char}));
                     }
+                    let status_char = staging.chars().nth(1).unwrap_or(' ');
+                    if status_char != '.' && status_char != ' ' {
+                        unstaged.push(json!({"path": path, "status": status_char}));
+                    }
+                }
             } else if let Some(rest) = line.strip_prefix("? ") {
                 untracked.push(rest.to_string());
             }

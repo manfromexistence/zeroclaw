@@ -194,9 +194,10 @@ impl Channel for MattermostChannel {
                     last_create_at = last_create_at.max(create_at);
 
                     if let Some(channel_msg) = msg
-                        && tx.send(channel_msg).await.is_err() {
-                            return Ok(());
-                        }
+                        && tx.send(channel_msg).await.is_err()
+                    {
+                        return Ok(());
+                    }
                 }
             }
         }
@@ -242,9 +243,10 @@ impl Channel for MattermostChannel {
                     .json(&body)
                     .send()
                     .await
-                    && !r.status().is_success() {
-                        tracing::debug!(status = %r.status(), "Mattermost typing indicator failed");
-                    }
+                    && !r.status().is_success()
+                {
+                    tracing::debug!(status = %r.status(), "Mattermost typing indicator failed");
+                }
 
                 // Mattermost typing events expire after ~6s; re-fire every 4s.
                 tokio::time::sleep(std::time::Duration::from_secs(4)).await;
@@ -345,9 +347,10 @@ fn contains_bot_mention_mm(
             .get("metadata")
             .and_then(|m| m.get("mentions"))
             .and_then(|m| m.as_array())
-            && mentions.iter().any(|m| m.as_str() == Some(bot_user_id)) {
-                return true;
-            }
+        && mentions.iter().any(|m| m.as_str() == Some(bot_user_id))
+    {
+        return true;
+    }
 
     false
 }

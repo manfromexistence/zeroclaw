@@ -114,7 +114,7 @@ impl SearchEngine for MariaDbEngine {
 
         #[cfg(feature = "mysql")]
         {
-            use mysql_async::{prelude::*, Pool, Opts, OptsBuilder};
+            use mysql_async::{Opts, OptsBuilder, Pool, prelude::*};
 
             let offset = (query.page.saturating_sub(1)) * (self.limit as u32);
             let wildcard = format!("%{}%", query.query.replace(' ', "%"));
@@ -133,10 +133,7 @@ impl SearchEngine for MariaDbEngine {
                 .await
                 .map_err(|e| MetasearchError::Engine(format!("MariaDB connect: {e}")))?;
 
-            let full_query = format!(
-                "{} LIMIT {} OFFSET {}",
-                self.query_str, self.limit, offset
-            );
+            let full_query = format!("{} LIMIT {} OFFSET {}", self.query_str, self.limit, offset);
 
             // Execute the query with the wildcard parameter
             let rows: Vec<mysql_async::Row> = conn
@@ -201,9 +198,7 @@ impl SearchEngine for MariaDbEngine {
         #[cfg(not(feature = "mysql"))]
         {
             let _ = query; // Silence unused variable warning
-            tracing::warn!(
-                "MariaDB engine requires the 'mysql' feature. Returning empty results."
-            );
+            tracing::warn!("MariaDB engine requires the 'mysql' feature. Returning empty results.");
             Ok(Vec::new())
         }
     }

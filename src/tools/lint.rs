@@ -30,14 +30,25 @@ impl Tool for LintTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("lint");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("lint");
         let path = call
             .arguments
             .get("path")
             .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow::anyhow!("Missing 'path'"))?;
-        let ext = std::path::Path::new(path).extension().and_then(|e| e.to_str()).unwrap_or("");
-        let lang = call.arguments.get("language").and_then(|v| v.as_str()).unwrap_or(ext);
+        let ext = std::path::Path::new(path)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("");
+        let lang = call
+            .arguments
+            .get("language")
+            .and_then(|v| v.as_str())
+            .unwrap_or(ext);
         let fix = action == "fix";
 
         let cmd = match lang {
@@ -71,7 +82,11 @@ impl Tool for LintTool {
         } else {
             ("sh", "-c")
         };
-        let output = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await?;
+        let output = tokio::process::Command::new(shell)
+            .arg(flag)
+            .arg(&cmd)
+            .output()
+            .await?;
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         let combined = if stderr.is_empty() {

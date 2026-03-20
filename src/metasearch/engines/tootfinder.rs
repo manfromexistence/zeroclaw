@@ -62,8 +62,16 @@ impl SearchEngine for Tootfinder {
             urlencoding::encode(&query.query)
         );
 
-        let resp = self.client.get(&url).send().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
-        let text = resp.text().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let text = resp
+            .text()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
 
         // Tootfinder sometimes appends HTML error messages to the JSON;
         // only parse lines that start with '[{' (the actual JSON data).
@@ -94,12 +102,7 @@ impl SearchEngine for Tootfinder {
                     truncated
                 });
 
-                let mut result = SearchResult::new(
-                    title,
-                    url,
-                    content,
-                    "tootfinder",
-                );
+                let mut result = SearchResult::new(title, url, content, "tootfinder");
                 result.engine_rank = (i + 1) as u32;
                 Some(result)
             })
@@ -108,4 +111,3 @@ impl SearchEngine for Tootfinder {
         Ok(results)
     }
 }
-

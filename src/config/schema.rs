@@ -6323,16 +6323,17 @@ async fn resolve_runtime_config_dirs(
     }
 
     if let Ok(custom_workspace) = std::env::var("ZEROCLAW_WORKSPACE")
-        && !custom_workspace.is_empty() {
-            let expanded = shellexpand::tilde(&custom_workspace);
-            let (zeroclaw_dir, workspace_dir) =
-                resolve_config_dir_for_workspace(&PathBuf::from(expanded.as_ref()));
-            return Ok((
-                zeroclaw_dir,
-                workspace_dir,
-                ConfigResolutionSource::EnvWorkspace,
-            ));
-        }
+        && !custom_workspace.is_empty()
+    {
+        let expanded = shellexpand::tilde(&custom_workspace);
+        let (zeroclaw_dir, workspace_dir) =
+            resolve_config_dir_for_workspace(&PathBuf::from(expanded.as_ref()));
+        return Ok((
+            zeroclaw_dir,
+            workspace_dir,
+            ConfigResolutionSource::EnvWorkspace,
+        ));
+    }
 
     if let Some((zeroclaw_dir, workspace_dir)) =
         load_persisted_workspace_dirs(default_zeroclaw_dir).await?
@@ -6357,13 +6358,14 @@ fn decrypt_optional_secret(
     field_name: &str,
 ) -> Result<()> {
     if let Some(raw) = value.clone()
-        && crate::security::SecretStore::is_encrypted(&raw) {
-            *value = Some(
-                store
-                    .decrypt(&raw)
-                    .with_context(|| format!("Failed to decrypt {field_name}"))?,
-            );
-        }
+        && crate::security::SecretStore::is_encrypted(&raw)
+    {
+        *value = Some(
+            store
+                .decrypt(&raw)
+                .with_context(|| format!("Failed to decrypt {field_name}"))?,
+        );
+    }
     Ok(())
 }
 
@@ -6386,13 +6388,14 @@ fn encrypt_optional_secret(
     field_name: &str,
 ) -> Result<()> {
     if let Some(raw) = value.clone()
-        && !crate::security::SecretStore::is_encrypted(&raw) {
-            *value = Some(
-                store
-                    .encrypt(&raw)
-                    .with_context(|| format!("Failed to encrypt {field_name}"))?,
-            );
-        }
+        && !crate::security::SecretStore::is_encrypted(&raw)
+    {
+        *value = Some(
+            store
+                .encrypt(&raw)
+                .with_context(|| format!("Failed to encrypt {field_name}"))?,
+        );
+    }
     Ok(())
 }
 
@@ -6989,18 +6992,20 @@ impl Config {
             .as_deref()
             .map(str::trim)
             .is_none_or(|value| value.is_empty())
-            && let Some(base_url) = base_url.as_ref() {
-                self.api_url = Some(base_url.clone());
-            }
+            && let Some(base_url) = base_url.as_ref()
+        {
+            self.api_url = Some(base_url.clone());
+        }
 
         // Propagate api_path from the profile when not already set at top level.
         if self.api_path.is_none()
-            && let Some(ref path) = profile.api_path {
-                let trimmed = path.trim();
-                if !trimmed.is_empty() {
-                    self.api_path = Some(trimmed.to_string());
-                }
+            && let Some(ref path) = profile.api_path
+        {
+            let trimmed = path.trim();
+            if !trimmed.is_empty() {
+                self.api_path = Some(trimmed.to_string());
             }
+        }
 
         if profile.requires_openai_auth
             && self
@@ -7032,10 +7037,11 @@ impl Config {
         }
 
         if let Some(profile_name) = profile_name
-            && !profile_name.eq_ignore_ascii_case(&profile_key) {
-                self.default_provider = Some(profile_name.to_string());
-                return;
-            }
+            && !profile_name.eq_ignore_ascii_case(&profile_key)
+        {
+            self.default_provider = Some(profile_name.to_string());
+            return;
+        }
 
         if let Some(base_url) = base_url {
             self.default_provider = Some(format!("custom:{base_url}"));
@@ -7173,23 +7179,24 @@ impl Config {
             }
 
             if let Some(base_url) = profile.base_url.as_deref().map(str::trim)
-                && !base_url.is_empty() {
-                    let parsed = reqwest::Url::parse(base_url).with_context(|| {
-                        format!("model_providers.{profile_name}.base_url is not a valid URL")
-                    })?;
-                    if !matches!(parsed.scheme(), "http" | "https") {
-                        anyhow::bail!(
-                            "model_providers.{profile_name}.base_url must use http/https"
-                        );
-                    }
+                && !base_url.is_empty()
+            {
+                let parsed = reqwest::Url::parse(base_url).with_context(|| {
+                    format!("model_providers.{profile_name}.base_url is not a valid URL")
+                })?;
+                if !matches!(parsed.scheme(), "http" | "https") {
+                    anyhow::bail!("model_providers.{profile_name}.base_url must use http/https");
                 }
+            }
 
             if let Some(wire_api) = profile.wire_api.as_deref().map(str::trim)
-                && !wire_api.is_empty() && normalize_wire_api(wire_api).is_none() {
-                    anyhow::bail!(
-                        "model_providers.{profile_name}.wire_api must be one of: responses, chat_completions"
-                    );
-                }
+                && !wire_api.is_empty()
+                && normalize_wire_api(wire_api).is_none()
+            {
+                anyhow::bail!(
+                    "model_providers.{profile_name}.wire_api must be one of: responses, chat_completions"
+                );
+            }
         }
 
         // Ollama cloud-routing safety checks
@@ -7434,22 +7441,25 @@ impl Config {
     pub fn apply_env_overrides(&mut self) {
         // API Key: ZEROCLAW_API_KEY or API_KEY (generic)
         if let Ok(key) = std::env::var("ZEROCLAW_API_KEY").or_else(|_| std::env::var("API_KEY"))
-            && !key.is_empty() {
-                self.api_key = Some(key);
-            }
+            && !key.is_empty()
+        {
+            self.api_key = Some(key);
+        }
         // API Key: GLM_API_KEY overrides when provider is a GLM/Zhipu variant.
         if self.default_provider.as_deref().is_some_and(is_glm_alias)
             && let Ok(key) = std::env::var("GLM_API_KEY")
-                && !key.is_empty() {
-                    self.api_key = Some(key);
-                }
+            && !key.is_empty()
+        {
+            self.api_key = Some(key);
+        }
 
         // API Key: ZAI_API_KEY overrides when provider is a Z.AI variant.
         if self.default_provider.as_deref().is_some_and(is_zai_alias)
             && let Ok(key) = std::env::var("ZAI_API_KEY")
-                && !key.is_empty() {
-                    self.api_key = Some(key);
-                }
+            && !key.is_empty()
+        {
+            self.api_key = Some(key);
+        }
 
         // Provider override precedence:
         // 1) ZEROCLAW_PROVIDER always wins when set.
@@ -7477,16 +7487,18 @@ impl Config {
 
         // Model: ZEROCLAW_MODEL or MODEL
         if let Ok(model) = std::env::var("ZEROCLAW_MODEL").or_else(|_| std::env::var("MODEL"))
-            && !model.is_empty() {
-                self.default_model = Some(model);
-            }
+            && !model.is_empty()
+        {
+            self.default_model = Some(model);
+        }
 
         // Provider HTTP timeout: ZEROCLAW_PROVIDER_TIMEOUT_SECS
         if let Ok(timeout_secs) = std::env::var("ZEROCLAW_PROVIDER_TIMEOUT_SECS")
             && let Ok(timeout_secs) = timeout_secs.parse::<u64>()
-                && timeout_secs > 0 {
-                    self.provider_timeout_secs = timeout_secs;
-                }
+            && timeout_secs > 0
+        {
+            self.provider_timeout_secs = timeout_secs;
+        }
 
         // Extra provider headers: ZEROCLAW_EXTRA_HEADERS
         // Format: "Key:Value,Key2:Value2"
@@ -7502,24 +7514,26 @@ impl Config {
 
         // Workspace directory: ZEROCLAW_WORKSPACE
         if let Ok(workspace) = std::env::var("ZEROCLAW_WORKSPACE")
-            && !workspace.is_empty() {
-                let expanded = shellexpand::tilde(&workspace);
-                let (_, workspace_dir) =
-                    resolve_config_dir_for_workspace(&PathBuf::from(expanded.as_ref()));
-                self.workspace_dir = workspace_dir;
-            }
+            && !workspace.is_empty()
+        {
+            let expanded = shellexpand::tilde(&workspace);
+            let (_, workspace_dir) =
+                resolve_config_dir_for_workspace(&PathBuf::from(expanded.as_ref()));
+            self.workspace_dir = workspace_dir;
+        }
 
         // Open-skills opt-in flag: ZEROCLAW_OPEN_SKILLS_ENABLED
         if let Ok(flag) = std::env::var("ZEROCLAW_OPEN_SKILLS_ENABLED")
-            && !flag.trim().is_empty() {
-                match flag.trim().to_ascii_lowercase().as_str() {
-                    "1" | "true" | "yes" | "on" => self.skills.open_skills_enabled = true,
-                    "0" | "false" | "no" | "off" => self.skills.open_skills_enabled = false,
-                    _ => tracing::warn!(
-                        "Ignoring invalid ZEROCLAW_OPEN_SKILLS_ENABLED (valid: 1|0|true|false|yes|no|on|off)"
-                    ),
-                }
+            && !flag.trim().is_empty()
+        {
+            match flag.trim().to_ascii_lowercase().as_str() {
+                "1" | "true" | "yes" | "on" => self.skills.open_skills_enabled = true,
+                "0" | "false" | "no" | "off" => self.skills.open_skills_enabled = false,
+                _ => tracing::warn!(
+                    "Ignoring invalid ZEROCLAW_OPEN_SKILLS_ENABLED (valid: 1|0|true|false|yes|no|on|off)"
+                ),
             }
+        }
 
         // Open-skills directory override: ZEROCLAW_OPEN_SKILLS_DIR
         if let Ok(path) = std::env::var("ZEROCLAW_OPEN_SKILLS_DIR") {
@@ -7531,28 +7545,31 @@ impl Config {
 
         // Skills prompt mode override: ZEROCLAW_SKILLS_PROMPT_MODE
         if let Ok(mode) = std::env::var("ZEROCLAW_SKILLS_PROMPT_MODE")
-            && !mode.trim().is_empty() {
-                if let Some(parsed) = parse_skills_prompt_injection_mode(&mode) {
-                    self.skills.prompt_injection_mode = parsed;
-                } else {
-                    tracing::warn!(
-                        "Ignoring invalid ZEROCLAW_SKILLS_PROMPT_MODE (valid: full|compact)"
-                    );
-                }
+            && !mode.trim().is_empty()
+        {
+            if let Some(parsed) = parse_skills_prompt_injection_mode(&mode) {
+                self.skills.prompt_injection_mode = parsed;
+            } else {
+                tracing::warn!(
+                    "Ignoring invalid ZEROCLAW_SKILLS_PROMPT_MODE (valid: full|compact)"
+                );
             }
+        }
 
         // Gateway port: ZEROCLAW_GATEWAY_PORT or PORT
         if let Ok(port_str) =
             std::env::var("ZEROCLAW_GATEWAY_PORT").or_else(|_| std::env::var("PORT"))
-            && let Ok(port) = port_str.parse::<u16>() {
-                self.gateway.port = port;
-            }
+            && let Ok(port) = port_str.parse::<u16>()
+        {
+            self.gateway.port = port;
+        }
 
         // Gateway host: ZEROCLAW_GATEWAY_HOST or HOST
         if let Ok(host) = std::env::var("ZEROCLAW_GATEWAY_HOST").or_else(|_| std::env::var("HOST"))
-            && !host.is_empty() {
-                self.gateway.host = host;
-            }
+            && !host.is_empty()
+        {
+            self.gateway.host = host;
+        }
 
         // Allow public bind: ZEROCLAW_ALLOW_PUBLIC_BIND
         if let Ok(val) = std::env::var("ZEROCLAW_ALLOW_PUBLIC_BIND") {
@@ -7634,17 +7651,19 @@ impl Config {
         if let Ok(max_results) = std::env::var("ZEROCLAW_WEB_SEARCH_MAX_RESULTS")
             .or_else(|_| std::env::var("WEB_SEARCH_MAX_RESULTS"))
             && let Ok(max_results) = max_results.parse::<usize>()
-                && (1..=10).contains(&max_results) {
-                    self.web_search.max_results = max_results;
-                }
+            && (1..=10).contains(&max_results)
+        {
+            self.web_search.max_results = max_results;
+        }
 
         // Web search timeout: ZEROCLAW_WEB_SEARCH_TIMEOUT_SECS or WEB_SEARCH_TIMEOUT_SECS
         if let Ok(timeout_secs) = std::env::var("ZEROCLAW_WEB_SEARCH_TIMEOUT_SECS")
             .or_else(|_| std::env::var("WEB_SEARCH_TIMEOUT_SECS"))
             && let Ok(timeout_secs) = timeout_secs.parse::<u64>()
-                && timeout_secs > 0 {
-                    self.web_search.timeout_secs = timeout_secs;
-                }
+            && timeout_secs > 0
+        {
+            self.web_search.timeout_secs = timeout_secs;
+        }
 
         // Storage provider key (optional backend override): ZEROCLAW_STORAGE_PROVIDER
         if let Ok(provider) = std::env::var("ZEROCLAW_STORAGE_PROVIDER") {
@@ -7665,9 +7684,10 @@ impl Config {
         // Storage connect timeout: ZEROCLAW_STORAGE_CONNECT_TIMEOUT_SECS
         if let Ok(timeout_secs) = std::env::var("ZEROCLAW_STORAGE_CONNECT_TIMEOUT_SECS")
             && let Ok(timeout_secs) = timeout_secs.parse::<u64>()
-                && timeout_secs > 0 {
-                    self.storage.provider.config.connect_timeout_secs = Some(timeout_secs);
-                }
+            && timeout_secs > 0
+        {
+            self.storage.provider.config.connect_timeout_secs = Some(timeout_secs);
+        }
         // Proxy enabled flag: ZEROCLAW_PROXY_ENABLED
         let explicit_proxy_enabled = std::env::var("ZEROCLAW_PROXY_ENABLED")
             .ok()

@@ -2,17 +2,17 @@
 //! Two-step process: get token from code endpoint, then query with token.
 //! Features: No pagination
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
-    error::{Result},
+    error::Result,
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct WolframAlphaNoapi {
     metadata: EngineMetadata,
@@ -48,10 +48,7 @@ impl SearchEngine for WolframAlphaNoapi {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
-        let token_url = format!(
-            "https://www.wolframalpha.com/input/api/v1/code?ts={}",
-            ts
-        );
+        let token_url = format!("https://www.wolframalpha.com/input/api/v1/code?ts={}", ts);
 
         let token_resp = self
             .client
@@ -81,10 +78,7 @@ impl SearchEngine for WolframAlphaNoapi {
         };
 
         let encoded_query = urlencoding::encode(&query.query);
-        let referer = format!(
-            "https://www.wolframalpha.com/input/?i={}",
-            encoded_query
-        );
+        let referer = format!("https://www.wolframalpha.com/input/?i={}", encoded_query);
 
         // Step 2: Query with token
         let query_url = format!(
@@ -116,10 +110,7 @@ impl SearchEngine for WolframAlphaNoapi {
             Err(_) => return Ok(Vec::new()),
         };
 
-        let result_url = format!(
-            "https://www.wolframalpha.com/input/?i={}",
-            encoded_query
-        );
+        let result_url = format!("https://www.wolframalpha.com/input/?i={}", encoded_query);
 
         let mut results = Vec::new();
 
@@ -144,8 +135,7 @@ impl SearchEngine for WolframAlphaNoapi {
                 continue;
             }
 
-            let mut r =
-                SearchResult::new(title, &result_url, content, "wolframalpha_noapi");
+            let mut r = SearchResult::new(title, &result_url, content, "wolframalpha_noapi");
             r.engine_rank = (i + 1) as u32;
             r.category = SearchCategory::Science.to_string();
             results.push(r);

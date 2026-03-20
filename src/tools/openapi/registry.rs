@@ -293,10 +293,7 @@ mod tests {
 
     #[test]
     fn generate_operation_id_formats_correctly() {
-        assert_eq!(
-            generate_operation_id("get", "/users/{id}"),
-            "get_users_id"
-        );
+        assert_eq!(generate_operation_id("get", "/users/{id}"), "get_users_id");
         assert_eq!(
             generate_operation_id("post", "/users/{id}/posts"),
             "post_users_id_posts"

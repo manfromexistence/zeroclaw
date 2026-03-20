@@ -4,7 +4,6 @@
 //! Website: https://music.yandex.ru
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct YandexMusic {
     metadata: EngineMetadata,
@@ -72,7 +72,10 @@ impl SearchEngine for YandexMusic {
 
         let mut results = Vec::new();
 
-        let items = match data.get("tracks").and_then(|t| t.get("items")).and_then(|i| i.as_array())
+        let items = match data
+            .get("tracks")
+            .and_then(|t| t.get("items"))
+            .and_then(|i| i.as_array())
         {
             Some(items) => items,
             None => return Ok(results),
@@ -84,7 +87,10 @@ impl SearchEngine for YandexMusic {
                 continue;
             }
 
-            let title = item.get("title").and_then(|t| t.as_str()).unwrap_or_default();
+            let title = item
+                .get("title")
+                .and_then(|t| t.as_str())
+                .unwrap_or_default();
             if title.is_empty() {
                 continue;
             }

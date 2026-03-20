@@ -52,7 +52,11 @@ impl Tool for AgentTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("status");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("status");
         let mut state = self.state.lock().unwrap();
 
         match action {

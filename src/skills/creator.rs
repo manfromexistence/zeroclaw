@@ -50,9 +50,11 @@ impl SkillCreator {
 
         // Deduplicate via embeddings when an embedding provider is available.
         if let Some(provider) = embedding_provider
-            && provider.name() != "none" && self.is_duplicate(task_description, provider).await? {
-                return Ok(None);
-            }
+            && provider.name() != "none"
+            && self.is_duplicate(task_description, provider).await?
+        {
+            return Ok(None);
+        }
 
         let slug = Self::generate_slug(task_description);
         if !Self::validate_slug(&slug) {
@@ -292,25 +294,26 @@ pub fn extract_tool_calls_from_history(
 
         // Try parsing as JSON (native tool_calls format).
         if let Ok(value) = serde_json::from_str::<serde_json::Value>(&msg.content)
-            && let Some(tool_calls) = value.get("tool_calls").and_then(|v| v.as_array()) {
-                for call in tool_calls {
-                    if let Some(function) = call.get("function") {
-                        let name = function
-                            .get("name")
-                            .and_then(serde_json::Value::as_str)
-                            .unwrap_or("")
-                            .to_string();
-                        let args_str = function
-                            .get("arguments")
-                            .and_then(serde_json::Value::as_str)
-                            .unwrap_or("{}");
-                        let args = serde_json::from_str(args_str).unwrap_or_default();
-                        if !name.is_empty() {
-                            records.push(ToolCallRecord { name, args });
-                        }
+            && let Some(tool_calls) = value.get("tool_calls").and_then(|v| v.as_array())
+        {
+            for call in tool_calls {
+                if let Some(function) = call.get("function") {
+                    let name = function
+                        .get("name")
+                        .and_then(serde_json::Value::as_str)
+                        .unwrap_or("")
+                        .to_string();
+                    let args_str = function
+                        .get("arguments")
+                        .and_then(serde_json::Value::as_str)
+                        .unwrap_or("{}");
+                    let args = serde_json::from_str(args_str).unwrap_or_default();
+                    if !name.is_empty() {
+                        records.push(ToolCallRecord { name, args });
                     }
                 }
             }
+        }
 
         // Also try XML tool call format: <tool_name>...</tool_name>
         // Simple extraction for `<shell>{"command":"..."}</shell>` style tags.

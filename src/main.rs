@@ -202,7 +202,7 @@ enum Commands {
     },
 
     /// Start the AI agent loop
-    #[command(hide = true)]  // Hidden from help - this is the default command
+    #[command(hide = true)] // Hidden from help - this is the default command
     #[command(long_about = "\
 Start the AI agent loop.
 
@@ -814,12 +814,12 @@ enum MemoryCommands {
 async fn main() -> Result<()> {
     // Register exit handler to show train animation on normal exit
     let result = main_impl().await;
-    
+
     // Show train animation on exit (success or error)
     if std::io::stdout().is_terminal() {
         util::show_exit_train();
     }
-    
+
     result
 }
 
@@ -1364,9 +1364,7 @@ async fn main_impl() -> Result<()> {
                 litellm_providers.len(),
                 model_counts.len()
             );
-            println!(
-                "Tip: Use `zeroclaw models list --provider <name>` to see available models"
-            );
+            println!("Tip: Use `zeroclaw models list --provider <name>` to see available models");
             Ok(())
         }
 
@@ -1416,8 +1414,8 @@ async fn main_impl() -> Result<()> {
                 commands::openapi::tools_command(&config, spec_id.as_str()).await
             }
             ConnectCommands::Test { connect_name, args } => {
-                let args_json: serde_json::Value = serde_json::from_str(args.as_str())
-                    .context("Failed to parse args as JSON")?;
+                let args_json: serde_json::Value =
+                    serde_json::from_str(args.as_str()).context("Failed to parse args as JSON")?;
                 commands::openapi::test_command(&config, connect_name.as_str(), args_json).await
             }
             ConnectCommands::Search { query } => {

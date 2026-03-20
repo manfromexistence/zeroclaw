@@ -164,9 +164,10 @@ fn load_skills_from_directory(skills_dir: &Path) -> Vec<Skill> {
                 skills.push(skill);
             }
         } else if md_path.exists()
-            && let Ok(skill) = load_skill_md(&md_path, &path) {
-                skills.push(skill);
-            }
+            && let Ok(skill) = load_skill_md(&md_path, &path)
+        {
+            skills.push(skill);
+        }
     }
 
     skills
@@ -226,9 +227,10 @@ fn load_open_skills_from_directory(skills_dir: &Path) -> Vec<Skill> {
                 skills.push(finalize_open_skill(skill));
             }
         } else if md_path.exists()
-            && let Ok(skill) = load_open_skill_md(&md_path) {
-                skills.push(skill);
-            }
+            && let Ok(skill) = load_open_skill_md(&md_path)
+        {
+            skills.push(skill);
+        }
     }
 
     skills
@@ -396,13 +398,14 @@ fn ensure_open_skills_repo(
 
 fn clone_open_skills_repo(repo_dir: &Path) -> bool {
     if let Some(parent) = repo_dir.parent()
-        && let Err(err) = std::fs::create_dir_all(parent) {
-            tracing::warn!(
-                "failed to create open-skills parent directory {}: {err}",
-                parent.display()
-            );
-            return false;
-        }
+        && let Err(err) = std::fs::create_dir_all(parent)
+    {
+        tracing::warn!(
+            "failed to create open-skills parent directory {}: {err}",
+            parent.display()
+        );
+        return false;
+    }
 
     let output = Command::new("git")
         .args(["clone", "--depth", "1", OPEN_SKILLS_REPO_URL])
@@ -561,9 +564,10 @@ struct ParsedSkillMarkdown {
 
 fn parse_skill_markdown(content: &str) -> ParsedSkillMarkdown {
     if let Some((frontmatter, body)) = split_skill_frontmatter(content)
-        && let Ok(meta) = serde_yaml::from_str::<SkillMarkdownMeta>(&frontmatter) {
-            return ParsedSkillMarkdown { meta, body };
-        }
+        && let Ok(meta) = serde_yaml::from_str::<SkillMarkdownMeta>(&frontmatter)
+    {
+        return ParsedSkillMarkdown { meta, body };
+    }
 
     ParsedSkillMarkdown {
         meta: SkillMarkdownMeta::default(),
@@ -631,10 +635,9 @@ fn resolve_skill_location(skill: &Skill, workspace_dir: &Path) -> PathBuf {
 
 fn render_skill_location(skill: &Skill, workspace_dir: &Path, prefer_relative: bool) -> String {
     let location = resolve_skill_location(skill, workspace_dir);
-    if prefer_relative
-        && let Ok(relative) = location.strip_prefix(workspace_dir) {
-            return relative.display().to_string();
-        }
+    if prefer_relative && let Ok(relative) = location.strip_prefix(workspace_dir) {
+        return relative.display().to_string();
+    }
     location.display().to_string()
 }
 
@@ -1068,9 +1071,10 @@ pub fn handle_command(command: crate::SkillCommands, config: &crate::config::Con
                 .canonicalize()
                 .unwrap_or_else(|_| skills_dir(workspace_dir));
             if let Ok(canonical_skill) = skill_path.canonicalize()
-                && !canonical_skill.starts_with(&canonical_skills) {
-                    anyhow::bail!("Skill path escapes skills directory: {name}");
-                }
+                && !canonical_skill.starts_with(&canonical_skills)
+            {
+                anyhow::bail!("Skill path escapes skills directory: {name}");
+            }
 
             if !skill_path.exists() {
                 anyhow::bail!("Skill not found: {name}");

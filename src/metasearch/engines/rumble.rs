@@ -1,6 +1,5 @@
 //! Rumble — video search via HTML scraping.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;
@@ -54,7 +54,10 @@ impl SearchEngine for Rumble {
                 "User-Agent",
                 "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
             )
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            )
             .header("Accept-Language", "en-US,en;q=0.9")
             .send()
             .await
@@ -108,12 +111,7 @@ impl SearchEngine for Rumble {
                 .and_then(|img| img.value().attr("src").map(|s| s.to_string()));
 
             if !title.is_empty() && !href.is_empty() {
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    snippet,
-                    "rumble",
-                );
+                let mut result = SearchResult::new(title, result_url, snippet, "rumble");
                 result.engine_rank = (i + 1) as u32;
                 result.thumbnail = thumbnail_url;
                 results.push(result);

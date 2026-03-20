@@ -1,7 +1,6 @@
 //! 1337x engine — search torrents via HTML scraping.
 //! Translated from SearXNG `searx/engines/1337x.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +8,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;

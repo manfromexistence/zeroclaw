@@ -1,7 +1,6 @@
 //! Crossref engine — search scholarly publications via Crossref API.
 //! Translated from SearXNG `searx/engines/crossref.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +8,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -65,10 +65,7 @@ impl SearchEngine for Crossref {
             return Ok(Vec::new());
         }
 
-        let data: serde_json::Value = match resp
-            .json()
-            .await
-        {
+        let data: serde_json::Value = match resp.json().await {
             Ok(v) => v,
             Err(_) => return Ok(Vec::new()),
         };

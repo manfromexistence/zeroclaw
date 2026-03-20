@@ -7,7 +7,6 @@
 //!    Website: https://www.ncbi.nlm.nih.gov/pubmed
 //!    Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -15,10 +14,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Pubmed {
     metadata: EngineMetadata,
@@ -222,11 +222,7 @@ impl SearchEngine for Pubmed {
             results.push(r);
         }
 
-        info!(
-            engine = "pubmed",
-            count = results.len(),
-            "Search complete"
-        );
+        info!(engine = "pubmed", count = results.len(), "Search complete");
         Ok(results)
     }
 }

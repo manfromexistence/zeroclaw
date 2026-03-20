@@ -1,7 +1,6 @@
 //! IMDb engine — search movies/TV shows via IMDb suggestion API.
 //! Translated from SearXNG `searx/engines/imdb.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,9 +8,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use std::collections::HashMap;
 use smallvec::smallvec;
+use std::collections::HashMap;
 
 pub struct Imdb {
     metadata: EngineMetadata,

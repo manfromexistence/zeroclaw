@@ -4,7 +4,6 @@
 //! Implements the `web` category using Qwant's undocumented v3 API.
 //! The API returns JSON with results in `data.result.items.mainline`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 

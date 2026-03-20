@@ -74,7 +74,11 @@ impl Tool for LlmTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("complete");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("complete");
         let provider = call
             .arguments
             .get("provider")
@@ -91,10 +95,16 @@ impl Tool for LlmTool {
                 let api_key = self.get_api_key(provider)
                     .ok_or(anyhow::anyhow!("No API key for '{provider}'. Set env var (GEMINI_API_KEY, OPENAI_API_KEY, GROQ_API_KEY, etc.)"))?;
                 let base_url = self.get_api_url(provider);
-                let max_tokens =
-                    call.arguments.get("max_tokens").and_then(|v| v.as_u64()).unwrap_or(1024);
-                let temperature =
-                    call.arguments.get("temperature").and_then(|v| v.as_f64()).unwrap_or(0.7);
+                let max_tokens = call
+                    .arguments
+                    .get("max_tokens")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(1024);
+                let temperature = call
+                    .arguments
+                    .get("temperature")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.7);
 
                 let client = reqwest::Client::new();
                 match provider {
@@ -109,8 +119,7 @@ impl Tool for LlmTool {
                             "{}/models/{}:generateContent?key={}",
                             base_url, model, api_key
                         );
-                        let contents =
-                            vec![json!({"role": "user", "parts": [{"text": prompt}]})];
+                        let contents = vec![json!({"role": "user", "parts": [{"text": prompt}]})];
                         let mut body = json!({"contents": contents, "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature}});
                         if let Some(sys) = system {
                             body["systemInstruction"] = json!({"parts": [{"text": sys}]});
@@ -146,8 +155,12 @@ impl Tool for LlmTool {
                         }
                         messages.push(json!({"role": "user", "content": prompt}));
                         let body = json!({"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature});
-                        let resp =
-                            client.post(&url).bearer_auth(&api_key).json(&body).send().await?;
+                        let resp = client
+                            .post(&url)
+                            .bearer_auth(&api_key)
+                            .json(&body)
+                            .send()
+                            .await?;
                         let status = resp.status();
                         let text = resp.text().await?;
                         if status.is_success() {
@@ -188,8 +201,9 @@ impl Tool for LlmTool {
                         let text = resp.text().await?;
                         if status.is_success() {
                             let parsed: serde_json::Value = serde_json::from_str(&text)?;
-                            let content =
-                                parsed["content"][0]["text"].as_str().unwrap_or("(no content)");
+                            let content = parsed["content"][0]["text"]
+                                .as_str()
+                                .unwrap_or("(no content)");
                             Ok(ToolResult::success(call.id, content.to_string()))
                         } else {
                             Ok(ToolResult::error(
@@ -198,7 +212,10 @@ impl Tool for LlmTool {
                             ))
                         }
                     }
-                    _ => Ok(ToolResult::error(call.id, format!("Unknown provider: {provider}"))),
+                    _ => Ok(ToolResult::error(
+                        call.id,
+                        format!("Unknown provider: {provider}"),
+                    )),
                 }
             }
             "models" => {
@@ -208,12 +225,17 @@ impl Tool for LlmTool {
                     "anthropic": ["claude-sonnet-4-20250514", "claude-3-5-haiku-20241022"],
                     "local": ["llama3", "codellama", "mistral", "mixtral"]
                 });
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&models)?)
-                    .with_data(models))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&models)?)
+                        .with_data(models),
+                )
             }
             "cost" => {
-                let tokens =
-                    call.arguments.get("max_tokens").and_then(|v| v.as_u64()).unwrap_or(1000);
+                let tokens = call
+                    .arguments
+                    .get("max_tokens")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(1000);
                 let cost_per_1k = match (provider, model) {
                     ("google", _) => 0.0, // Gemma is free via AI Studio
                     ("openai", "gpt-4o") => 0.005,
@@ -236,7 +258,10 @@ impl Tool for LlmTool {
                 call.id,
                 "Embedding generation — connect embedding model for vector output".into(),
             )),
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

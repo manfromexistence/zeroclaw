@@ -1,6 +1,5 @@
 //! Selfh.st engine — search self-hosted application icons via selfh.st index.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -70,7 +70,8 @@ impl SearchEngine for Selfhst {
             let tags = item["Tags"].as_str().unwrap_or_default();
             let category = item["Category"].as_str().unwrap_or_default();
 
-            let search_text = format!("{} {} {} {}", name, reference, tags, category).to_lowercase();
+            let search_text =
+                format!("{} {} {} {}", name, reference, tags, category).to_lowercase();
 
             let matches = query_words.iter().any(|word| search_text.contains(word));
             if !matches {
@@ -79,7 +80,9 @@ impl SearchEngine for Selfhst {
 
             // Values are strings "Yes" / "" — not JSON booleans
             let is_yes = |v: &serde_json::Value| {
-                v.as_str().map(|s| s.eq_ignore_ascii_case("yes")).unwrap_or(false)
+                v.as_str()
+                    .map(|s| s.eq_ignore_ascii_case("yes"))
+                    .unwrap_or(false)
                     || v.as_bool().unwrap_or(false)
             };
 

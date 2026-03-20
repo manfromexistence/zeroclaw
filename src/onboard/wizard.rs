@@ -1506,10 +1506,7 @@ fn setup_hardware() -> Result<HardwareConfig> {
                 .unwrap_or_default();
             prompts::log::info(format!(
                 "{}{}{} [{}]",
-                device.name,
-                detail,
-                path,
-                device.transport
+                device.name, detail, path, device.transport
             ))?;
         }
     }
@@ -1671,14 +1668,16 @@ fn setup_project_context() -> Result<ProjectContext> {
             .placeholder("UTC")
             .interact()?
     } else {
-        let tz_options = ["US/Eastern",
+        let tz_options = [
+            "US/Eastern",
             "US/Central",
             "US/Mountain",
             "US/Pacific",
             "Europe/London",
             "Europe/Berlin",
             "Asia/Tokyo",
-            "UTC"];
+            "UTC",
+        ];
         tz_options[tz_idx].to_string()
     };
 

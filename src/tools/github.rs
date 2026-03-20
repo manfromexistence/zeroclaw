@@ -102,8 +102,16 @@ impl Tool for GithubTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("repo_info");
-        let repo = call.arguments.get("repo").and_then(|v| v.as_str()).unwrap_or("");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("repo_info");
+        let repo = call
+            .arguments
+            .get("repo")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
 
         let req_builder = |method: reqwest::Method, endpoint: &str| {
             let url = format!("https://api.github.com{}", endpoint);
@@ -120,17 +128,31 @@ impl Tool for GithubTool {
 
         match action {
             "repo_info" => {
-                let resp =
-                    req_builder(reqwest::Method::GET, &format!("/repos/{}", repo)).send().await?;
+                let resp = req_builder(reqwest::Method::GET, &format!("/repos/{}", repo))
+                    .send()
+                    .await?;
                 let data: serde_json::Value = resp.json().await?;
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&data)?)
-                    .with_data(data))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&data)?)
+                        .with_data(data),
+                )
             }
             "pr_create" => {
-                let title =
-                    call.arguments.get("title").and_then(|v| v.as_str()).unwrap_or("New PR");
-                let body = call.arguments.get("body").and_then(|v| v.as_str()).unwrap_or("");
-                let base = call.arguments.get("base").and_then(|v| v.as_str()).unwrap_or("main");
+                let title = call
+                    .arguments
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("New PR");
+                let body = call
+                    .arguments
+                    .get("body")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let base = call
+                    .arguments
+                    .get("base")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("main");
                 let head = call
                     .arguments
                     .get("head")
@@ -145,9 +167,16 @@ impl Tool for GithubTool {
                 Ok(ToolResult::success(call.id, format!("PR #{} created", pr_num)).with_data(data))
             }
             "issue_manage" => {
-                let title =
-                    call.arguments.get("title").and_then(|v| v.as_str()).unwrap_or("New Issue");
-                let body = call.arguments.get("body").and_then(|v| v.as_str()).unwrap_or("");
+                let title = call
+                    .arguments
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("New Issue");
+                let body = call
+                    .arguments
+                    .get("body")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let resp = req_builder(reqwest::Method::POST, &format!("/repos/{}/issues", repo))
                     .json(&json!({"title": title, "body": body}))
                     .send()
@@ -163,14 +192,22 @@ impl Tool for GithubTool {
                 .send()
                 .await?;
                 let data: serde_json::Value = resp.json().await?;
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&data)?)
-                    .with_data(data))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&data)?)
+                        .with_data(data),
+                )
             }
             "gist" => {
-                let body_content =
-                    call.arguments.get("body").and_then(|v| v.as_str()).unwrap_or("# Gist");
-                let title =
-                    call.arguments.get("title").and_then(|v| v.as_str()).unwrap_or("gist.md");
+                let body_content = call
+                    .arguments
+                    .get("body")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("# Gist");
+                let title = call
+                    .arguments
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("gist.md");
                 let resp = req_builder(reqwest::Method::POST, "/gists")
                     .json(&json!({"files": {title: {"content": body_content}}, "public": false}))
                     .send()
@@ -178,9 +215,10 @@ impl Tool for GithubTool {
                 let data: serde_json::Value = resp.json().await?;
                 Ok(ToolResult::success(call.id, format!("Gist created")).with_data(data))
             }
-            _ => {
-                Ok(ToolResult::success(call.id, format!("GitHub action '{}' acknowledged", action)))
-            }
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("GitHub action '{}' acknowledged", action),
+            )),
         }
     }
 }

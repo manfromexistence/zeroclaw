@@ -178,7 +178,7 @@ pub fn multiselect<T: Clone>(prompt: impl Into<String>) -> MultiSelect<T> {
 }
 
 pub mod log {
-    use super::{Display, io, THEME, SYMBOLS, rainbow_symbol};
+    use super::{Display, SYMBOLS, THEME, io, rainbow_symbol};
     use owo_colors::OwoColorize;
 
     pub fn info(text: impl Display) -> io::Result<()> {

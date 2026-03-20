@@ -113,8 +113,16 @@ impl SearchEngine for OpenAlex {
             query.page
         );
 
-        let resp = self.client.get(&url).send().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
-        let data: ApiResponse = resp.json().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let data: ApiResponse = resp
+            .json()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
 
         let results = data
             .results
@@ -186,12 +194,7 @@ impl SearchEngine for OpenAlex {
                     content.push_str(&abstract_text);
                 }
 
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    content,
-                    "openalex",
-                );
+                let mut result = SearchResult::new(title, result_url, content, "openalex");
                 result.engine_rank = (i + 1) as u32;
                 Some(result)
             })
@@ -200,4 +203,3 @@ impl SearchEngine for OpenAlex {
         Ok(results)
     }
 }
-

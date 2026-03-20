@@ -5,7 +5,6 @@
 //! Website: https://www.nicovideo.jp
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -13,9 +12,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Niconico {
     metadata: EngineMetadata,
@@ -111,9 +111,7 @@ impl SearchEngine for Niconico {
                 .take(200)
                 .collect::<String>();
 
-            let thumbnail = item["thumbnailUrl"]
-                .as_str()
-                .map(|s| s.to_string());
+            let thumbnail = item["thumbnailUrl"].as_str().map(|s| s.to_string());
 
             let mut r = SearchResult::new(title, &result_url, &description, "niconico");
             r.engine_rank = i as u32;

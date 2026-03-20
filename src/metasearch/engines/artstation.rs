@@ -4,7 +4,6 @@
 //! ArtStation requires CSRF tokens for API calls. We fetch them
 //! from the token endpoint before each search request.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
 use smallvec::smallvec;

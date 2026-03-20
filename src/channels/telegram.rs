@@ -528,9 +528,10 @@ impl TelegramChannel {
             return;
         }
         if let Ok(mut users) = self.allowed_users.write()
-            && !users.iter().any(|u| u == &normalized) {
-                users.push(normalized);
-            }
+            && !users.iter().any(|u| u == &normalized)
+        {
+            users.push(normalized);
+        }
     }
 
     fn extract_bind_code(text: &str) -> Option<&str> {
@@ -966,13 +967,14 @@ Allowlist Telegram username (without '@') or numeric user ID.",
 
         // Check file size limit
         if let Some(size) = attachment.file_size
-            && size > TELEGRAM_MAX_FILE_DOWNLOAD_BYTES {
-                tracing::info!(
-                    "Skipping attachment: file size {size} bytes exceeds {} MB limit",
-                    TELEGRAM_MAX_FILE_DOWNLOAD_BYTES / (1024 * 1024)
-                );
-                return None;
-            }
+            && size > TELEGRAM_MAX_FILE_DOWNLOAD_BYTES
+        {
+            tracing::info!(
+                "Skipping attachment: file size {size} bytes exceeds {} MB limit",
+                TELEGRAM_MAX_FILE_DOWNLOAD_BYTES / (1024 * 1024)
+            );
+            return None;
+        }
 
         let (username, sender_id, sender_identity) = Self::extract_sender_info(message);
 
@@ -1058,10 +1060,11 @@ Allowlist Telegram username (without '@') or numeric user ID.",
         // [Document:] format regardless of Telegram's classification.
         let mut content = format_attachment_content(attachment.kind, &local_filename, &local_path);
         if let Some(caption) = &attachment.caption
-            && !caption.is_empty() {
-                use std::fmt::Write;
-                let _ = write!(content, "\n\n{caption}");
-            }
+            && !caption.is_empty()
+        {
+            use std::fmt::Write;
+            let _ = write!(content, "\n\n{caption}");
+        }
 
         // Prepend reply context if replying to another message
         if let Some(quote) = self.extract_reply_context(message) {
@@ -1435,63 +1438,78 @@ Allowlist Telegram username (without '@') or numeric user ID.",
             let len = bytes.len();
             while i < len {
                 // Bold: **text** or __text__
-                if i + 1 < len && bytes[i] == b'*' && bytes[i + 1] == b'*'
-                    && let Some(end) = line[i + 2..].find("**") {
-                        let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
-                        let _ = write!(line_out, "<b>{inner}</b>");
-                        i += 4 + end;
-                        continue;
-                    }
-                if i + 1 < len && bytes[i] == b'_' && bytes[i + 1] == b'_'
-                    && let Some(end) = line[i + 2..].find("__") {
-                        let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
-                        let _ = write!(line_out, "<b>{inner}</b>");
-                        i += 4 + end;
-                        continue;
-                    }
+                if i + 1 < len
+                    && bytes[i] == b'*'
+                    && bytes[i + 1] == b'*'
+                    && let Some(end) = line[i + 2..].find("**")
+                {
+                    let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
+                    let _ = write!(line_out, "<b>{inner}</b>");
+                    i += 4 + end;
+                    continue;
+                }
+                if i + 1 < len
+                    && bytes[i] == b'_'
+                    && bytes[i + 1] == b'_'
+                    && let Some(end) = line[i + 2..].find("__")
+                {
+                    let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
+                    let _ = write!(line_out, "<b>{inner}</b>");
+                    i += 4 + end;
+                    continue;
+                }
                 // Italic: *text* or _text_ (single)
-                if bytes[i] == b'*' && (i == 0 || bytes[i - 1] != b'*')
+                if bytes[i] == b'*'
+                    && (i == 0 || bytes[i - 1] != b'*')
                     && let Some(end) = line[i + 1..].find('*')
-                        && end > 0 {
-                            let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
-                            let _ = write!(line_out, "<i>{inner}</i>");
-                            i += 2 + end;
-                            continue;
-                        }
+                    && end > 0
+                {
+                    let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
+                    let _ = write!(line_out, "<i>{inner}</i>");
+                    i += 2 + end;
+                    continue;
+                }
                 // Inline code: `code`
-                if bytes[i] == b'`' && (i == 0 || bytes[i - 1] != b'`')
-                    && let Some(end) = line[i + 1..].find('`') {
-                        let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
-                        let _ = write!(line_out, "<code>{inner}</code>");
-                        i += 2 + end;
-                        continue;
-                    }
+                if bytes[i] == b'`'
+                    && (i == 0 || bytes[i - 1] != b'`')
+                    && let Some(end) = line[i + 1..].find('`')
+                {
+                    let inner = Self::escape_html(&line[i + 1..i + 1 + end]);
+                    let _ = write!(line_out, "<code>{inner}</code>");
+                    i += 2 + end;
+                    continue;
+                }
                 // Markdown link: [text](url)
                 if bytes[i] == b'['
-                    && let Some(bracket_end) = line[i + 1..].find(']') {
-                        let text_part = &line[i + 1..i + 1 + bracket_end];
-                        let after_bracket = i + 1 + bracket_end + 1; // position after ']'
-                        if after_bracket < len && bytes[after_bracket] == b'('
-                            && let Some(paren_end) = line[after_bracket + 1..].find(')') {
-                                let url = &line[after_bracket + 1..after_bracket + 1 + paren_end];
-                                if url.starts_with("http://") || url.starts_with("https://") {
-                                    let text_html = Self::escape_html(text_part);
-                                    let url_html = Self::escape_html(url);
-                                    let _ =
-                                        write!(line_out, "<a href=\"{url_html}\">{text_html}</a>");
-                                    i = after_bracket + 1 + paren_end + 1;
-                                    continue;
-                                }
-                            }
+                    && let Some(bracket_end) = line[i + 1..].find(']')
+                {
+                    let text_part = &line[i + 1..i + 1 + bracket_end];
+                    let after_bracket = i + 1 + bracket_end + 1; // position after ']'
+                    if after_bracket < len
+                        && bytes[after_bracket] == b'('
+                        && let Some(paren_end) = line[after_bracket + 1..].find(')')
+                    {
+                        let url = &line[after_bracket + 1..after_bracket + 1 + paren_end];
+                        if url.starts_with("http://") || url.starts_with("https://") {
+                            let text_html = Self::escape_html(text_part);
+                            let url_html = Self::escape_html(url);
+                            let _ = write!(line_out, "<a href=\"{url_html}\">{text_html}</a>");
+                            i = after_bracket + 1 + paren_end + 1;
+                            continue;
+                        }
                     }
+                }
                 // Strikethrough: ~~text~~
-                if i + 1 < len && bytes[i] == b'~' && bytes[i + 1] == b'~'
-                    && let Some(end) = line[i + 2..].find("~~") {
-                        let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
-                        let _ = write!(line_out, "<s>{inner}</s>");
-                        i += 4 + end;
-                        continue;
-                    }
+                if i + 1 < len
+                    && bytes[i] == b'~'
+                    && bytes[i + 1] == b'~'
+                    && let Some(end) = line[i + 2..].find("~~")
+                {
+                    let inner = Self::escape_html(&line[i + 2..i + 2 + end]);
+                    let _ = write!(line_out, "<s>{inner}</s>");
+                    i += 4 + end;
+                    continue;
+                }
                 // Default: escape HTML entities
                 let ch = line[i..].chars().next().unwrap();
                 match ch {
@@ -2689,12 +2707,12 @@ Ensure only one `zeroclaw` process is using this bot token."
                     if self.ack_reactions
                         && let Some((reaction_chat_id, reaction_message_id)) =
                             Self::extract_update_message_target(update)
-                        {
-                            self.try_add_ack_reaction_nonblocking(
-                                reaction_chat_id,
-                                reaction_message_id,
-                            );
-                        }
+                    {
+                        self.try_add_ack_reaction_nonblocking(
+                            reaction_chat_id,
+                            reaction_message_id,
+                        );
+                    }
 
                     // Send "typing" indicator immediately when we receive a message
                     let typing_body = serde_json::json!({

@@ -154,12 +154,8 @@ impl SearchEngine for SensCritique {
                 .and_then(|v| v.as_str())
                 .unwrap_or_default();
 
-            let mut result = SearchResult::new(
-                title,
-                url.to_string(),
-                content,
-                self.metadata.name.clone(),
-            );
+            let mut result =
+                SearchResult::new(title, url.to_string(), content, self.metadata.name.clone());
             result.engine_rank = (i + 1) as u32;
             result.category = SearchCategory::General.to_string();
             if !thumbnail.is_empty() {

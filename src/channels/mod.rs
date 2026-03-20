@@ -608,12 +608,13 @@ fn normalize_cached_channel_turns(turns: Vec<ChatMessage>) -> Vec<ChatMessage> {
             // (no assistant persisted yet). Merge instead of dropping.
             (false, "user") | (true, "assistant") => {
                 if let Some(last_turn) = normalized.last_mut()
-                    && !turn.content.is_empty() {
-                        if !last_turn.content.is_empty() {
-                            last_turn.content.push_str("\n\n");
-                        }
-                        last_turn.content.push_str(&turn.content);
+                    && !turn.content.is_empty()
+                {
+                    if !last_turn.content.is_empty() {
+                        last_turn.content.push_str("\n\n");
                     }
+                    last_turn.content.push_str(&turn.content);
+                }
             }
             _ => {}
         }
@@ -774,13 +775,14 @@ fn decrypt_optional_secret_for_runtime_reload(
     field_name: &str,
 ) -> Result<()> {
     if let Some(raw) = value.clone()
-        && crate::security::SecretStore::is_encrypted(&raw) {
-            *value = Some(
-                store
-                    .decrypt(&raw)
-                    .with_context(|| format!("Failed to decrypt {field_name}"))?,
-            );
-        }
+        && crate::security::SecretStore::is_encrypted(&raw)
+    {
+        *value = Some(
+            store
+                .decrypt(&raw)
+                .with_context(|| format!("Failed to decrypt {field_name}"))?,
+        );
+    }
     Ok(())
 }
 
@@ -837,9 +839,10 @@ async fn maybe_apply_runtime_config_update(ctx: &ChannelRuntimeContext) -> Resul
             .lock()
             .unwrap_or_else(|e| e.into_inner());
         if let Some(state) = store.get(&config_path)
-            && state.last_applied_stamp == Some(stamp) {
-                return Ok(());
-            }
+            && state.last_applied_stamp == Some(stamp)
+        {
+            return Ok(());
+        }
     }
 
     let next_defaults = load_runtime_defaults_from_config_file(&config_path).await?;
@@ -1001,9 +1004,10 @@ fn proactive_trim_turns(turns: &mut Vec<ChatMessage>, budget: usize) -> usize {
 fn append_sender_turn(ctx: &ChannelRuntimeContext, sender_key: &str, turn: ChatMessage) {
     // Persist to JSONL before adding to in-memory history.
     if let Some(ref store) = ctx.session_store
-        && let Err(e) = store.append(sender_key, &turn) {
-            tracing::warn!("Failed to persist session turn: {e}");
-        }
+        && let Err(e) = store.append(sender_key, &turn)
+    {
+        tracing::warn!("Failed to persist session turn: {e}");
+    }
 
     let mut histories = ctx
         .conversation_histories
@@ -1044,9 +1048,10 @@ fn rollback_orphan_user_turn(
     // Also remove the orphan turn from the persisted JSONL session store so
     // it doesn't resurface after a daemon restart (fixes #3674).
     if let Some(ref store) = ctx.session_store
-        && let Err(e) = store.remove_last(sender_key) {
-            tracing::warn!("Failed to rollback session store entry: {e}");
-        }
+        && let Err(e) = store.remove_last(sender_key)
+    {
+        tracing::warn!("Failed to rollback session store entry: {e}");
+    }
 
     true
 }
@@ -1458,9 +1463,10 @@ fn extract_tool_context_summary(history: &[ChatMessage], start_index: usize) -> 
                 if let Some(json_end) = segment.find(close_tag) {
                     let json_str = segment[..json_end].trim();
                     if let Ok(val) = serde_json::from_str::<serde_json::Value>(json_str)
-                        && let Some(name) = val.get("name").and_then(|n| n.as_str()) {
-                            push_unique_tool_name(tool_names, name);
-                        }
+                        && let Some(name) = val.get("name").and_then(|n| n.as_str())
+                    {
+                        push_unique_tool_name(tool_names, name);
+                    }
                 }
             }
         }
@@ -1468,18 +1474,19 @@ fn extract_tool_context_summary(history: &[ChatMessage], start_index: usize) -> 
 
     fn collect_tool_names_from_native_json(content: &str, tool_names: &mut Vec<String>) {
         if let Ok(val) = serde_json::from_str::<serde_json::Value>(content)
-            && let Some(calls) = val.get("tool_calls").and_then(|c| c.as_array()) {
-                for call in calls {
-                    let name = call
-                        .get("function")
-                        .and_then(|f| f.get("name"))
-                        .and_then(|n| n.as_str())
-                        .or_else(|| call.get("name").and_then(|n| n.as_str()));
-                    if let Some(name) = name {
-                        push_unique_tool_name(tool_names, name);
-                    }
+            && let Some(calls) = val.get("tool_calls").and_then(|c| c.as_array())
+        {
+            for call in calls {
+                let name = call
+                    .get("function")
+                    .and_then(|f| f.get("name"))
+                    .and_then(|n| n.as_str())
+                    .or_else(|| call.get("name").and_then(|n| n.as_str()));
+                if let Some(name) = name {
+                    push_unique_tool_name(tool_names, name);
                 }
             }
+        }
     }
 
     fn collect_tool_names_from_tool_results(content: &str, tool_names: &mut Vec<String>) {
@@ -1662,18 +1669,18 @@ fn sanitize_tool_json_value(
 
     if let Some(tool_calls) = object.get("tool_calls").and_then(|value| value.as_array())
         && !tool_calls.is_empty()
-            && tool_calls
-                .iter()
-                .all(|call| is_tool_call_payload(call, known_tool_names))
-        {
-            let content = object
-                .get("content")
-                .and_then(|value| value.as_str())
-                .unwrap_or("")
-                .trim()
-                .to_string();
-            return Some((content, true));
-        }
+        && tool_calls
+            .iter()
+            .all(|call| is_tool_call_payload(call, known_tool_names))
+    {
+        let content = object
+            .get("content")
+            .and_then(|value| value.as_str())
+            .unwrap_or("")
+            .trim()
+            .to_string();
+        return Some((content, true));
+    }
 
     if is_tool_result_payload(object, saw_tool_call_payload) {
         return Some((String::new(), false));
@@ -1716,16 +1723,16 @@ fn strip_isolated_tool_json_artifacts(message: &str, known_tool_names: &HashSet<
                 if is_line_isolated_json_segment(message, start, end)
                     && let Some((replacement, marks_tool_call)) =
                         sanitize_tool_json_value(&value, known_tool_names, saw_tool_call_payload)
-                    {
-                        if marks_tool_call {
-                            saw_tool_call_payload = true;
-                        }
-                        if !replacement.trim().is_empty() {
-                            cleaned.push_str(replacement.trim());
-                        }
-                        cursor = end;
-                        continue;
+                {
+                    if marks_tool_call {
+                        saw_tool_call_payload = true;
                     }
+                    if !replacement.trim().is_empty() {
+                        cleaned.push_str(replacement.trim());
+                    }
+                    cursor = end;
+                    continue;
+                }
             }
         }
 
@@ -1841,7 +1848,6 @@ fn spawn_scoped_typing_task(
 ) -> tokio::task::JoinHandle<()> {
     let stop_signal = cancellation_token;
     let refresh_interval = Duration::from_secs(CHANNEL_TYPING_REFRESH_INTERVAL_SECS);
-    
 
     tokio::spawn(async move {
         let mut interval = tokio::time::interval(refresh_interval);
@@ -1935,21 +1941,21 @@ async fn process_channel_message(
             .model_routes
             .iter()
             .find(|r| r.hint.eq_ignore_ascii_case(&hint))
-        {
-            tracing::info!(
-                target: "query_classification",
-                hint = hint.as_str(),
-                provider = matched_route.provider.as_str(),
-                model = matched_route.model.as_str(),
-                channel = %msg.channel,
-                "Channel message classified — overriding route"
-            );
-            route = ChannelRouteSelection {
-                provider: matched_route.provider.clone(),
-                model: matched_route.model.clone(),
-                api_key: matched_route.api_key.clone(),
-            };
-        }
+    {
+        tracing::info!(
+            target: "query_classification",
+            hint = hint.as_str(),
+            provider = matched_route.provider.as_str(),
+            model = matched_route.model.as_str(),
+            channel = %msg.channel,
+            "Channel message classified — overriding route"
+        );
+        route = ChannelRouteSelection {
+            provider: matched_route.provider.clone(),
+            model: matched_route.model.clone(),
+            api_key: matched_route.api_key.clone(),
+        };
+    }
 
     let runtime_defaults = runtime_defaults_snapshot(ctx.as_ref());
     let active_provider = match get_or_create_provider(
@@ -2072,9 +2078,11 @@ async fn process_channel_message(
         )
         .await;
         if let Some(last_turn) = prior_turns.last_mut()
-            && last_turn.role == "user" && !memory_context.is_empty() {
-                last_turn.content = format!("{memory_context}{}", msg.content);
-            }
+            && last_turn.role == "user"
+            && !memory_context.is_empty()
+        {
+            last_turn.content = format!("{memory_context}{}", msg.content);
+        }
     }
 
     let system_prompt =
@@ -2152,12 +2160,12 @@ async fn process_channel_message(
     // React with 👀 to acknowledge the incoming message
     if ctx.ack_reactions
         && let Some(channel) = target_channel.as_ref()
-            && let Err(e) = channel
-                .add_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
-                .await
-            {
-                tracing::debug!("Failed to add reaction: {e}");
-            }
+        && let Err(e) = channel
+            .add_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
+            .await
+    {
+        tracing::debug!("Failed to add reaction: {e}");
+    }
 
     let typing_cancellation = target_channel.as_ref().map(|_| CancellationToken::new());
     let typing_task = match (target_channel.as_ref(), typing_cancellation.as_ref()) {
@@ -2291,9 +2299,10 @@ async fn process_channel_message(
             );
             if let (Some(channel), Some(draft_id)) =
                 (target_channel.as_ref(), draft_message_id.as_deref())
-                && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
-                    tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
-                }
+                && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await
+            {
+                tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
+            }
         }
         LlmExecutionResult::Completed(Ok(Ok(response))) => {
             // ── Hook: on_message_sending (modifying) ─────────
@@ -2469,9 +2478,10 @@ async fn process_channel_message(
                 );
                 if let (Some(channel), Some(draft_id)) =
                     (target_channel.as_ref(), draft_message_id.as_deref())
-                    && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await {
-                        tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
-                    }
+                    && let Err(err) = channel.cancel_draft(&msg.reply_target, draft_id).await
+                {
+                    tracing::debug!("Failed to cancel draft on {}: {err}", channel.name());
+                }
             } else if is_context_window_overflow_error(&e) {
                 let compacted = compact_sender_history(ctx.as_ref(), &history_key);
                 let error_text = if compacted {
@@ -2613,14 +2623,15 @@ async fn process_channel_message(
 
     // Swap 👀 → ✅ (or ⚠️ on error) to signal processing is complete
     if ctx.ack_reactions
-        && let Some(channel) = target_channel.as_ref() {
-            let _ = channel
-                .remove_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
-                .await;
-            let _ = channel
-                .add_reaction(&msg.reply_target, &msg.id, reaction_done_emoji)
-                .await;
-        }
+        && let Some(channel) = target_channel.as_ref()
+    {
+        let _ = channel
+            .remove_reaction(&msg.reply_target, &msg.id, "\u{1F440}")
+            .await;
+        let _ = channel
+            .add_reaction(&msg.reply_target, &msg.id, reaction_done_emoji)
+            .await;
+    }
 }
 
 async fn run_message_dispatch_loop(
@@ -3087,20 +3098,20 @@ fn maybe_restart_managed_daemon_service() -> Result<bool> {
         let openrc_init_script = PathBuf::from("/etc/init.d/zeroclaw");
         if openrc_init_script.exists()
             && let Ok(status_output) = Command::new("rc-service").args(OPENRC_STATUS_ARGS).output()
-            {
-                // rc-service exits 0 if running, non-zero otherwise
-                if status_output.status.success() {
-                    let restart_output = Command::new("rc-service")
-                        .args(OPENRC_RESTART_ARGS)
-                        .output()
-                        .context("Failed to restart OpenRC daemon service")?;
-                    if !restart_output.status.success() {
-                        let stderr = String::from_utf8_lossy(&restart_output.stderr);
-                        anyhow::bail!("rc-service restart failed: {}", stderr.trim());
-                    }
-                    return Ok(true);
+        {
+            // rc-service exits 0 if running, non-zero otherwise
+            if status_output.status.success() {
+                let restart_output = Command::new("rc-service")
+                    .args(OPENRC_RESTART_ARGS)
+                    .output()
+                    .context("Failed to restart OpenRC daemon service")?;
+                if !restart_output.status.success() {
+                    let stderr = String::from_utf8_lossy(&restart_output.stderr);
+                    anyhow::bail!("rc-service restart failed: {}", stderr.trim());
                 }
+                return Ok(true);
             }
+        }
 
         // Systemd (user-level)
         let home = directories::UserDirs::new()

@@ -4,7 +4,6 @@
 //! general-web search engine at https://rightdao.com.
 //! Ported from integrations/metasearch2/src/engines/search/rightdao.rs.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;
@@ -113,7 +113,11 @@ impl SearchEngine for RightDao {
             results.push(r);
         }
 
-        info!(engine = "rightdao", count = results.len(), "Search complete");
+        info!(
+            engine = "rightdao",
+            count = results.len(),
+            "Search complete"
+        );
         Ok(results)
     }
 }

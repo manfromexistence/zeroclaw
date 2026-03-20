@@ -42,7 +42,9 @@ impl BashTool {
     }
 
     fn is_blocked(&self, command: &str) -> bool {
-        self.blocked_commands.iter().any(|blocked| command.contains(blocked))
+        self.blocked_commands
+            .iter()
+            .any(|blocked| command.contains(blocked))
     }
 }
 
@@ -92,7 +94,10 @@ impl Tool for BashTool {
 
         // Safety check
         if self.is_blocked(command) {
-            return Ok(ToolResult::error(call.id, "Command blocked for safety reasons".into()));
+            return Ok(ToolResult::error(
+                call.id,
+                "Command blocked for safety reasons".into(),
+            ));
         }
 
         let cwd = call

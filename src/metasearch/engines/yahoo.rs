@@ -4,7 +4,6 @@
 //! Yahoo wraps result URLs in a tracking redirect. This engine
 //! extracts the real destination from the `/RU=…/RK` wrapper.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use smallvec::smallvec;

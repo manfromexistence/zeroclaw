@@ -5,7 +5,6 @@
 //! Website: https://www.ask.com/
 //! Features: Paging (max 5 pages)
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -13,10 +12,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 // Removed unused imports - using regex and JSON parsing instead
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Ask {
     metadata: EngineMetadata,

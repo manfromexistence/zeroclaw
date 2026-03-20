@@ -3,7 +3,6 @@
 //! XML API: https://api.wolframalpha.com/v2/query
 //! Features: No pagination
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,10 +10,11 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct WolframAlphaApi {
     metadata: EngineMetadata,
@@ -51,9 +51,8 @@ impl SearchEngine for WolframAlphaApi {
         if key.is_empty() {
             return Err(MetasearchError::EngineError {
                 engine: "wolframalpha_api".to_string(),
-                message:
-                    "No API key configured. Get one at https://developer.wolframalpha.com/"
-                        .to_string(),
+                message: "No API key configured. Get one at https://developer.wolframalpha.com/"
+                    .to_string(),
             });
         }
 
@@ -89,14 +88,8 @@ impl SearchEngine for WolframAlphaApi {
         let mut results = Vec::new();
 
         for (i, pod_cap) in pod_re.captures_iter(&xml_text).enumerate() {
-            let pod_title = pod_cap
-                .get(1)
-                .map(|m| m.as_str())
-                .unwrap_or_default();
-            let pod_body = pod_cap
-                .get(2)
-                .map(|m| m.as_str())
-                .unwrap_or_default();
+            let pod_title = pod_cap.get(1).map(|m| m.as_str()).unwrap_or_default();
+            let pod_body = pod_cap.get(2).map(|m| m.as_str()).unwrap_or_default();
 
             // Extract plaintext content from within this pod
             let content = plaintext_re
@@ -117,8 +110,7 @@ impl SearchEngine for WolframAlphaApi {
                 .replace("&quot;", "\"")
                 .replace("&apos;", "'");
 
-            let mut r =
-                SearchResult::new(pod_title, &result_url, &content, "wolframalpha_api");
+            let mut r = SearchResult::new(pod_title, &result_url, &content, "wolframalpha_api");
             r.engine_rank = (i + 1) as u32;
             r.category = SearchCategory::Science.to_string();
             results.push(r);

@@ -32,20 +32,29 @@ impl Tool for DesignTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("tokens");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("tokens");
 
         match action {
             "palette" => {
-                let base =
-                    call.arguments.get("base_color").and_then(|v| v.as_str()).unwrap_or("#3b82f6");
+                let base = call
+                    .arguments
+                    .get("base_color")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("#3b82f6");
                 let palette = json!({
                     "50": lighten(base, 0.9), "100": lighten(base, 0.8), "200": lighten(base, 0.6),
                     "300": lighten(base, 0.4), "400": lighten(base, 0.2), "500": base,
                     "600": darken(base, 0.2), "700": darken(base, 0.4), "800": darken(base, 0.6),
                     "900": darken(base, 0.8), "950": darken(base, 0.9),
                 });
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&palette)?)
-                    .with_data(palette))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&palette)?)
+                        .with_data(palette),
+                )
             }
             "typography" => {
                 let scale = json!({
@@ -58,15 +67,19 @@ impl Tool for DesignTool {
                     "3xl": {"size": "1.875rem", "line_height": "2.25rem"},
                     "4xl": {"size": "2.25rem", "line_height": "2.5rem"},
                 });
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&scale)?)
-                    .with_data(scale))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&scale)?)
+                        .with_data(scale),
+                )
             }
             "spacing" => {
                 let spacing = json!({"0": "0", "1": "0.25rem", "2": "0.5rem", "3": "0.75rem", "4": "1rem",
                     "5": "1.25rem", "6": "1.5rem", "8": "2rem", "10": "2.5rem", "12": "3rem",
                     "16": "4rem", "20": "5rem", "24": "6rem", "32": "8rem", "40": "10rem"});
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&spacing)?)
-                    .with_data(spacing))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&spacing)?)
+                        .with_data(spacing),
+                )
             }
             "tokens" => {
                 let tokens = json!({
@@ -74,13 +87,22 @@ impl Tool for DesignTool {
                     "radius": {"sm": "0.125rem", "md": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
                     "shadow": {"sm": "0 1px 2px rgba(0,0,0,0.05)", "md": "0 4px 6px rgba(0,0,0,0.1)", "lg": "0 10px 15px rgba(0,0,0,0.1)"},
                 });
-                Ok(ToolResult::success(call.id, serde_json::to_string_pretty(&tokens)?)
-                    .with_data(tokens))
+                Ok(
+                    ToolResult::success(call.id, serde_json::to_string_pretty(&tokens)?)
+                        .with_data(tokens),
+                )
             }
             "component" => {
-                let name = call.arguments.get("name").and_then(|v| v.as_str()).unwrap_or("Button");
-                let fw =
-                    call.arguments.get("framework").and_then(|v| v.as_str()).unwrap_or("react");
+                let name = call
+                    .arguments
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Button");
+                let fw = call
+                    .arguments
+                    .get("framework")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("react");
                 let component = match fw {
                     "react" => format!(
                         r#"interface {name}Props {{ children: React.ReactNode; variant?: 'primary' | 'secondary'; onClick?: () => void; }}
@@ -95,7 +117,10 @@ export function {name}({{ children, variant = 'primary', onClick }}: {name}Props
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("Design '{}' — connect design system for full generation", action),
+                format!(
+                    "Design '{}' — connect design system for full generation",
+                    action
+                ),
             )),
         }
     }

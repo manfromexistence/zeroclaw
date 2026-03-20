@@ -127,11 +127,8 @@ impl SearchEngine for SqliteEngine {
                     .prepare(&full_query)
                     .map_err(|e| MetasearchError::Engine(format!("SQLite prepare: {e}")))?;
 
-                let column_names: Vec<String> = stmt
-                    .column_names()
-                    .into_iter()
-                    .map(String::from)
-                    .collect();
+                let column_names: Vec<String> =
+                    stmt.column_names().into_iter().map(String::from).collect();
 
                 let params = rusqlite::named_params! {
                     ":query": &search_query,
@@ -186,9 +183,7 @@ impl SearchEngine for SqliteEngine {
         #[cfg(not(feature = "sqlite"))]
         {
             let _ = query; // Silence unused variable warning
-            tracing::warn!(
-                "SQLite engine requires the 'sqlite' feature. Returning empty results."
-            );
+            tracing::warn!("SQLite engine requires the 'sqlite' feature. Returning empty results.");
             Ok(Vec::new())
         }
     }

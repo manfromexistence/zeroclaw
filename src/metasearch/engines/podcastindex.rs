@@ -1,6 +1,5 @@
 //! Podcast Index — podcast search via podcastindex.org JSON API.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use serde::Deserialize;
 use smallvec::smallvec;
@@ -100,12 +100,7 @@ impl SearchEngine for PodcastIndex {
                     }
                 }
                 let thumbnail_url = feed.image.filter(|u| !u.is_empty());
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    snippet,
-                    "podcastindex",
-                );
+                let mut result = SearchResult::new(title, result_url, snippet, "podcastindex");
                 result.engine_rank = (i + 1) as u32;
                 result.thumbnail = thumbnail_url;
                 Some(result)

@@ -2,7 +2,6 @@
 //!
 //! Fetches the Lucide tags.json and filters icons client-side.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -10,9 +9,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use std::collections::HashMap;
 use smallvec::smallvec;
+use std::collections::HashMap;
 
 pub struct Lucide {
     metadata: EngineMetadata,

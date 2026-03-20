@@ -8,8 +8,7 @@ use std::time::Duration;
 
 // Import metasearch components - metasearch is a crate-root sibling of tools
 use crate::metasearch::{
-    SearchCategory, SearchQuery, ResultAggregator, 
-    EngineRegistry, SearchEngine
+    EngineRegistry, ResultAggregator, SearchCategory, SearchEngine, SearchQuery,
 };
 
 /// Web search tool for searching the internet.
@@ -114,9 +113,11 @@ impl WebSearchTool {
     fn resolve_brave_api_key(&self) -> anyhow::Result<String> {
         // Fast path: boot-time key is present and usable (not an encrypted blob).
         if let Some(ref key) = self.boot_brave_api_key
-            && !key.is_empty() && !crate::security::SecretStore::is_encrypted(key) {
-                return Ok(key.clone());
-            }
+            && !key.is_empty()
+            && !crate::security::SecretStore::is_encrypted(key)
+        {
+            return Ok(key.clone());
+        }
 
         // Slow path: re-read config.toml to pick up keys set/rotated after boot.
         self.reload_brave_api_key()
@@ -160,7 +161,9 @@ impl WebSearchTool {
 
     /// Search using metasearch (215+ engines, privacy-respecting, free)
     async fn search_metasearch(&self, query: &str) -> anyhow::Result<String> {
-        let registry = self.metasearch_registry.as_ref()
+        let registry = self
+            .metasearch_registry
+            .as_ref()
             .ok_or_else(|| anyhow::anyhow!("Metasearch registry not initialized"))?;
 
         // Create search query
@@ -174,8 +177,7 @@ impl WebSearchTool {
         }
 
         // Use top 5 engines for speed and reliability
-        let top_engines: Vec<Arc<dyn SearchEngine>> = 
-            engines.into_iter().take(5).collect();
+        let top_engines: Vec<Arc<dyn SearchEngine>> = engines.into_iter().take(5).collect();
 
         // Parallel search across multiple engines
         let mut tasks = Vec::new();
@@ -211,9 +213,17 @@ impl WebSearchTool {
         let search_response = aggregator.aggregate(query, all_results, 0);
 
         // Format results
-        let mut lines = vec![format!("Search results for: {} (via Metasearch - 215+ engines)", query)];
+        let mut lines = vec![format!(
+            "Search results for: {} (via Metasearch - 215+ engines)",
+            query
+        )];
 
-        for (i, result) in search_response.results.iter().take(self.max_results).enumerate() {
+        for (i, result) in search_response
+            .results
+            .iter()
+            .take(self.max_results)
+            .enumerate()
+        {
             lines.push(format!("{}. {}", i + 1, result.title));
             lines.push(format!("   {}", result.url));
             if !result.content.is_empty() {

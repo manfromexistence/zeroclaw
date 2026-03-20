@@ -35,7 +35,11 @@ impl Tool for DocumentTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("parse");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("parse");
 
         match action {
             "parse" | "extract" => {
@@ -60,16 +64,24 @@ impl Tool for DocumentTool {
                                 "Binary format '{ext}' — install pandoc for conversion or use specialized library"
                             ),
                         )),
-                        _ => Ok(ToolResult::success(call.id, format!("Unknown format '{ext}'"))),
+                        _ => Ok(ToolResult::success(
+                            call.id,
+                            format!("Unknown format '{ext}'"),
+                        )),
                     }
                 } else if let Some(content) = call.arguments.get("content").and_then(|v| v.as_str())
                 {
                     let lines = content.lines().count();
                     let words = content.split_whitespace().count();
-                    Ok(ToolResult::success(call.id, format!("{lines} lines, {words} words"))
-                        .with_data(json!({"lines": lines, "words": words})))
+                    Ok(
+                        ToolResult::success(call.id, format!("{lines} lines, {words} words"))
+                            .with_data(json!({"lines": lines, "words": words})),
+                    )
                 } else {
-                    Ok(ToolResult::error(call.id, "Provide 'file' or 'content'".into()))
+                    Ok(ToolResult::error(
+                        call.id,
+                        "Provide 'file' or 'content'".into(),
+                    ))
                 }
             }
             "template" => {
@@ -115,12 +127,22 @@ impl Tool for DocumentTool {
                     .map(|(i, line)| format!("{}:{}", i + 1, line))
                     .collect::<Vec<_>>()
                     .join("\n");
-                Ok(ToolResult::success(call.id, format!("{} matches:\n{}", matches.len(), output)))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("{} matches:\n{}", matches.len(), output),
+                ))
             }
             "convert" => {
-                let file = call.arguments.get("file").and_then(|v| v.as_str()).unwrap_or("");
-                let target =
-                    call.arguments.get("output_format").and_then(|v| v.as_str()).unwrap_or("txt");
+                let file = call
+                    .arguments
+                    .get("file")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let target = call
+                    .arguments
+                    .get("output_format")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("txt");
                 // Use pandoc for conversion if available
                 let (shell, flag) = if cfg!(windows) {
                     ("cmd", "/C")
@@ -128,10 +150,16 @@ impl Tool for DocumentTool {
                     ("sh", "-c")
                 };
                 let cmd = format!("pandoc {} -o output.{}", file, target);
-                match tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await {
-                    Ok(o) if o.status.success() => {
-                        Ok(ToolResult::success(call.id, format!("Converted to {target}")))
-                    }
+                match tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(&cmd)
+                    .output()
+                    .await
+                {
+                    Ok(o) if o.status.success() => Ok(ToolResult::success(
+                        call.id,
+                        format!("Converted to {target}"),
+                    )),
                     _ => Ok(ToolResult::success(
                         call.id,
                         format!("Conversion to {target} — install pandoc for format conversion"),

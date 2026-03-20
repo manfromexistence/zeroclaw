@@ -126,9 +126,10 @@ pub fn default_search_dirs(workspace_dir: &Path) -> Vec<PathBuf> {
     let mut dirs = vec![workspace_dir.to_path_buf()];
 
     if let Ok(exe) = std::env::current_exe()
-        && let Some(parent) = exe.parent() {
-            dirs.push(parent.to_path_buf());
-        }
+        && let Some(parent) = exe.parent()
+    {
+        dirs.push(parent.to_path_buf());
+    }
 
     // During development, also check the project root (where Cargo.toml lives).
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));

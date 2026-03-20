@@ -4,7 +4,6 @@
 //! Website: https://ollama.com
 //! Features: No pagination, configurable model
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,9 +11,10 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
-use tracing::info;
 use smallvec::smallvec;
+use tracing::info;
 
 pub struct Ollama {
     metadata: EngineMetadata,
@@ -89,11 +89,7 @@ impl SearchEngine for Ollama {
             }
         }
 
-        info!(
-            engine = "ollama",
-            count = results.len(),
-            "Search complete"
-        );
+        info!(engine = "ollama", count = results.len(), "Search complete");
         Ok(results)
     }
 }

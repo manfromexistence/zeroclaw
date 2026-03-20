@@ -1314,9 +1314,10 @@ fn parse_glm_style_tool_calls(text: &str) -> Vec<(String, serde_json::Value, Opt
                 }
 
                 if rest.starts_with('{')
-                    && let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest) {
-                        calls.push((tool_name.to_string(), json_args, Some(line.to_string())));
-                    }
+                    && let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest)
+                {
+                    calls.push((tool_name.to_string(), json_args, Some(line.to_string())));
+                }
             }
         }
     }
@@ -1545,17 +1546,19 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
         if !calls.is_empty() {
             // If we found tool_calls, extract any content field as text
             if let Some(content) = json_value.get("content").and_then(|v| v.as_str())
-                && !content.trim().is_empty() {
-                    text_parts.push(content.trim().to_string());
-                }
+                && !content.trim().is_empty()
+            {
+                text_parts.push(content.trim().to_string());
+            }
             return (text_parts.join("\n"), calls);
         }
     }
 
     if let Some((minimax_text, minimax_calls)) = parse_minimax_invoke_calls(response)
-        && !minimax_calls.is_empty() {
-            return (minimax_text, minimax_calls);
-        }
+        && !minimax_calls.is_empty()
+    {
+        return (minimax_text, minimax_calls);
+    }
 
     // Fall back to XML-style tool-call tag parsing.
     while let Some((start, open_tag)) = find_first_tag(remaining, &TOOL_CALL_OPEN_TAGS) {
@@ -1585,11 +1588,10 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             }
 
             // If JSON parsing failed, try XML format (DeepSeek/GLM style)
-            if !parsed_any
-                && let Some(xml_calls) = parse_xml_tool_calls(inner) {
-                    calls.extend(xml_calls);
-                    parsed_any = true;
-                }
+            if !parsed_any && let Some(xml_calls) = parse_xml_tool_calls(inner) {
+                calls.extend(xml_calls);
+                parsed_any = true;
+            }
 
             if !parsed_any {
                 // GLM-style shortened body: `shell>uname -a` or `shell\ncommand: date`
@@ -1626,18 +1628,16 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
                 }
 
                 // Try XML
-                if !parsed_any
-                    && let Some(xml_calls) = parse_xml_tool_calls(inner) {
-                        calls.extend(xml_calls);
-                        parsed_any = true;
-                    }
+                if !parsed_any && let Some(xml_calls) = parse_xml_tool_calls(inner) {
+                    calls.extend(xml_calls);
+                    parsed_any = true;
+                }
 
                 // Try GLM shortened body
-                if !parsed_any
-                    && let Some(glm_call) = parse_glm_shortened_body(inner) {
-                        calls.push(glm_call);
-                        parsed_any = true;
-                    }
+                if !parsed_any && let Some(glm_call) = parse_glm_shortened_body(inner) {
+                    calls.push(glm_call);
+                    parsed_any = true;
+                }
 
                 if parsed_any {
                     remaining = &after_open[cross_idx + cross_tag.len()..];
@@ -1654,14 +1654,14 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             if let Some(json_end) = find_json_end(after_open)
                 && let Ok(value) =
                     serde_json::from_str::<serde_json::Value>(&after_open[..json_end])
-                {
-                    let parsed_calls = parse_tool_calls_from_json_value(&value);
-                    if !parsed_calls.is_empty() {
-                        calls.extend(parsed_calls);
-                        remaining = strip_leading_close_tags(&after_open[json_end..]);
-                        continue;
-                    }
+            {
+                let parsed_calls = parse_tool_calls_from_json_value(&value);
+                if !parsed_calls.is_empty() {
+                    calls.extend(parsed_calls);
+                    remaining = strip_leading_close_tags(&after_open[json_end..]);
+                    continue;
                 }
+            }
 
             if let Some((value, consumed_end)) = extract_first_json_value_with_end(after_open) {
                 let parsed_calls = parse_tool_calls_from_json_value(&value);
@@ -1791,13 +1791,14 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
                 calls.push(call);
                 // Try to remove the XML from text
                 if let Some(start) = cleaned_text.find("<minimax:toolcall>")
-                    && let Some(end) = cleaned_text.find("</minimax:toolcall>") {
-                        let end_pos = end + "</minimax:toolcall>".len();
-                        if end_pos <= cleaned_text.len() {
-                            cleaned_text =
-                                format!("{}{}", &cleaned_text[..start], &cleaned_text[end_pos..]);
-                        }
+                    && let Some(end) = cleaned_text.find("</minimax:toolcall>")
+                {
+                    let end_pos = end + "</minimax:toolcall>".len();
+                    if end_pos <= cleaned_text.len() {
+                        cleaned_text =
+                            format!("{}{}", &cleaned_text[..start], &cleaned_text[end_pos..]);
                     }
+                }
             }
             if !cleaned_text.trim().is_empty() {
                 text_parts.push(cleaned_text.trim().to_string());
@@ -2308,11 +2309,12 @@ fn should_execute_tools_in_parallel(
     }
 
     if let Some(mgr) = approval
-        && tool_calls.iter().any(|call| mgr.needs_approval(&call.name)) {
-            // Approval-gated calls must keep sequential handling so the caller can
-            // enforce CLI prompt/deny policy consistently.
-            return false;
-        }
+        && tool_calls.iter().any(|call| mgr.needs_approval(&call.name))
+    {
+        // Approval-gated calls must keep sequential handling so the caller can
+        // enforce CLI prompt/deny policy consistently.
+        return false;
+    }
 
     true
 }
@@ -2425,21 +2427,22 @@ pub(crate) async fn run_tool_call_loop(
         // Check if model switch was requested via model_switch tool
         if let Some(ref callback) = model_switch_callback
             && let Ok(guard) = callback.lock()
-                && let Some((new_provider, new_model)) = guard.as_ref()
-                    && (new_provider != provider_name || new_model != model) {
-                        tracing::info!(
-                            "Model switch detected: {} {} -> {} {}",
-                            provider_name,
-                            model,
-                            new_provider,
-                            new_model
-                        );
-                        return Err(ModelSwitchRequested {
-                            provider: new_provider.clone(),
-                            model: new_model.clone(),
-                        }
-                        .into());
-                    }
+            && let Some((new_provider, new_model)) = guard.as_ref()
+            && (new_provider != provider_name || new_model != model)
+        {
+            tracing::info!(
+                "Model switch detected: {} {} -> {} {}",
+                provider_name,
+                model,
+                new_provider,
+                new_model
+            );
+            return Err(ModelSwitchRequested {
+                provider: new_provider.clone(),
+                model: new_model.clone(),
+            }
+            .into());
+        }
 
         // Rebuild tool_specs each iteration so newly activated deferred tools appear.
         let mut tool_specs: Vec<crate::tools::ToolSpec> = tools_registry
@@ -2803,57 +2806,58 @@ pub(crate) async fn run_tool_call_loop(
 
             // ── Approval hook ────────────────────────────────
             if let Some(mgr) = approval
-                && mgr.needs_approval(&tool_name) {
-                    let request = ApprovalRequest {
-                        tool_name: tool_name.clone(),
-                        arguments: tool_args.clone(),
-                    };
+                && mgr.needs_approval(&tool_name)
+            {
+                let request = ApprovalRequest {
+                    tool_name: tool_name.clone(),
+                    arguments: tool_args.clone(),
+                };
 
-                    // Interactive CLI: prompt the operator.
-                    // Non-interactive (channels): auto-deny since no operator
-                    // is present to approve.
-                    let decision = if mgr.is_non_interactive() {
-                        ApprovalResponse::No
-                    } else {
-                        mgr.prompt_cli(&request)
-                    };
+                // Interactive CLI: prompt the operator.
+                // Non-interactive (channels): auto-deny since no operator
+                // is present to approve.
+                let decision = if mgr.is_non_interactive() {
+                    ApprovalResponse::No
+                } else {
+                    mgr.prompt_cli(&request)
+                };
 
-                    mgr.record_decision(&tool_name, &tool_args, decision, channel_name);
+                mgr.record_decision(&tool_name, &tool_args, decision, channel_name);
 
-                    if decision == ApprovalResponse::No {
-                        let denied = "Denied by user.".to_string();
-                        runtime_trace::record_event(
-                            "tool_call_result",
-                            Some(channel_name),
-                            Some(provider_name),
-                            Some(model),
-                            Some(&turn_id),
-                            Some(false),
-                            Some(&denied),
-                            serde_json::json!({
-                                "iteration": iteration + 1,
-                                "tool": tool_name.clone(),
-                                "arguments": scrub_credentials(&tool_args.to_string()),
-                            }),
-                        );
-                        if let Some(ref tx) = on_delta {
-                            let _ = tx
-                                .send(format!("\u{274c} {}: {}\n", tool_name, denied))
-                                .await;
-                        }
-                        ordered_results[idx] = Some((
-                            tool_name.clone(),
-                            call.tool_call_id.clone(),
-                            ToolExecutionOutcome {
-                                output: denied.clone(),
-                                success: false,
-                                error_reason: Some(denied),
-                                duration: Duration::ZERO,
-                            },
-                        ));
-                        continue;
+                if decision == ApprovalResponse::No {
+                    let denied = "Denied by user.".to_string();
+                    runtime_trace::record_event(
+                        "tool_call_result",
+                        Some(channel_name),
+                        Some(provider_name),
+                        Some(model),
+                        Some(&turn_id),
+                        Some(false),
+                        Some(&denied),
+                        serde_json::json!({
+                            "iteration": iteration + 1,
+                            "tool": tool_name.clone(),
+                            "arguments": scrub_credentials(&tool_args.to_string()),
+                        }),
+                    );
+                    if let Some(ref tx) = on_delta {
+                        let _ = tx
+                            .send(format!("\u{274c} {}: {}\n", tool_name, denied))
+                            .await;
                     }
+                    ordered_results[idx] = Some((
+                        tool_name.clone(),
+                        call.tool_call_id.clone(),
+                        ToolExecutionOutcome {
+                            output: denied.clone(),
+                            success: false,
+                            error_reason: Some(denied),
+                            duration: Duration::ZERO,
+                        },
+                    ));
+                    continue;
                 }
+            }
 
             let signature = tool_call_signature(&tool_name, &tool_args);
             let dedup_exempt = dedup_exempt_tools.iter().any(|e| e == &tool_name);
@@ -3651,7 +3655,7 @@ pub async fn run(
             let input = String::from_utf8_lossy(&raw).into_owned();
 
             let user_input = input.trim().to_string();
-            
+
             if user_input.is_empty() {
                 continue;
             }
@@ -3668,7 +3672,9 @@ pub async fn run(
                     continue;
                 }
                 "/clear" | "/new" => {
-                    println!("This will clear the current conversation and delete all session memory.");
+                    println!(
+                        "This will clear the current conversation and delete all session memory."
+                    );
                     println!("Core memories (long-term facts/preferences) will be preserved.");
                     print!("\nContinue? [y/N] ");
                     let _ = std::io::stdout().flush();
@@ -3835,9 +3841,10 @@ pub async fn run(
                 config.agent.max_context_tokens,
             )
             .await
-                && compacted {
-                    println!("\x1b[90mAuto-compaction complete\x1b[0m\n");
-                }
+                && compacted
+            {
+                println!("\x1b[90mAuto-compaction complete\x1b[0m\n");
+            }
 
             // Hard cap as a safety net.
             trim_history(&mut history, config.agent.max_history_messages);

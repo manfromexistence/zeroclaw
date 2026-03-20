@@ -33,11 +33,23 @@ impl Tool for DebugTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("inspect");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("inspect");
         match action {
             "breakpoint" => {
-                let file = call.arguments.get("file").and_then(|v| v.as_str()).unwrap_or("unknown");
-                let line = call.arguments.get("line").and_then(|v| v.as_u64()).unwrap_or(0);
+                let file = call
+                    .arguments
+                    .get("file")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("unknown");
+                let line = call
+                    .arguments
+                    .get("line")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(0);
                 Ok(ToolResult::success(call.id, format!("Breakpoint set at {file}:{line} — connect DAP debugger for live interaction"))
                     .with_data(json!({"action": "breakpoint", "file": file, "line": line})))
             }
@@ -50,8 +62,11 @@ impl Tool for DebugTool {
                 ))
             }
             "evaluate" => {
-                let expr =
-                    call.arguments.get("expression").and_then(|v| v.as_str()).unwrap_or("(none)");
+                let expr = call
+                    .arguments
+                    .get("expression")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("(none)");
                 Ok(ToolResult::success(
                     call.id,
                     format!("Evaluate '{expr}' — connect DAP for live evaluation"),

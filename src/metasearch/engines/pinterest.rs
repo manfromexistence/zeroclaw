@@ -1,6 +1,5 @@
 //! Pinterest — image search via Pinterest resource API.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -8,6 +7,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use serde_json::Value;
 use smallvec::smallvec;
@@ -108,12 +108,7 @@ impl SearchEngine for Pinterest {
                     .or_else(|| pin["images"]["orig"]["url"].as_str())
                     .map(|s| s.to_string());
 
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    snippet,
-                    "pinterest",
-                );
+                let mut result = SearchResult::new(title, result_url, snippet, "pinterest");
                 result.engine_rank = (i + 1) as u32;
                 result.thumbnail = thumbnail_url;
                 Some(result)

@@ -122,16 +122,16 @@ impl SearchEngine for Www1x {
                 .or_else(|| {
                     let text = anchor.text().collect::<String>();
                     let trimmed = text.trim().to_string();
-                    if trimmed.is_empty() { None } else { Some(trimmed) }
+                    if trimmed.is_empty() {
+                        None
+                    } else {
+                        Some(trimmed)
+                    }
                 })
                 .unwrap_or_else(|| "1x Photo".to_string());
 
-            let mut result = SearchResult::new(
-                title,
-                item_url,
-                String::new(),
-                self.metadata.name.clone(),
-            );
+            let mut result =
+                SearchResult::new(title, item_url, String::new(), self.metadata.name.clone());
             result.engine_rank = (i + 1) as u32;
             result.category = SearchCategory::Images.to_string();
             if !thumbnail.is_empty() {

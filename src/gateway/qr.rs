@@ -20,7 +20,7 @@ use qrcode::render::unicode;
 pub fn generate_pairing_qr(code: &str, gateway_url: &str) -> anyhow::Result<String> {
     let data = format!("zeroclaw://pair?code={}&gateway={}", code, gateway_url);
     let qr = QrCode::new(data.as_bytes())?;
-    
+
     Ok(qr
         .render::<unicode::Dense1x2>()
         .dark_color(unicode::Dense1x2::Dark)
@@ -34,18 +34,18 @@ pub fn generate_pairing_qr(code: &str, gateway_url: &str) -> anyhow::Result<Stri
 pub fn generate_pairing_qr_png(code: &str, gateway_url: &str) -> anyhow::Result<Vec<u8>> {
     let data = format!("zeroclaw://pair?code={}&gateway={}", code, gateway_url);
     let qr = QrCode::new(data.as_bytes())?;
-    
+
     // Render as image with 8x scale for better readability
     let image = qr
         .render::<image::Luma<u8>>()
         .min_dimensions(200, 200)
         .build();
-    
+
     // Encode as PNG
     let mut buf = Vec::new();
     let mut cursor = std::io::Cursor::new(&mut buf);
     image.write_to(&mut cursor, image::ImageFormat::Png)?;
-    
+
     Ok(buf)
 }
 
@@ -55,7 +55,8 @@ pub fn generate_pairing_qr_png(code: &str, gateway_url: &str) -> anyhow::Result<
 /// `data:image/png;base64,iVBORw0KGgo...`
 pub fn generate_pairing_qr_data_url(code: &str, gateway_url: &str) -> anyhow::Result<String> {
     let png_bytes = generate_pairing_qr_png(code, gateway_url)?;
-    let base64_data = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_bytes);
+    let base64_data =
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_bytes);
     Ok(format!("data:image/png;base64,{}", base64_data))
 }
 

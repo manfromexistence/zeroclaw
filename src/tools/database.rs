@@ -32,7 +32,11 @@ impl Tool for DatabaseTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("schema");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("schema");
         let connection = call
             .arguments
             .get("connection")
@@ -54,7 +58,11 @@ impl Tool for DatabaseTool {
                             ("sh", "-c")
                         };
                         let cmd = format!("sqlite3 {} .schema", db_path);
-                        match tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await
+                        match tokio::process::Command::new(shell)
+                            .arg(flag)
+                            .arg(&cmd)
+                            .output()
+                            .await
                         {
                             Ok(o) => Ok(ToolResult::success(
                                 call.id,
@@ -115,13 +123,22 @@ impl Tool for DatabaseTool {
                 ))
             }
             "backup" => {
-                let file =
-                    call.arguments.get("file").and_then(|v| v.as_str()).unwrap_or("backup.sql");
-                Ok(ToolResult::success(call.id, format!("Backup '{}' to '{}'", connection, file)))
+                let file = call
+                    .arguments
+                    .get("file")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("backup.sql");
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Backup '{}' to '{}'", connection, file),
+                ))
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("Database '{}' — connect database driver for execution", action),
+                format!(
+                    "Database '{}' — connect database driver for execution",
+                    action
+                ),
             )),
         }
     }

@@ -580,21 +580,21 @@ pub async fn setup_provider(
                             && let Some(stale) =
                                 load_any_cached_models_for_provider(workspace_dir, provider_name)
                                     .await?
-                            {
-                                prompts::log::step(format!(
-                                    "Loaded stale cache from {} ago.",
-                                    humanize_age(stale.age_secs)
-                                ))?;
+                        {
+                            prompts::log::step(format!(
+                                "Loaded stale cache from {} ago.",
+                                humanize_age(stale.age_secs)
+                            ))?;
 
-                                live_options = Some(build_model_options(
-                                    stale
-                                        .models
-                                        .into_iter()
-                                        .take(LIVE_MODEL_MAX_OPTIONS)
-                                        .collect(),
-                                    "stale-cache",
-                                ));
-                            }
+                            live_options = Some(build_model_options(
+                                stale
+                                    .models
+                                    .into_iter()
+                                    .take(LIVE_MODEL_MAX_OPTIONS)
+                                    .collect(),
+                                "stale-cache",
+                            ));
+                        }
                     }
                 }
             }

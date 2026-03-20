@@ -35,7 +35,11 @@ impl Tool for MediaTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("metadata");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("metadata");
         let input = call
             .arguments
             .get("input")
@@ -46,19 +50,27 @@ impl Tool for MediaTool {
             "metadata" => {
                 let path = std::path::Path::new(input);
                 if !path.exists() {
-                    return Ok(ToolResult::error(call.id, format!("File not found: {input}")));
+                    return Ok(ToolResult::error(
+                        call.id,
+                        format!("File not found: {input}"),
+                    ));
                 }
                 let meta = tokio::fs::metadata(input).await?;
                 let size = meta.len();
                 let mime = infer::get_from_path(input)?
                     .map(|t| t.mime_type().to_string())
                     .unwrap_or_default();
-                Ok(ToolResult::success(call.id, format!("{input}: {mime}, {} bytes", size))
-                    .with_data(json!({"path": input, "size": size, "mime": mime})))
+                Ok(
+                    ToolResult::success(call.id, format!("{input}: {mime}, {} bytes", size))
+                        .with_data(json!({"path": input, "size": size, "mime": mime})),
+                )
             }
             "resize" | "crop" | "compress" | "convert" | "thumbnail" | "optimize" => {
-                let output =
-                    call.arguments.get("output").and_then(|v| v.as_str()).unwrap_or("output.png");
+                let output = call
+                    .arguments
+                    .get("output")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("output.png");
                 let (shell, flag) = if cfg!(windows) {
                     ("cmd", "/C")
                 } else {
@@ -68,14 +80,24 @@ impl Tool for MediaTool {
                 // Use ffmpeg/ImageMagick when available
                 let cmd = match action {
                     "resize" => {
-                        let w = call.arguments.get("width").and_then(|v| v.as_u64()).unwrap_or(800);
-                        let h =
-                            call.arguments.get("height").and_then(|v| v.as_u64()).unwrap_or(600);
+                        let w = call
+                            .arguments
+                            .get("width")
+                            .and_then(|v| v.as_u64())
+                            .unwrap_or(800);
+                        let h = call
+                            .arguments
+                            .get("height")
+                            .and_then(|v| v.as_u64())
+                            .unwrap_or(600);
                         format!("magick convert {} -resize {}x{} {}", input, w, h, output)
                     }
                     "compress" => {
-                        let quality =
-                            call.arguments.get("quality").and_then(|v| v.as_u64()).unwrap_or(85);
+                        let quality = call
+                            .arguments
+                            .get("quality")
+                            .and_then(|v| v.as_u64())
+                            .unwrap_or(85);
                         format!("magick convert {} -quality {} {}", input, quality, output)
                     }
                     "convert" => {
@@ -87,7 +109,12 @@ impl Tool for MediaTool {
                     _ => format!("magick convert {} {}", input, output),
                 };
 
-                match tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await {
+                match tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(&cmd)
+                    .output()
+                    .await
+                {
                     Ok(o) if o.status.success() => Ok(ToolResult::success(
                         call.id,
                         format!("Media '{}' completed: {} → {}", action, input, output),

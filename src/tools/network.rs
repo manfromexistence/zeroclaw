@@ -66,7 +66,11 @@ impl Tool for NetworkTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("ping");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("ping");
         let host = call
             .arguments
             .get("host")
@@ -77,14 +81,24 @@ impl Tool for NetworkTool {
             "dns" => {
                 use tokio::net::lookup_host;
                 let addr = format!("{}:80", host);
-                let results: Vec<String> =
-                    lookup_host(&addr).await?.map(|a| a.ip().to_string()).collect();
+                let results: Vec<String> = lookup_host(&addr)
+                    .await?
+                    .map(|a| a.ip().to_string())
+                    .collect();
                 Ok(ToolResult::success(call.id, results.join("\n"))
                     .with_data(json!({"addresses": results})))
             }
             "port_scan" => {
-                let port = call.arguments.get("port").and_then(|v| v.as_u64()).unwrap_or(80) as u16;
-                let timeout_s = call.arguments.get("timeout").and_then(|v| v.as_u64()).unwrap_or(5);
+                let port = call
+                    .arguments
+                    .get("port")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(80) as u16;
+                let timeout_s = call
+                    .arguments
+                    .get("timeout")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(5);
                 let addr = format!("{}:{}", host, port);
                 match tokio::time::timeout(
                     std::time::Duration::from_secs(timeout_s),
@@ -92,9 +106,10 @@ impl Tool for NetworkTool {
                 )
                 .await
                 {
-                    Ok(Ok(_)) => {
-                        Ok(ToolResult::success(call.id, format!("{}:{} is OPEN", host, port)))
-                    }
+                    Ok(Ok(_)) => Ok(ToolResult::success(
+                        call.id,
+                        format!("{}:{} is OPEN", host, port),
+                    )),
                     _ => Ok(ToolResult::success(
                         call.id,
                         format!("{}:{} is CLOSED/FILTERED", host, port),
@@ -132,8 +147,11 @@ impl Tool for NetworkTool {
                 } else {
                     format!("ping -c 1 {}", host)
                 };
-                let output =
-                    tokio::process::Command::new(shell).arg(flag).arg(&ping_cmd).output().await?;
+                let output = tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(&ping_cmd)
+                    .output()
+                    .await?;
                 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 Ok(ToolResult::success(call.id, stdout))
             }
@@ -141,7 +159,10 @@ impl Tool for NetworkTool {
                 call.id,
                 "Mock server requires runtime orchestration".into(),
             )),
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

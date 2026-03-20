@@ -17,9 +17,10 @@ pub fn deserialize_maybe_stringified<T: serde::de::DeserializeOwned>(
             if let Some(s) = v.as_str() {
                 let s = s.trim();
                 if (s.starts_with('{') || s.starts_with('['))
-                    && let Ok(inner) = serde_json::from_str::<serde_json::Value>(s) {
-                        return serde_json::from_value::<T>(inner);
-                    }
+                    && let Ok(inner) = serde_json::from_str::<serde_json::Value>(s)
+                {
+                    return serde_json::from_value::<T>(inner);
+                }
             }
             Err(first_err)
         }

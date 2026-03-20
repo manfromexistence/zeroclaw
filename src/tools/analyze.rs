@@ -42,8 +42,16 @@ impl Tool for AnalyzeTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("lint");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("lint");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
 
         match action {
             "complexity" => {
@@ -143,7 +151,10 @@ impl Tool for AnalyzeTool {
                     ),
                 ))
             }
-            other => Ok(ToolResult::error(call.id, format!("Unknown action: {other}"))),
+            other => Ok(ToolResult::error(
+                call.id,
+                format!("Unknown action: {other}"),
+            )),
         }
     }
 }

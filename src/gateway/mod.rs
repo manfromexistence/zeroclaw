@@ -280,10 +280,9 @@ fn client_key_from_request(
     headers: &HeaderMap,
     trust_forwarded_headers: bool,
 ) -> String {
-    if trust_forwarded_headers
-        && let Some(ip) = forwarded_client_ip(headers) {
-            return ip.to_string();
-        }
+    if trust_forwarded_headers && let Some(ip) = forwarded_client_ip(headers) {
+        return ip.to_string();
+    }
 
     peer_addr
         .map(|addr| addr.ip().to_string())
@@ -575,9 +574,10 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
                 tracing::info!("Gateway session persistence enabled (SQLite)");
                 if config.gateway.session_ttl_hours > 0
                     && let Ok(cleaned) = b.cleanup_stale(config.gateway.session_ttl_hours)
-                        && cleaned > 0 {
-                            tracing::info!("Cleaned up {cleaned} stale gateway sessions");
-                        }
+                    && cleaned > 0
+                {
+                    tracing::info!("Cleaned up {cleaned} stale gateway sessions");
+                }
                 Some(Arc::new(b))
             }
             Err(e) => {
@@ -639,11 +639,11 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         println!();
         println!("  🔐 PAIRING REQUIRED — Scan QR code or use code:");
         println!();
-        
+
         // Generate and display QR code
         let fallback_url = format!("ws://{}", display_addr);
         let gateway_url = tunnel_url.as_deref().unwrap_or(&fallback_url);
-        
+
         if let Ok(qr) = qr::generate_pairing_qr(&code, gateway_url) {
             // Display QR code with border
             for line in qr.lines() {
@@ -651,7 +651,7 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
             }
             println!();
         }
-        
+
         println!("     Manual code: {code}");
         println!("     Gateway URL: {gateway_url}");
         println!();
@@ -1107,15 +1107,16 @@ async fn handle_webhook(
         .and_then(|v| v.to_str().ok())
         .map(str::trim)
         .filter(|value| !value.is_empty())
-        && !state.idempotency_store.record_if_new(idempotency_key) {
-            tracing::info!("Webhook duplicate ignored (idempotency key: {idempotency_key})");
-            let body = serde_json::json!({
-                "status": "duplicate",
-                "idempotent": true,
-                "message": "Request already processed for this idempotency key"
-            });
-            return (StatusCode::OK, Json(body));
-        }
+        && !state.idempotency_store.record_if_new(idempotency_key)
+    {
+        tracing::info!("Webhook duplicate ignored (idempotency key: {idempotency_key})");
+        let body = serde_json::json!({
+            "status": "duplicate",
+            "idempotent": true,
+            "message": "Request already processed for this idempotency key"
+        });
+        return (StatusCode::OK, Json(body));
+    }
 
     let message = &webhook_body.message;
     let session_id = webhook_session_id(&headers);

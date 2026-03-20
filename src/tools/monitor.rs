@@ -51,7 +51,11 @@ impl Tool for MonitorTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("metrics");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("metrics");
 
         match action {
             "metrics" => {
@@ -60,8 +64,14 @@ impl Tool for MonitorTool {
                     call.arguments.get("value").and_then(|v| v.as_f64()),
                 ) {
                     let mut metrics = self.metrics.lock().unwrap();
-                    metrics.entry(name.to_string()).or_insert_with(Vec::new).push(value);
-                    Ok(ToolResult::success(call.id, format!("Recorded metric {name}={value}")))
+                    metrics
+                        .entry(name.to_string())
+                        .or_insert_with(Vec::new)
+                        .push(value);
+                    Ok(ToolResult::success(
+                        call.id,
+                        format!("Recorded metric {name}={value}"),
+                    ))
                 } else {
                     let metrics = self.metrics.lock().unwrap();
                     let summary: String = metrics
@@ -80,8 +90,11 @@ impl Tool for MonitorTool {
             }
             "logs" => {
                 if let Some(msg) = call.arguments.get("message").and_then(|v| v.as_str()) {
-                    let level =
-                        call.arguments.get("level").and_then(|v| v.as_str()).unwrap_or("info");
+                    let level = call
+                        .arguments
+                        .get("level")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("info");
                     let entry = LogEntry {
                         level: level.into(),
                         message: msg.into(),
@@ -134,11 +147,16 @@ impl Tool for MonitorTool {
                         Ok(ToolResult::success(call.id, format!("{}: {} ({:.0}ms)", url, if up { "UP" } else { "DOWN" }, latency.as_millis()))
                             .with_data(json!({"url": url, "up": up, "status": resp.status().as_u16(), "latency_ms": latency.as_millis()})))
                     }
-                    Err(e) => Ok(ToolResult::success(call.id, format!("{}: DOWN ({})", url, e))
-                        .with_data(json!({"url": url, "up": false}))),
+                    Err(e) => Ok(
+                        ToolResult::success(call.id, format!("{}: DOWN ({})", url, e))
+                            .with_data(json!({"url": url, "up": false})),
+                    ),
                 }
             }
-            _ => Ok(ToolResult::success(call.id, format!("Monitor '{}' completed", action))),
+            _ => Ok(ToolResult::success(
+                call.id,
+                format!("Monitor '{}' completed", action),
+            )),
         }
     }
 }

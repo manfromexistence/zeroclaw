@@ -112,9 +112,10 @@ impl SqliteSessionBackend {
                     continue;
                 }
                 if let Ok(msg) = serde_json::from_str::<ChatMessage>(trimmed)
-                    && self.append(key, &msg).is_ok() {
-                        count += 1;
-                    }
+                    && self.append(key, &msg).is_ok()
+                {
+                    count += 1;
+                }
             }
 
             if count > 0 {

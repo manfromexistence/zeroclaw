@@ -33,8 +33,16 @@ impl Tool for I18nTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("stats");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("stats");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
 
         match action {
             "extract" => {
@@ -45,7 +53,11 @@ impl Tool for I18nTool {
                     .filter_map(|e| e.ok())
                     .filter(|e| e.file_type().is_file())
                 {
-                    let ext = entry.path().extension().and_then(|e| e.to_str()).unwrap_or("");
+                    let ext = entry
+                        .path()
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .unwrap_or("");
                     if !["rs", "ts", "tsx", "js", "jsx", "py", "vue", "svelte"].contains(&ext) {
                         continue;
                     }
@@ -76,12 +88,16 @@ impl Tool for I18nTool {
                                 format!("Valid locale file: {count} keys"),
                             ))
                         }
-                        Err(e) => {
-                            Ok(ToolResult::error(call.id, format!("Invalid locale file: {e}")))
-                        }
+                        Err(e) => Ok(ToolResult::error(
+                            call.id,
+                            format!("Invalid locale file: {e}"),
+                        )),
                     }
                 } else {
-                    Ok(ToolResult::success(call.id, "Provide 'file' to validate".into()))
+                    Ok(ToolResult::success(
+                        call.id,
+                        "Provide 'file' to validate".into(),
+                    ))
                 }
             }
             "stats" => {
@@ -149,7 +165,10 @@ impl Tool for I18nTool {
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("I18n '{}' — connect translation service for full support", action),
+                format!(
+                    "I18n '{}' — connect translation service for full support",
+                    action
+                ),
             )),
         }
     }

@@ -219,15 +219,16 @@ impl AnthropicProvider {
     /// Apply cache control to the last message content block
     fn apply_cache_to_last_message(messages: &mut [NativeMessage]) {
         if let Some(last_msg) = messages.last_mut()
-            && let Some(last_content) = last_msg.content.last_mut() {
-                match last_content {
-                    NativeContentOut::Text { cache_control, .. }
-                    | NativeContentOut::ToolResult { cache_control, .. } => {
-                        *cache_control = Some(CacheControl::ephemeral());
-                    }
-                    NativeContentOut::ToolUse { .. } | NativeContentOut::Image { .. } => {}
+            && let Some(last_content) = last_msg.content.last_mut()
+        {
+            match last_content {
+                NativeContentOut::Text { cache_control, .. }
+                | NativeContentOut::ToolResult { cache_control, .. } => {
+                    *cache_control = Some(CacheControl::ephemeral());
                 }
+                NativeContentOut::ToolUse { .. } | NativeContentOut::Image { .. } => {}
             }
+        }
     }
 
     fn convert_tools<'a>(tools: Option<&'a [ToolSpec]>) -> Option<Vec<NativeToolSpec<'a>>> {
@@ -485,9 +486,10 @@ impl AnthropicProvider {
             match block.kind.as_str() {
                 "text" => {
                     if let Some(text) = block.text.map(|t| t.trim().to_string())
-                        && !text.is_empty() {
-                            text_parts.push(text);
-                        }
+                        && !text.is_empty()
+                    {
+                        text_parts.push(text);
+                    }
                 }
                 "tool_use" => {
                     let name = block.name.unwrap_or_default();

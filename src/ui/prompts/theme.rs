@@ -340,14 +340,16 @@ impl Default for DxTheme {
 }
 
 /// Global theme instance
-pub static THEME: std::sync::LazyLock<RwLock<DxTheme>> = std::sync::LazyLock::new(|| RwLock::new(DxTheme::default()));
+pub static THEME: std::sync::LazyLock<RwLock<DxTheme>> =
+    std::sync::LazyLock::new(|| RwLock::new(DxTheme::default()));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rainbow Animation
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Global rainbow effect for animated symbols
-pub static RAINBOW: std::sync::LazyLock<RwLock<RainbowEffect>> = std::sync::LazyLock::new(|| RwLock::new(RainbowEffect::new()));
+pub static RAINBOW: std::sync::LazyLock<RwLock<RainbowEffect>> =
+    std::sync::LazyLock::new(|| RwLock::new(RainbowEffect::new()));
 
 /// Get a rainbow-colored symbol at a specific index
 pub fn rainbow_symbol(symbol: &str, index: usize) -> String {

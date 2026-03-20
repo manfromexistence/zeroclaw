@@ -218,10 +218,9 @@ async fn handle_clear(
     println!("Found {} entries in '{scope}'.", entries.len());
 
     if !yes {
-        let confirmed =
-            crate::ui::prompts::confirm(format!("  Delete {} entries?", entries.len()))
-                .initial_value(false)
-                .interact()?;
+        let confirmed = crate::ui::prompts::confirm(format!("  Delete {} entries?", entries.len()))
+            .initial_value(false)
+            .interact()?;
         if !confirmed {
             println!("Aborted.");
             return Ok(());

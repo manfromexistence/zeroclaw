@@ -34,7 +34,11 @@ impl Tool for LspTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("diagnostics");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("diagnostics");
         let file = call
             .arguments
             .get("file")
@@ -44,7 +48,11 @@ impl Tool for LspTool {
             .arguments
             .get("language")
             .and_then(|v| v.as_str())
-            .or_else(|| std::path::Path::new(file).extension().and_then(|e| e.to_str()))
+            .or_else(|| {
+                std::path::Path::new(file)
+                    .extension()
+                    .and_then(|e| e.to_str())
+            })
             .unwrap_or("unknown");
 
         // LSP operations require a running language server — this provides the interface

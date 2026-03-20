@@ -83,7 +83,7 @@ impl ToolRegistry {
     pub fn register_all(&mut self) {
         // Note: Only registering tools that are actually implemented in src/tools/
         // Many tools from the original tools/ folder are stubs and not yet integrated
-        
+
         // TODO: Implement and register the 42 merged tools once their dependencies are resolved
         // For now, this registry is a placeholder
     }
@@ -117,7 +117,11 @@ mod tests {
         }
 
         async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-            let text = call.arguments.get("text").and_then(|v| v.as_str()).unwrap_or("(empty)");
+            let text = call
+                .arguments
+                .get("text")
+                .and_then(|v| v.as_str())
+                .unwrap_or("(empty)");
             Ok(ToolResult::success(call.id, text.to_string()))
         }
     }

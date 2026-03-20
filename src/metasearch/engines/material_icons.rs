@@ -2,7 +2,6 @@
 //!
 //! Fetches the full icon metadata JSON from Google Fonts and filters locally.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -10,6 +9,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -83,18 +83,12 @@ impl SearchEngine for MaterialIcons {
                     "https://fonts.google.com/icons?icon.query={}",
                     urlencoding::encode(name)
                 );
-                let img_src = format!(
-                    "https://api.iconify.design/material-symbols/{name}.svg"
-                );
+                let img_src = format!("https://api.iconify.design/material-symbols/{name}.svg");
 
                 let snippet = format!("Material Symbol icon: {}", display);
 
-                let mut result = SearchResult::new(
-                    display,
-                    page_url,
-                    snippet,
-                    self.metadata.name.clone(),
-                );
+                let mut result =
+                    SearchResult::new(display, page_url, snippet, self.metadata.name.clone());
                 result.engine_rank = (results.len() + 1) as u32;
                 result.thumbnail = Some(img_src);
                 result.category = SearchCategory::Images.to_string();

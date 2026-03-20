@@ -4,7 +4,6 @@
 //! Website: https://scanr.enseignementsup-recherche.gouv.fr
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -92,7 +92,8 @@ impl SearchEngine for ScanrStructures {
 
                 let item_url = format!("{}/structure/{}", SCANR_BASE, id);
 
-                let title = item["label"]["default"].as_str()
+                let title = item["label"]["default"]
+                    .as_str()
                     .or_else(|| item["label"]["fr"].as_str())
                     .unwrap_or_default();
                 if title.is_empty() {
@@ -107,8 +108,7 @@ impl SearchEngine for ScanrStructures {
 
                 let thumbnail = item["logo"].as_str().map(|s| s.to_string());
 
-                let mut r =
-                    SearchResult::new(title, &item_url, content, "scanr_structures");
+                let mut r = SearchResult::new(title, &item_url, content, "scanr_structures");
                 r.engine_rank = i as u32;
                 r.category = SearchCategory::Science.to_string();
                 r.thumbnail = thumbnail;

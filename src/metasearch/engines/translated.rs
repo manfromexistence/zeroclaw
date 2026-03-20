@@ -4,7 +4,6 @@
 //! Website: https://mymemory.translated.net
 //! Features: Translation via MyMemory API, no pagination
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -102,17 +102,14 @@ impl SearchEngine for Translated {
                     continue;
                 }
 
-                let source_lang = m
-                    .get("source")
-                    .and_then(|s| s.as_str())
-                    .unwrap_or("auto");
-                let target_lang = m
-                    .get("target")
-                    .and_then(|t| t.as_str())
-                    .unwrap_or("en");
+                let source_lang = m.get("source").and_then(|s| s.as_str()).unwrap_or("auto");
+                let target_lang = m.get("target").and_then(|t| t.as_str()).unwrap_or("en");
 
                 let content = if !segment.is_empty() {
-                    format!("{} → {} ({} → {})", segment, translation, source_lang, target_lang)
+                    format!(
+                        "{} → {} ({} → {})",
+                        segment, translation, source_lang, target_lang
+                    )
                 } else {
                     translation.to_string()
                 };

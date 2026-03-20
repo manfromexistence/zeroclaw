@@ -1,7 +1,6 @@
 //! Mastodon engine — search accounts/hashtags via Mastodon API.
 //! Translated from SearXNG `searx/engines/mastodon.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +8,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 

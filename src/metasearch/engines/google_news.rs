@@ -63,7 +63,7 @@ fn extract_xml_text<'a>(item_xml: &'a str, tag: &str) -> Option<&'a str> {
 
 /// Extract attribute value from an XML element.
 fn extract_xml_attr<'a>(item_xml: &'a str, tag: &str, attr: &str) -> Option<&'a str> {
-    let tag_start = item_xml.find(&format!("<{}", tag))? ;
+    let tag_start = item_xml.find(&format!("<{}", tag))?;
     let tag_end = item_xml[tag_start..].find('>')? + tag_start;
     let tag_content = &item_xml[tag_start..tag_end];
     let attr_marker = format!("{}=\"", attr);
@@ -142,7 +142,9 @@ impl SearchEngine for GoogleNews {
                 let raw_title = extract_xml_text(item_xml, "title").unwrap_or_default();
                 // Strip CDATA if present
                 let title = if raw_title.starts_with("<![CDATA[") {
-                    raw_title.trim_start_matches("<![CDATA[").trim_end_matches("]]>")
+                    raw_title
+                        .trim_start_matches("<![CDATA[")
+                        .trim_end_matches("]]>")
                 } else {
                     raw_title
                 };
@@ -157,14 +159,15 @@ impl SearchEngine for GoogleNews {
                     continue;
                 }
 
-                let link = extract_xml_text(item_xml, "link").unwrap_or_default().trim();
+                let link = extract_xml_text(item_xml, "link")
+                    .unwrap_or_default()
+                    .trim();
                 if link.is_empty() {
                     continue;
                 }
 
                 // Try to decode the base64 article URL; fall back to the Google News link
-                let article_url = decode_google_news_url(link)
-                    .unwrap_or_else(|| link.to_string());
+                let article_url = decode_google_news_url(link).unwrap_or_else(|| link.to_string());
 
                 let pub_date = extract_xml_text(item_xml, "pubDate")
                     .unwrap_or_default()
@@ -192,7 +195,8 @@ impl SearchEngine for GoogleNews {
                 r.engine_rank = item_idx as u32;
                 r.category = SearchCategory::News.to_string();
                 if !source_url.is_empty() {
-                    r.metadata = serde_json::json!({ "source": source_name, "source_url": source_url });
+                    r.metadata =
+                        serde_json::json!({ "source": source_name, "source_url": source_url });
                 }
                 results.push(r);
             } else {

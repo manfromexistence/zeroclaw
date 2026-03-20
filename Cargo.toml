@@ -54,8 +54,7 @@ blake3 = "1"
 zstd = "0.13"
 
 # Local GGUF model inference (llama.cpp bindings) - DEFAULT FEATURE
-llama-cpp-2 = "0.1"
-rand = "0.8"
+llama-cpp-2 = { version = "0.1", optional = true }
 
 # Matrix client + E2EE decryption
 matrix-sdk = { version = "0.16", optional = true, default-features = false, features = ["e2e-encryption", "rustls-tls", "markdown", "sqlite"] }

@@ -1,7 +1,6 @@
 //! YouTube engine — search videos via YouTube web scraping (no API key needed).
 //! Translated from SearXNG `searx/engines/youtube_noapi.py`.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +8,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 

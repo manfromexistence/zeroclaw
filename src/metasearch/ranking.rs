@@ -59,10 +59,7 @@ impl ResultAggregator {
         }
 
         // Parallel collection and sorting
-        let mut results: Vec<SearchResult> = url_map
-            .into_iter()
-            .map(|(_, v)| v)
-            .collect();
+        let mut results: Vec<SearchResult> = url_map.into_iter().map(|(_, v)| v).collect();
 
         // Parallel sort (unstable is faster)
         results.par_sort_unstable_by(|a, b| {

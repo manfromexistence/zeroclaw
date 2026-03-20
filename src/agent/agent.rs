@@ -295,10 +295,11 @@ impl Agent {
     /// to avoid duplicating the system prompt.
     pub fn seed_history(&mut self, messages: &[ChatMessage]) {
         if self.history.is_empty()
-            && let Ok(sys) = self.build_system_prompt() {
-                self.history
-                    .push(ConversationMessage::Chat(ChatMessage::system(sys)));
-            }
+            && let Ok(sys) = self.build_system_prompt()
+        {
+            self.history
+                .push(ConversationMessage::Chat(ChatMessage::system(sys)));
+        }
         for msg in messages {
             if msg.role != "system" {
                 self.history.push(ConversationMessage::Chat(msg.clone()));
@@ -527,22 +528,23 @@ impl Agent {
     fn classify_model(&self, user_message: &str) -> String {
         if let Some(decision) =
             super::classifier::classify_with_decision(&self.classification_config, user_message)
-            && self.available_hints.contains(&decision.hint) {
-                let resolved_model = self
-                    .route_model_by_hint
-                    .get(&decision.hint)
-                    .map(String::as_str)
-                    .unwrap_or("unknown");
-                tracing::info!(
-                    target: "query_classification",
-                    hint = decision.hint.as_str(),
-                    model = resolved_model,
-                    rule_priority = decision.priority,
-                    message_length = user_message.len(),
-                    "Classified message route"
-                );
-                return format!("hint:{}", decision.hint);
-            }
+            && self.available_hints.contains(&decision.hint)
+        {
+            let resolved_model = self
+                .route_model_by_hint
+                .get(&decision.hint)
+                .map(String::as_str)
+                .unwrap_or("unknown");
+            tracing::info!(
+                target: "query_classification",
+                hint = decision.hint.as_str(),
+                model = resolved_model,
+                rule_priority = decision.priority,
+                message_length = user_message.len(),
+                "Classified message route"
+            );
+            return format!("hint:{}", decision.hint);
+        }
         self.model_name.clone()
     }
 

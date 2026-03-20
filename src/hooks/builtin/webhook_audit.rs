@@ -123,10 +123,11 @@ impl WebhookAuditHook {
 
         // Validate URL against SSRF if one is provided.
         if !config.url.is_empty()
-            && let Err(e) = validate_webhook_url(&config.url) {
-                tracing::error!(hook = "webhook-audit", error = %e, "webhook URL validation failed");
-                panic!("webhook-audit: {e}");
-            }
+            && let Err(e) = validate_webhook_url(&config.url)
+        {
+            tracing::error!(hook = "webhook-audit", error = %e, "webhook URL validation failed");
+            panic!("webhook-audit: {e}");
+        }
 
         let client = reqwest::Client::builder()
             .timeout(Duration::from_secs(5))

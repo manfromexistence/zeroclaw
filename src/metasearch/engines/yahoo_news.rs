@@ -70,10 +70,10 @@ impl SearchEngine for YahooNews {
 
         let item_sel = Selector::parse("ol.searchCenterMiddle li")
             .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
-        let title_sel = Selector::parse("h4 a")
-            .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
-        let content_sel = Selector::parse("p")
-            .map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
+        let title_sel =
+            Selector::parse("h4 a").map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
+        let content_sel =
+            Selector::parse("p").map_err(|e| MetasearchError::ParseError(format!("{e:?}")))?;
 
         let mut results = Vec::new();
 
@@ -99,12 +99,8 @@ impl SearchEngine for YahooNews {
                 .map(|el| el.text().collect::<String>().trim().to_string())
                 .unwrap_or_default();
 
-            let mut result = SearchResult::new(
-                title,
-                href.to_string(),
-                content,
-                self.metadata.name.clone(),
-            );
+            let mut result =
+                SearchResult::new(title, href.to_string(), content, self.metadata.name.clone());
             result.engine_rank = (i + 1) as u32;
             result.category = SearchCategory::News.to_string();
             results.push(result);

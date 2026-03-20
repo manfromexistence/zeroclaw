@@ -33,7 +33,11 @@ impl Tool for DesktopTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("screenshot");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("screenshot");
         let (shell, flag) = if cfg!(windows) {
             ("cmd", "/C")
         } else {
@@ -53,9 +57,16 @@ impl Tool for DesktopTool {
                         r#"powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen | ForEach-Object {{ $bmp = New-Object System.Drawing.Bitmap($_.Bounds.Width, $_.Bounds.Height); $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($_.Bounds.Location, [System.Drawing.Point]::Empty, $_.Bounds.Size); $bmp.Save('{}') }}""#,
                         output
                     );
-                    let _ = tokio::process::Command::new(shell).arg(flag).arg(&ps).output().await;
+                    let _ = tokio::process::Command::new(shell)
+                        .arg(flag)
+                        .arg(&ps)
+                        .output()
+                        .await;
                 }
-                Ok(ToolResult::success(call.id, format!("Screenshot saved to {output}")))
+                Ok(ToolResult::success(
+                    call.id,
+                    format!("Screenshot saved to {output}"),
+                ))
             }
             "clipboard_read" => {
                 let cmd = if cfg!(windows) {
@@ -63,15 +74,22 @@ impl Tool for DesktopTool {
                 } else {
                     "xclip -selection clipboard -o"
                 };
-                let output =
-                    tokio::process::Command::new(shell).arg(flag).arg(cmd).output().await?;
+                let output = tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(cmd)
+                    .output()
+                    .await?;
                 Ok(ToolResult::success(
                     call.id,
                     String::from_utf8_lossy(&output.stdout).to_string(),
                 ))
             }
             "clipboard_write" => {
-                let text = call.arguments.get("text").and_then(|v| v.as_str()).unwrap_or("");
+                let text = call
+                    .arguments
+                    .get("text")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let cmd = if cfg!(windows) {
                     format!(
                         "powershell -Command \"Set-Clipboard -Value '{}'\"",
@@ -80,7 +98,11 @@ impl Tool for DesktopTool {
                 } else {
                     format!("echo '{}' | xclip -selection clipboard", text)
                 };
-                let _ = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await;
+                let _ = tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(&cmd)
+                    .output()
+                    .await;
                 Ok(ToolResult::success(call.id, "Copied to clipboard".into()))
             }
             "window_list" => {
@@ -89,8 +111,11 @@ impl Tool for DesktopTool {
                 } else {
                     "wmctrl -l"
                 };
-                let output =
-                    tokio::process::Command::new(shell).arg(flag).arg(cmd).output().await?;
+                let output = tokio::process::Command::new(shell)
+                    .arg(flag)
+                    .arg(cmd)
+                    .output()
+                    .await?;
                 Ok(ToolResult::success(
                     call.id,
                     String::from_utf8_lossy(&output.stdout).to_string(),
@@ -98,7 +123,10 @@ impl Tool for DesktopTool {
             }
             _ => Ok(ToolResult::success(
                 call.id,
-                format!("Desktop '{}' — requires platform-specific implementation", action),
+                format!(
+                    "Desktop '{}' — requires platform-specific implementation",
+                    action
+                ),
             )),
         }
     }

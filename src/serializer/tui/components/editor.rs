@@ -1,18 +1,12 @@
 //! Input and output editor panels.
 
 use ratatui::{
-    layout::Rect,
-    widgets::{
-        Block,
-        Borders,
-    },
     Frame,
+    layout::Rect,
+    widgets::{Block, Borders},
 };
 
-use crate::tui::{
-    state::AppState,
-    theme::Theme,
-};
+use crate::tui::{state::AppState, theme::Theme};
 
 pub struct EditorComponent;
 

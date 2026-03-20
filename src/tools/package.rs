@@ -33,8 +33,16 @@ impl Tool for PackageTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("list");
-        let manager = call.arguments.get("manager").and_then(|v| v.as_str()).unwrap_or("auto");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("list");
+        let manager = call
+            .arguments
+            .get("manager")
+            .and_then(|v| v.as_str())
+            .unwrap_or("auto");
         let name = call.arguments.get("name").and_then(|v| v.as_str());
 
         // Auto-detect package manager
@@ -60,7 +68,11 @@ impl Tool for PackageTool {
             }
             ("install", "npm") => {
                 let n = name.ok_or_else(|| anyhow::anyhow!("Missing 'name'"))?;
-                let dev = call.arguments.get("dev").and_then(|v| v.as_bool()).unwrap_or(false);
+                let dev = call
+                    .arguments
+                    .get("dev")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
                 if dev {
                     format!("npm install -D {n}")
                 } else {
@@ -93,7 +105,11 @@ impl Tool for PackageTool {
             _ => format!("echo 'Package action {action} for {pm}'"),
         };
 
-        let output = tokio::process::Command::new(shell).arg(flag).arg(&cmd).output().await?;
+        let output = tokio::process::Command::new(shell)
+            .arg(flag)
+            .arg(&cmd)
+            .output()
+            .await?;
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         let combined = if stderr.is_empty() {

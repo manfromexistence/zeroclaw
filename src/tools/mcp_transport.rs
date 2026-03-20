@@ -318,10 +318,11 @@ impl SseTransport {
             return Ok(());
         }
         if let Some(task) = &self.reader_task
-            && !task.is_finished() {
-                self.stream_state = SseStreamState::Connected;
-                return Ok(());
-            }
+            && !task.is_finished()
+        {
+            self.stream_state = SseStreamState::Connected;
+            return Ok(());
+        }
 
         let has_accept = self
             .headers
@@ -720,11 +721,12 @@ impl McpTransportConn for SseTransport {
                 {
                     let guard = self.shared.lock().await;
                     if guard.message_url_from_endpoint
-                        && let Some(url) = &guard.message_url {
-                            message_url = url.clone();
-                            from_endpoint = true;
-                            break;
-                        }
+                        && let Some(url) = &guard.message_url
+                    {
+                        message_url = url.clone();
+                        from_endpoint = true;
+                        break;
+                    }
                 }
                 let _ = timeout(Duration::from_millis(300), self.notify.notified()).await;
             }
@@ -745,14 +747,15 @@ impl McpTransportConn for SseTransport {
 
         let mut rx = None;
         if let Some(id) = id
-            && self.stream_state == SseStreamState::Connected {
-                let (tx, ch) = oneshot::channel();
-                {
-                    let mut guard = self.shared.lock().await;
-                    guard.pending.insert(id, tx);
-                }
-                rx = Some((id, ch));
+            && self.stream_state == SseStreamState::Connected
+        {
+            let (tx, ch) = oneshot::channel();
+            {
+                let mut guard = self.shared.lock().await;
+                guard.pending.insert(id, tx);
             }
+            rx = Some((id, ch));
+        }
 
         let mut got_direct = None;
         let mut last_status = None;
@@ -866,10 +869,11 @@ impl McpTransportConn for SseTransport {
                 let mut guard = self.shared.lock().await;
                 guard.pending.remove(id);
             } else if let Some(status) = last_status
-                && !status.is_success() {
-                    let mut guard = self.shared.lock().await;
-                    guard.pending.remove(id);
-                }
+                && !status.is_success()
+            {
+                let mut guard = self.shared.lock().await;
+                guard.pending.remove(id);
+            }
         }
 
         if let Some(resp) = got_direct {

@@ -62,13 +62,21 @@ impl SearchEngine for Searchcode {
             urlencoding::encode(&query.query)
         );
 
-        let resp = self.client.get(&url).send().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
 
         if !resp.status().is_success() {
             return Ok(Vec::new());
         }
 
-        let text = resp.text().await.map_err(|e| MetasearchError::Engine(e.to_string()))?;
+        let text = resp
+            .text()
+            .await
+            .map_err(|e| MetasearchError::Engine(e.to_string()))?;
         if text.trim_start().starts_with('<') {
             return Ok(Vec::new());
         }
@@ -116,12 +124,7 @@ impl SearchEngine for Searchcode {
                     _ => format!("Code in {}", repo),
                 };
 
-                let mut result = SearchResult::new(
-                    title,
-                    result_url,
-                    content,
-                    "searchcode",
-                );
+                let mut result = SearchResult::new(title, result_url, content, "searchcode");
                 result.engine_rank = (i + 1) as u32;
                 Some(result)
             })
@@ -130,4 +133,3 @@ impl SearchEngine for Searchcode {
         Ok(results)
     }
 }
-

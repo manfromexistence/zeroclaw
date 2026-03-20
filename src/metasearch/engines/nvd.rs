@@ -1,7 +1,5 @@
 //! NVD engine — search the National Vulnerability Database.
 
-use async_trait::async_trait;
-use chrono::DateTime;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,6 +7,8 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
+use chrono::DateTime;
 use reqwest::Client;
 use smallvec::smallvec;
 
@@ -93,12 +93,8 @@ impl SearchEngine for Nvd {
                     .unwrap_or("")
                     .to_string();
 
-                let mut result = SearchResult::new(
-                    cve_id.to_string(),
-                    vuln_url,
-                    content,
-                    "nvd".to_string(),
-                );
+                let mut result =
+                    SearchResult::new(cve_id.to_string(), vuln_url, content, "nvd".to_string());
                 result.engine_rank = (i + 1) as u32;
                 result.category = SearchCategory::IT.to_string();
 

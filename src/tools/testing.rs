@@ -32,8 +32,16 @@ impl Tool for TestTool {
     }
 
     async fn execute(&self, call: ToolCall) -> Result<ToolResult> {
-        let action = call.arguments.get("action").and_then(|v| v.as_str()).unwrap_or("run");
-        let path = call.arguments.get("path").and_then(|v| v.as_str()).unwrap_or(".");
+        let action = call
+            .arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("run");
+        let path = call
+            .arguments
+            .get("path")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
         let filter = call.arguments.get("filter").and_then(|v| v.as_str());
         let package = call.arguments.get("package").and_then(|v| v.as_str());
 
@@ -150,6 +158,9 @@ mod tests {
     }
     #[test]
     fn test_detect() {
-        assert!(matches!(detect_framework("."), Framework::Cargo | Framework::Unknown));
+        assert!(matches!(
+            detect_framework("."),
+            Framework::Cargo | Framework::Unknown
+        ));
     }
 }

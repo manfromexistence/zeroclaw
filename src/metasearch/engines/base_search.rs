@@ -3,7 +3,6 @@
 //! Reference: <https://base-search.net>
 //! API docs: <https://api.base-search.net/>
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -11,6 +10,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
 use smallvec::smallvec;

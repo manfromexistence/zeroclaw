@@ -44,24 +44,26 @@ impl WorkspaceBoundary {
     /// Check whether a tool is allowed in the current workspace.
     pub fn check_tool_access(&self, tool_name: &str) -> BoundaryVerdict {
         if let Some(profile) = &self.profile
-            && profile.is_tool_restricted(tool_name) {
-                return BoundaryVerdict::Deny(format!(
-                    "tool '{}' is restricted in workspace '{}'",
-                    tool_name, profile.name
-                ));
-            }
+            && profile.is_tool_restricted(tool_name)
+        {
+            return BoundaryVerdict::Deny(format!(
+                "tool '{}' is restricted in workspace '{}'",
+                tool_name, profile.name
+            ));
+        }
         BoundaryVerdict::Allow
     }
 
     /// Check whether a domain is allowed in the current workspace.
     pub fn check_domain_access(&self, domain: &str) -> BoundaryVerdict {
         if let Some(profile) = &self.profile
-            && !profile.is_domain_allowed(domain) {
-                return BoundaryVerdict::Deny(format!(
-                    "domain '{}' is not in the allowlist for workspace '{}'",
-                    domain, profile.name
-                ));
-            }
+            && !profile.is_domain_allowed(domain)
+        {
+            return BoundaryVerdict::Deny(format!(
+                "domain '{}' is not in the allowlist for workspace '{}'",
+                domain, profile.name
+            ));
+        }
         BoundaryVerdict::Allow
     }
 
@@ -83,16 +85,17 @@ impl WorkspaceBoundary {
                 .and_then(|c| c.as_os_str().to_str());
 
             if let Some(ws_name) = first_component
-                && ws_name != profile.name {
-                    if self.cross_workspace_search {
-                        // Cross-workspace search is allowed, but only for read-like access
-                        return BoundaryVerdict::Allow;
-                    }
-                    return BoundaryVerdict::Deny(format!(
-                        "access to workspace '{}' is denied from workspace '{}'",
-                        ws_name, profile.name
-                    ));
+                && ws_name != profile.name
+            {
+                if self.cross_workspace_search {
+                    // Cross-workspace search is allowed, but only for read-like access
+                    return BoundaryVerdict::Allow;
                 }
+                return BoundaryVerdict::Deny(format!(
+                    "access to workspace '{}' is denied from workspace '{}'",
+                    ws_name, profile.name
+                ));
+            }
         }
 
         BoundaryVerdict::Allow

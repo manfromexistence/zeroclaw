@@ -4,7 +4,6 @@
 //! Website: https://pic.sogou.com
 //! Features: Paging
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -12,6 +11,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use regex::Regex;
 use reqwest::Client;
 use smallvec::smallvec;
@@ -76,10 +76,7 @@ impl SearchEngine for SogouImages {
             .map_err(|e| MetasearchError::ParseError(e.to_string()))?;
 
         let json_str = match re.captures(&body) {
-            Some(caps) => caps
-                .get(1)
-                .map(|m| m.as_str())
-                .unwrap_or("{}"),
+            Some(caps) => caps.get(1).map(|m| m.as_str()).unwrap_or("{}"),
             None => {
                 return Ok(Vec::new());
             }

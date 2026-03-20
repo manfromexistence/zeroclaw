@@ -1,7 +1,6 @@
 //! Brave Search engine implementation.
 //! Selectors ported from metasearch2/src/engines/search/brave.rs.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -9,11 +8,12 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{Html, Selector};
+use smallvec::smallvec;
 use std::borrow::Cow;
 use tracing::info;
-use smallvec::smallvec;
 
 #[allow(dead_code)]
 pub struct Brave {
@@ -77,9 +77,10 @@ impl SearchEngine for Brave {
 
         // metasearch2 selectors
         let result_sel = Selector::parse("#results > .snippet[data-pos]:not(.standalone)").unwrap();
-        let title_sel  = Selector::parse(".title").unwrap();
-        let link_sel   = Selector::parse("a").unwrap();
-        let desc_sel   = Selector::parse(".generic-snippet, .video-snippet > .snippet-description").unwrap();
+        let title_sel = Selector::parse(".title").unwrap();
+        let link_sel = Selector::parse("a").unwrap();
+        let desc_sel =
+            Selector::parse(".generic-snippet, .video-snippet > .snippet-description").unwrap();
 
         for (i, element) in document.select(&result_sel).enumerate() {
             let title = element

@@ -341,68 +341,66 @@ impl OllamaProvider {
             .map(|message| {
                 if message.role == "assistant"
                     && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content)
-                        && let Some(tool_calls_value) = value.get("tool_calls")
-                            && let Ok(parsed_calls) =
-                                serde_json::from_value::<Vec<ToolCall>>(tool_calls_value.clone())
-                            {
-                                let outgoing_calls: Vec<OutgoingToolCall> = parsed_calls
-                                    .into_iter()
-                                    .map(|call| {
-                                        tool_name_by_id.insert(call.id.clone(), call.name.clone());
-                                        OutgoingToolCall {
-                                            kind: "function".to_string(),
-                                            function: OutgoingFunction {
-                                                name: call.name,
-                                                arguments: Self::parse_tool_arguments(
-                                                    &call.arguments,
-                                                ),
-                                            },
-                                        }
-                                    })
-                                    .collect();
-                                let content = value
-                                    .get("content")
-                                    .and_then(serde_json::Value::as_str)
-                                    .map(ToString::to_string);
-                                return Message {
-                                    role: "assistant".to_string(),
-                                    content,
-                                    images: None,
-                                    tool_calls: Some(outgoing_calls),
-                                    tool_name: None,
-                                };
+                    && let Some(tool_calls_value) = value.get("tool_calls")
+                    && let Ok(parsed_calls) =
+                        serde_json::from_value::<Vec<ToolCall>>(tool_calls_value.clone())
+                {
+                    let outgoing_calls: Vec<OutgoingToolCall> = parsed_calls
+                        .into_iter()
+                        .map(|call| {
+                            tool_name_by_id.insert(call.id.clone(), call.name.clone());
+                            OutgoingToolCall {
+                                kind: "function".to_string(),
+                                function: OutgoingFunction {
+                                    name: call.name,
+                                    arguments: Self::parse_tool_arguments(&call.arguments),
+                                },
                             }
+                        })
+                        .collect();
+                    let content = value
+                        .get("content")
+                        .and_then(serde_json::Value::as_str)
+                        .map(ToString::to_string);
+                    return Message {
+                        role: "assistant".to_string(),
+                        content,
+                        images: None,
+                        tool_calls: Some(outgoing_calls),
+                        tool_name: None,
+                    };
+                }
 
                 if message.role == "tool"
-                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content) {
-                        let tool_name = value
-                            .get("tool_name")
-                            .and_then(serde_json::Value::as_str)
-                            .map(ToString::to_string)
-                            .or_else(|| {
-                                value
-                                    .get("tool_call_id")
-                                    .and_then(serde_json::Value::as_str)
-                                    .and_then(|id| tool_name_by_id.get(id))
-                                    .cloned()
-                            });
-                        let content = value
-                            .get("content")
-                            .and_then(serde_json::Value::as_str)
-                            .map(ToString::to_string)
-                            .or_else(|| {
-                                (!message.content.trim().is_empty())
-                                    .then_some(message.content.clone())
-                            });
+                    && let Ok(value) = serde_json::from_str::<serde_json::Value>(&message.content)
+                {
+                    let tool_name = value
+                        .get("tool_name")
+                        .and_then(serde_json::Value::as_str)
+                        .map(ToString::to_string)
+                        .or_else(|| {
+                            value
+                                .get("tool_call_id")
+                                .and_then(serde_json::Value::as_str)
+                                .and_then(|id| tool_name_by_id.get(id))
+                                .cloned()
+                        });
+                    let content = value
+                        .get("content")
+                        .and_then(serde_json::Value::as_str)
+                        .map(ToString::to_string)
+                        .or_else(|| {
+                            (!message.content.trim().is_empty()).then_some(message.content.clone())
+                        });
 
-                        return Message {
-                            role: "tool".to_string(),
-                            content,
-                            images: None,
-                            tool_calls: None,
-                            tool_name,
-                        };
-                    }
+                    return Message {
+                        role: "tool".to_string(),
+                        content,
+                        images: None,
+                        tool_calls: None,
+                        tool_name,
+                    };
+                }
 
                 if message.role == "user" {
                     let (content, images) = self.convert_user_message_content(&message.content);
@@ -453,10 +451,9 @@ impl OllamaProvider {
 
         let mut request_builder = self.http_client().post(&url).json(&request);
 
-        if should_auth
-            && let Some(key) = self.api_key.as_ref() {
-                request_builder = request_builder.bearer_auth(key);
-            }
+        if should_auth && let Some(key) = self.api_key.as_ref() {
+            request_builder = request_builder.bearer_auth(key);
+        }
 
         let response = request_builder.send().await?;
         let status = response.status();
@@ -595,19 +592,20 @@ impl OllamaProvider {
             || name == "tool.call"
             || name.starts_with("tool_call>")
             || name.starts_with("tool_call<"))
-            && let Some(nested_name) = args.get("name").and_then(|v| v.as_str()) {
-                let nested_args = args
-                    .get("arguments")
-                    .cloned()
-                    .unwrap_or(serde_json::json!({}));
-                tracing::debug!(
-                    "Unwrapped nested tool call: {} -> {} with args {:?}",
-                    name,
-                    nested_name,
-                    nested_args
-                );
-                return (nested_name.to_string(), nested_args);
-            }
+            && let Some(nested_name) = args.get("name").and_then(|v| v.as_str())
+        {
+            let nested_args = args
+                .get("arguments")
+                .cloned()
+                .unwrap_or(serde_json::json!({}));
+            tracing::debug!(
+                "Unwrapped nested tool call: {} -> {} with args {:?}",
+                name,
+                nested_name,
+                nested_args
+            );
+            return (nested_name.to_string(), nested_args);
+        }
 
         // Pattern 2: Prefixed tool name (tool.shell, tool.file_read, etc.)
         if let Some(stripped) = name.strip_prefix("tool.") {
@@ -831,24 +829,25 @@ impl Provider for OllamaProvider {
     ) -> anyhow::Result<ChatResponse> {
         // Convert ToolSpec to OpenAI-compatible JSON and delegate to chat_with_tools.
         if let Some(specs) = request.tools
-            && !specs.is_empty() {
-                let tools: Vec<serde_json::Value> = specs
-                    .iter()
-                    .map(|s| {
-                        serde_json::json!({
-                            "type": "function",
-                            "function": {
-                                "name": s.name,
-                                "description": s.description,
-                                "parameters": s.parameters
-                            }
-                        })
+            && !specs.is_empty()
+        {
+            let tools: Vec<serde_json::Value> = specs
+                .iter()
+                .map(|s| {
+                    serde_json::json!({
+                        "type": "function",
+                        "function": {
+                            "name": s.name,
+                            "description": s.description,
+                            "parameters": s.parameters
+                        }
                     })
-                    .collect();
-                return self
-                    .chat_with_tools(request.messages, &tools, model, temperature)
-                    .await;
-            }
+                })
+                .collect();
+            return self
+                .chat_with_tools(request.messages, &tools, model, temperature)
+                .await;
+        }
 
         // No tools — fall back to plain text chat.
         let text = self

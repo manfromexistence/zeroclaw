@@ -118,12 +118,7 @@ impl SearchEngine for TokyoToshokan {
                 content
             };
 
-            let mut result = SearchResult::new(
-                title,
-                href,
-                content,
-                "tokyotoshokan",
-            );
+            let mut result = SearchResult::new(title, href, content, "tokyotoshokan");
             result.engine_rank = rank;
             results.push(result);
             rank += 1;
@@ -132,4 +127,3 @@ impl SearchEngine for TokyoToshokan {
         Ok(results)
     }
 }
-

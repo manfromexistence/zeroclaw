@@ -5,7 +5,6 @@
 //!   1. GET the search page to extract an embedded public JWT token.
 //!   2. Call api.vimeo.com/videos with that JWT in the Authorization header.
 
-use async_trait::async_trait;
 use crate::metasearch::{
     category::SearchCategory,
     engine::{EngineMetadata, SearchEngine},
@@ -13,6 +12,7 @@ use crate::metasearch::{
     query::SearchQuery,
     result::SearchResult,
 };
+use async_trait::async_trait;
 use reqwest::Client;
 use smallvec::smallvec;
 

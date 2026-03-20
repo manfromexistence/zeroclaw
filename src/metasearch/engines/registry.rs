@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 
-use dashmap::DashMap;
 use crate::metasearch::category::SearchCategory;
 use crate::metasearch::engine::SearchEngine;
+use dashmap::DashMap;
 use reqwest::Client;
 
 use super::{
@@ -37,8 +37,7 @@ use super::{
     openlibrary::OpenLibrary, openstreetmap::OpenStreetMap, openverse::Openverse,
     peertube::PeerTube, photon::Photon, pinterest::Pinterest, piped::Piped, piratebay::PirateBay,
     pkg_go_dev::PkgGoDev, podcastindex::PodcastIndex, pypi::PyPI, quark::Quark, qwant::Qwant,
-    radio_browser::RadioBrowser, recoll_engine::RecollEngine, reddit::Reddit,
-    rightdao::RightDao,
+    radio_browser::RadioBrowser, recoll_engine::RecollEngine, reddit::Reddit, rightdao::RightDao,
     rottentomatoes::RottenTomatoes, rumble::Rumble, searchcode::Searchcode,
     semantic_scholar::SemanticScholar, sepiasearch::SepiaSearch, sogou::Sogou,
     solidtorrents::SolidTorrents, soundcloud::SoundCloud, sourcehut::Sourcehut, spotify::Spotify,
@@ -49,34 +48,34 @@ use super::{
     wordnik::Wordnik, yahoo::Yahoo, yandex::Yandex, yep::Yep, youtube::YouTube,
 };
 use super::{
-    microsoft_learn::MicrosoftLearn, mrs::Mrs, nvd::Nvd, openclipart::Openclipart,
-    pdbe::Pdbe, repology::Repology, reuters::Reuters, scanr_structures::ScanrStructures,
-    searchcode_code::SearchcodeCode, selfhst::Selfhst, senscritique::SensCritique,
-    sogou_images::SogouImages, sogou_videos::SogouVideos, sogou_wechat::SogouWechat,
-    steam::SteamStore, uxwing::Uxwing, www1x::Www1x, yahoo_news::YahooNews,
-};
-use super::{
     astrophysics_data_system::AstrophysicsDataSystem, presearch::Presearch,
     wolframalpha_api::WolframAlphaApi, wolframalpha_noapi::WolframAlphaNoapi,
     youtube_api::YoutubeApi, youtube_noapi::YoutubeNoapi,
+};
+use super::{azure::Azure, cloudflareai::CloudflareAi, ollama::Ollama};
+use super::{
+    duckduckgo_extra::DuckDuckGoExtra, pexels::Pexels, pixiv::Pixiv,
+    three_sixty_search::ThreeSixtySearch, torznab::Torznab, yacy::Yacy,
 };
 use super::{
     github_code::GithubCode, niconico::Niconico, pixabay::Pixabay, pubmed::Pubmed,
     yandex_music::YandexMusic, zlibrary::Zlibrary,
 };
 use super::{
-    mozhi::Mozhi, open_meteo::OpenMeteo, seznam::Seznam, startpage::Startpage,
-    translated::Translated, wttr::Wttr,
+    microsoft_learn::MicrosoftLearn, mrs::Mrs, nvd::Nvd, openclipart::Openclipart, pdbe::Pdbe,
+    repology::Repology, reuters::Reuters, scanr_structures::ScanrStructures,
+    searchcode_code::SearchcodeCode, selfhst::Selfhst, senscritique::SensCritique,
+    sogou_images::SogouImages, sogou_videos::SogouVideos, sogou_wechat::SogouWechat,
+    steam::SteamStore, uxwing::Uxwing, www1x::Www1x, yahoo_news::YahooNews,
 };
 use super::{
-    duckduckgo_extra::DuckDuckGoExtra, pexels::Pexels, pixiv::Pixiv,
-    three_sixty_search::ThreeSixtySearch, torznab::Torznab, yacy::Yacy,
+    mozhi::Mozhi, open_meteo::OpenMeteo, seznam::Seznam, startpage::Startpage,
+    translated::Translated, wttr::Wttr,
 };
 use super::{
     opensemantic::OpenSemantic, public_domain_image_archive::PublicDomainImageArchive,
     searx_engine::SearxEngine, solr::Solr, tubearchivist::TubeArchivist, wikidata::Wikidata,
 };
-use super::{azure::Azure, cloudflareai::CloudflareAi, ollama::Ollama};
 
 /// Central registry of all search engines.
 pub struct EngineRegistry {
@@ -386,7 +385,12 @@ impl EngineRegistry {
 
         // ── Batch 32: AI/Cloud: Ollama, Cloudflare AI, Azure Search ──
         registry.register(Arc::new(Ollama::new(client.clone(), "", None)));
-        registry.register(Arc::new(CloudflareAi::new(client.clone(), None, None, None)));
+        registry.register(Arc::new(CloudflareAi::new(
+            client.clone(),
+            None,
+            None,
+            None,
+        )));
         registry.register(Arc::new(Azure::new(client.clone(), "", None, None)));
 
         registry

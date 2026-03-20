@@ -456,9 +456,10 @@ impl KnowledgeGraph {
         let mut results: Vec<SearchResult> = Vec::new();
         for (eid, score) in expert_scores {
             if let Some(node) = self.get_node(&eid)?
-                && node.node_type == NodeType::Expert {
-                    results.push(SearchResult { node, score });
-                }
+                && node.node_type == NodeType::Expert
+            {
+                results.push(SearchResult { node, score });
+            }
         }
 
         results.sort_by(|a, b| {
