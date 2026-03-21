@@ -101,7 +101,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
     let project_ctx = setup_project_context()?;
 
     print_step(9, 9, "Workspace Files")?;
-    scaffold_workspace(&workspace_dir, &project_ctx).await?;
+    scaffold_workspace(&workspace_dir, &project_ctx, &memory_config.backend).await?;
 
     // ── Build config ──
     // Defaults: SQLite memory, supervised autonomy, workspace-scoped, native runtime
@@ -554,7 +554,7 @@ async fn run_quick_setup_with_home(
             "Be warm, natural, and clear. Use occasional relevant emojis (1-2 max) and avoid robotic phrasing."
                 .into(),
     };
-    scaffold_workspace(&workspace_dir, &default_ctx).await?;
+    scaffold_workspace(&workspace_dir, &default_ctx, &memory_backend_name).await?;
 
     prompts::log::success(format!("Workspace: {}", workspace_dir.display()))?;
     prompts::log::success(format!("Provider: {}", provider_name))?;
@@ -1952,7 +1952,11 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
 // ── Step 6: Scaffold workspace files ─────────────────────────────
 
 #[allow(clippy::too_many_lines)]
-async fn scaffold_workspace(workspace_dir: &Path, ctx: &ProjectContext) -> Result<()> {
+async fn scaffold_workspace(
+    workspace_dir: &Path,
+    ctx: &ProjectContext,
+    memory_backend: &str,
+) -> Result<()> {
     let agent = if ctx.agent_name.is_empty() {
         "Agent"
     } else {

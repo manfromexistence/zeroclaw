@@ -120,6 +120,7 @@ mod ui {
     pub use agent::ui::*;
 }
 mod util;
+mod verifiable_intent;
 
 use config::Config;
 

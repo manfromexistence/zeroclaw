@@ -243,6 +243,7 @@ mod tests {
                 tz: None,
             },
             "touch cron-run-approval",
+            None,
             true,
         )
         .unwrap();

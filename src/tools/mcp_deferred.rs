@@ -247,6 +247,8 @@ pub fn build_deferred_tools_section(deferred: &DeferredMcpToolSet) -> String {
     out.push_str("<available-deferred-tools>\n");
     for stub in &deferred.stubs {
         out.push_str(&stub.prefixed_name);
+        out.push_str(" - ");
+        out.push_str(&stub.description);
         out.push('\n');
     }
     out.push_str("</available-deferred-tools>\n");
@@ -417,8 +419,8 @@ mod tests {
         };
         let section = build_deferred_tools_section(&set);
         assert!(section.contains("<available-deferred-tools>"));
-        assert!(section.contains("fs__read_file"));
-        assert!(section.contains("git__status"));
+        assert!(section.contains("fs__read_file - Read a file"));
+        assert!(section.contains("git__status - Git status"));
         assert!(section.contains("</available-deferred-tools>"));
     }
 

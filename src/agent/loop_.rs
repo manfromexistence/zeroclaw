@@ -3,12 +3,12 @@ use crate::config::Config;
 use crate::i18n::ToolDescriptions;
 use crate::memory::{self, Memory, MemoryCategory};
 use crate::multimodal;
-use crate::observability::{self, Observer, ObserverEvent, runtime_trace};
+use crate::observability::{self, runtime_trace, Observer, ObserverEvent};
 use crate::providers::{
     self, ChatMessage, ChatRequest, Provider, ProviderCapabilityError, ToolCall,
 };
 use crate::runtime;
-use crate::security::SecurityPolicy;
+use crate::security::{AutonomyLevel, SecurityPolicy};
 use crate::tools::{self, Tool};
 use crate::util::truncate_with_ellipsis;
 use anyhow::Result;
@@ -786,7 +786,11 @@ fn parse_xml_tool_calls(xml_content: &str) -> Option<Vec<ParsedToolCall>> {
         });
     }
 
-    if calls.is_empty() { None } else { Some(calls) }
+    if calls.is_empty() {
+        None
+    } else {
+        Some(calls)
+    }
 }
 
 /// Parse MiniMax-style XML tool calls with attributed invoke/parameter tags.
@@ -1226,7 +1230,7 @@ fn parse_function_call_tool_calls(response: &str) -> Vec<ParsedToolCall> {
 }
 
 /// Parse GLM-style tool calls from response text.
-/// Map tool name aliases from various LLM providers to DX-Agent tool names.
+/// Map tool name aliases from various LLM providers to ZeroClaw tool names.
 /// This handles variations like "fileread" -> "file_read", "bash" -> "shell", etc.
 fn map_tool_name_alias(tool_name: &str) -> &str {
     match tool_name {
@@ -1311,10 +1315,10 @@ fn parse_glm_style_tool_calls(text: &str) -> Vec<(String, serde_json::Value, Opt
                     continue;
                 }
 
-                if rest.starts_with('{')
-                    && let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest)
-                {
-                    calls.push((tool_name.to_string(), json_args, Some(line.to_string())));
+                if rest.starts_with('{') {
+                    if let Ok(json_args) = serde_json::from_str::<serde_json::Value>(rest) {
+                        calls.push((tool_name.to_string(), json_args, Some(line.to_string())));
+                    }
                 }
             }
         }
@@ -1327,7 +1331,7 @@ fn parse_glm_style_tool_calls(text: &str) -> Vec<(String, serde_json::Value, Opt
 ///
 /// When a model emits a shortened call like `shell>uname -a` (without an
 /// explicit `/param_name`), we need to infer which parameter the value maps
-/// to. This function encodes the mapping for known DX-Agent tools.
+/// to. This function encodes the mapping for known ZeroClaw tools.
 fn default_param_for_tool(tool: &str) -> &'static str {
     match tool {
         "shell" | "bash" | "sh" | "exec" | "command" | "cmd" => "command",
@@ -1543,19 +1547,19 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
         calls = parse_tool_calls_from_json_value(&json_value);
         if !calls.is_empty() {
             // If we found tool_calls, extract any content field as text
-            if let Some(content) = json_value.get("content").and_then(|v| v.as_str())
-                && !content.trim().is_empty()
-            {
-                text_parts.push(content.trim().to_string());
+            if let Some(content) = json_value.get("content").and_then(|v| v.as_str()) {
+                if !content.trim().is_empty() {
+                    text_parts.push(content.trim().to_string());
+                }
             }
             return (text_parts.join("\n"), calls);
         }
     }
 
-    if let Some((minimax_text, minimax_calls)) = parse_minimax_invoke_calls(response)
-        && !minimax_calls.is_empty()
-    {
-        return (minimax_text, minimax_calls);
+    if let Some((minimax_text, minimax_calls)) = parse_minimax_invoke_calls(response) {
+        if !minimax_calls.is_empty() {
+            return (minimax_text, minimax_calls);
+        }
     }
 
     // Fall back to XML-style tool-call tag parsing.
@@ -1586,9 +1590,11 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             }
 
             // If JSON parsing failed, try XML format (DeepSeek/GLM style)
-            if !parsed_any && let Some(xml_calls) = parse_xml_tool_calls(inner) {
-                calls.extend(xml_calls);
-                parsed_any = true;
+            if !parsed_any {
+                if let Some(xml_calls) = parse_xml_tool_calls(inner) {
+                    calls.extend(xml_calls);
+                    parsed_any = true;
+                }
             }
 
             if !parsed_any {
@@ -1626,15 +1632,19 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
                 }
 
                 // Try XML
-                if !parsed_any && let Some(xml_calls) = parse_xml_tool_calls(inner) {
-                    calls.extend(xml_calls);
-                    parsed_any = true;
+                if !parsed_any {
+                    if let Some(xml_calls) = parse_xml_tool_calls(inner) {
+                        calls.extend(xml_calls);
+                        parsed_any = true;
+                    }
                 }
 
                 // Try GLM shortened body
-                if !parsed_any && let Some(glm_call) = parse_glm_shortened_body(inner) {
-                    calls.push(glm_call);
-                    parsed_any = true;
+                if !parsed_any {
+                    if let Some(glm_call) = parse_glm_shortened_body(inner) {
+                        calls.push(glm_call);
+                        parsed_any = true;
+                    }
                 }
 
                 if parsed_any {
@@ -1649,15 +1659,16 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
 
             // No cross-alias close tag resolved — fall back to JSON recovery
             // from unclosed tags (brace-balancing).
-            if let Some(json_end) = find_json_end(after_open)
-                && let Ok(value) =
+            if let Some(json_end) = find_json_end(after_open) {
+                if let Ok(value) =
                     serde_json::from_str::<serde_json::Value>(&after_open[..json_end])
-            {
-                let parsed_calls = parse_tool_calls_from_json_value(&value);
-                if !parsed_calls.is_empty() {
-                    calls.extend(parsed_calls);
-                    remaining = strip_leading_close_tags(&after_open[json_end..]);
-                    continue;
+                {
+                    let parsed_calls = parse_tool_calls_from_json_value(&value);
+                    if !parsed_calls.is_empty() {
+                        calls.extend(parsed_calls);
+                        remaining = strip_leading_close_tags(&after_open[json_end..]);
+                        continue;
+                    }
                 }
             }
 
@@ -1788,13 +1799,13 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
             for call in xml_calls {
                 calls.push(call);
                 // Try to remove the XML from text
-                if let Some(start) = cleaned_text.find("<minimax:toolcall>")
-                    && let Some(end) = cleaned_text.find("</minimax:toolcall>")
-                {
-                    let end_pos = end + "</minimax:toolcall>".len();
-                    if end_pos <= cleaned_text.len() {
-                        cleaned_text =
-                            format!("{}{}", &cleaned_text[..start], &cleaned_text[end_pos..]);
+                if let Some(start) = cleaned_text.find("<minimax:toolcall>") {
+                    if let Some(end) = cleaned_text.find("</minimax:toolcall>") {
+                        let end_pos = end + "</minimax:toolcall>".len();
+                        if end_pos <= cleaned_text.len() {
+                            cleaned_text =
+                                format!("{}{}", &cleaned_text[..start], &cleaned_text[end_pos..]);
+                        }
                     }
                 }
             }
@@ -1895,7 +1906,7 @@ fn parse_tool_calls(response: &str) -> (String, Vec<ParsedToolCall>) {
     // (e.g., in emails, files, or web pages) could include JSON that mimics a
     // tool call. Tool calls MUST be explicitly wrapped in either:
     // 1. OpenAI-style JSON with a "tool_calls" array
-    // 2. DX-Agent tool-call tags (<tool_call>, <toolcall>, <tool-call>)
+    // 2. ZeroClaw tool-call tags (<tool_call>, <toolcall>, <tool-call>)
     // 3. Markdown code blocks with tool_call/toolcall/tool-call language
     // 4. Explicit GLM line-based call formats (e.g. `shell/command>...`)
     // This ensures only the LLM's intentional tool calls are executed.
@@ -2097,9 +2108,20 @@ fn build_assistant_history_with_tool_calls(text: &str, tool_calls: &[ToolCall]) 
     parts.join("\n")
 }
 
-fn resolve_display_text(response_text: &str, parsed_text: &str, has_tool_calls: bool) -> String {
+fn resolve_display_text(
+    response_text: &str,
+    parsed_text: &str,
+    has_tool_calls: bool,
+    has_native_tool_calls: bool,
+) -> String {
     if has_tool_calls {
-        return parsed_text.to_string();
+        if !parsed_text.is_empty() {
+            return parsed_text.to_string();
+        }
+        if has_native_tool_calls {
+            return response_text.to_string();
+        }
+        return String::new();
     }
 
     if parsed_text.is_empty() {
@@ -2170,8 +2192,10 @@ pub(crate) async fn agent_turn(
     temperature: f64,
     silent: bool,
     channel_name: &str,
+    channel_reply_target: Option<&str>,
     multimodal_config: &crate::config::MultimodalConfig,
     max_tool_iterations: usize,
+    approval: Option<&ApprovalManager>,
     excluded_tools: &[String],
     dedup_exempt_tools: &[String],
     activated_tools: Option<&std::sync::Arc<std::sync::Mutex<crate::tools::ActivatedToolSet>>>,
@@ -2186,8 +2210,9 @@ pub(crate) async fn agent_turn(
         model,
         temperature,
         silent,
-        None,
+        approval,
         channel_name,
+        channel_reply_target,
         multimodal_config,
         max_tool_iterations,
         None,
@@ -2199,6 +2224,100 @@ pub(crate) async fn agent_turn(
         model_switch_callback,
     )
     .await
+}
+
+fn maybe_inject_channel_delivery_defaults(
+    tool_name: &str,
+    tool_args: &mut serde_json::Value,
+    channel_name: &str,
+    channel_reply_target: Option<&str>,
+) {
+    if tool_name != "cron_add" {
+        return;
+    }
+
+    if !matches!(
+        channel_name,
+        "telegram" | "discord" | "slack" | "mattermost" | "matrix"
+    ) {
+        return;
+    }
+
+    let Some(reply_target) = channel_reply_target
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    else {
+        return;
+    };
+
+    let Some(args) = tool_args.as_object_mut() else {
+        return;
+    };
+
+    let is_agent_job = args
+        .get("job_type")
+        .and_then(serde_json::Value::as_str)
+        .is_some_and(|job_type| job_type.eq_ignore_ascii_case("agent"))
+        || args
+            .get("prompt")
+            .and_then(serde_json::Value::as_str)
+            .is_some_and(|prompt| !prompt.trim().is_empty());
+    if !is_agent_job {
+        return;
+    }
+
+    let default_delivery = || {
+        serde_json::json!({
+            "mode": "announce",
+            "channel": channel_name,
+            "to": reply_target,
+        })
+    };
+
+    match args.get_mut("delivery") {
+        None => {
+            args.insert("delivery".to_string(), default_delivery());
+        }
+        Some(serde_json::Value::Null) => {
+            *args.get_mut("delivery").expect("delivery key exists") = default_delivery();
+        }
+        Some(serde_json::Value::Object(delivery)) => {
+            if delivery
+                .get("mode")
+                .and_then(serde_json::Value::as_str)
+                .is_some_and(|mode| mode.eq_ignore_ascii_case("none"))
+            {
+                return;
+            }
+
+            delivery
+                .entry("mode".to_string())
+                .or_insert_with(|| serde_json::Value::String("announce".to_string()));
+
+            let needs_channel = delivery
+                .get("channel")
+                .and_then(serde_json::Value::as_str)
+                .is_none_or(|value| value.trim().is_empty());
+            if needs_channel {
+                delivery.insert(
+                    "channel".to_string(),
+                    serde_json::Value::String(channel_name.to_string()),
+                );
+            }
+
+            let needs_target = delivery
+                .get("to")
+                .and_then(serde_json::Value::as_str)
+                .is_none_or(|value| value.trim().is_empty());
+            if needs_target {
+                delivery.insert(
+                    "to".to_string(),
+                    serde_json::Value::String(reply_target.to_string()),
+                );
+            }
+        }
+        Some(_) => {}
+    }
 }
 
 async fn execute_one_tool(
@@ -2306,12 +2425,20 @@ fn should_execute_tools_in_parallel(
         return false;
     }
 
-    if let Some(mgr) = approval
-        && tool_calls.iter().any(|call| mgr.needs_approval(&call.name))
-    {
-        // Approval-gated calls must keep sequential handling so the caller can
-        // enforce CLI prompt/deny policy consistently.
+    // tool_search activates deferred MCP tools into ActivatedToolSet.
+    // Running tool_search in parallel with the tools it activates causes a
+    // race condition where the tool lookup happens before activation completes.
+    // Force sequential execution whenever tool_search is in the batch.
+    if tool_calls.iter().any(|call| call.name == "tool_search") {
         return false;
+    }
+
+    if let Some(mgr) = approval {
+        if tool_calls.iter().any(|call| mgr.needs_approval(&call.name)) {
+            // Approval-gated calls must keep sequential handling so the caller can
+            // enforce CLI prompt/deny policy consistently.
+            return false;
+        }
     }
 
     true
@@ -2394,6 +2521,7 @@ pub(crate) async fn run_tool_call_loop(
     silent: bool,
     approval: Option<&ApprovalManager>,
     channel_name: &str,
+    channel_reply_target: Option<&str>,
     multimodal_config: &crate::config::MultimodalConfig,
     max_tool_iterations: usize,
     cancellation_token: Option<CancellationToken>,
@@ -2423,23 +2551,25 @@ pub(crate) async fn run_tool_call_loop(
         }
 
         // Check if model switch was requested via model_switch tool
-        if let Some(ref callback) = model_switch_callback
-            && let Ok(guard) = callback.lock()
-            && let Some((new_provider, new_model)) = guard.as_ref()
-            && (new_provider != provider_name || new_model != model)
-        {
-            tracing::info!(
-                "Model switch detected: {} {} -> {} {}",
-                provider_name,
-                model,
-                new_provider,
-                new_model
-            );
-            return Err(ModelSwitchRequested {
-                provider: new_provider.clone(),
-                model: new_model.clone(),
+        if let Some(ref callback) = model_switch_callback {
+            if let Ok(guard) = callback.lock() {
+                if let Some((new_provider, new_model)) = guard.as_ref() {
+                    if new_provider != provider_name || new_model != model {
+                        tracing::info!(
+                            "Model switch detected: {} {} -> {} {}",
+                            provider_name,
+                            model,
+                            new_provider,
+                            new_model
+                        );
+                        return Err(ModelSwitchRequested {
+                            provider: new_provider.clone(),
+                            model: new_model.clone(),
+                        }
+                        .into());
+                    }
+                }
             }
-            .into());
         }
 
         // Rebuild tool_specs each iteration so newly activated deferred tools appear.
@@ -2667,8 +2797,12 @@ pub(crate) async fn run_tool_call_loop(
                 }
             };
 
-        let display_text =
-            resolve_display_text(&response_text, &parsed_text, !tool_calls.is_empty());
+        let display_text = resolve_display_text(
+            &response_text,
+            &parsed_text,
+            !tool_calls.is_empty(),
+            !native_tool_calls.is_empty(),
+        );
         let display_text = strip_tool_result_blocks(&display_text);
 
         // ── Progress: LLM responded ─────────────────────────────
@@ -2729,10 +2863,18 @@ pub(crate) async fn run_tool_call_loop(
             return Ok(display_text);
         }
 
-        // Print any text the LLM produced alongside tool calls (unless silent)
-        if !silent && !display_text.is_empty() {
-            print!("{display_text}");
-            let _ = std::io::stdout().flush();
+        // Native tool-call providers can return assistant text separately from
+        // the structured call payload; relay it to draft-capable channels.
+        if !display_text.is_empty() {
+            if !native_tool_calls.is_empty() {
+                if let Some(ref tx) = on_delta {
+                    let _ = tx.send(display_text.clone()).await;
+                }
+            }
+            if !silent {
+                print!("{display_text}");
+                let _ = std::io::stdout().flush();
+            }
         }
 
         // Execute tool calls and build results. `individual_results` tracks per-call output so
@@ -2802,58 +2944,65 @@ pub(crate) async fn run_tool_call_loop(
                 }
             }
 
+            maybe_inject_channel_delivery_defaults(
+                &tool_name,
+                &mut tool_args,
+                channel_name,
+                channel_reply_target,
+            );
+
             // ── Approval hook ────────────────────────────────
-            if let Some(mgr) = approval
-                && mgr.needs_approval(&tool_name)
-            {
-                let request = ApprovalRequest {
-                    tool_name: tool_name.clone(),
-                    arguments: tool_args.clone(),
-                };
+            if let Some(mgr) = approval {
+                if mgr.needs_approval(&tool_name) {
+                    let request = ApprovalRequest {
+                        tool_name: tool_name.clone(),
+                        arguments: tool_args.clone(),
+                    };
 
-                // Interactive CLI: prompt the operator.
-                // Non-interactive (channels): auto-deny since no operator
-                // is present to approve.
-                let decision = if mgr.is_non_interactive() {
-                    ApprovalResponse::No
-                } else {
-                    mgr.prompt_cli(&request)
-                };
+                    // Interactive CLI: prompt the operator.
+                    // Non-interactive (channels): auto-deny since no operator
+                    // is present to approve.
+                    let decision = if mgr.is_non_interactive() {
+                        ApprovalResponse::No
+                    } else {
+                        mgr.prompt_cli(&request)
+                    };
 
-                mgr.record_decision(&tool_name, &tool_args, decision, channel_name);
+                    mgr.record_decision(&tool_name, &tool_args, decision, channel_name);
 
-                if decision == ApprovalResponse::No {
-                    let denied = "Denied by user.".to_string();
-                    runtime_trace::record_event(
-                        "tool_call_result",
-                        Some(channel_name),
-                        Some(provider_name),
-                        Some(model),
-                        Some(&turn_id),
-                        Some(false),
-                        Some(&denied),
-                        serde_json::json!({
-                            "iteration": iteration + 1,
-                            "tool": tool_name.clone(),
-                            "arguments": scrub_credentials(&tool_args.to_string()),
-                        }),
-                    );
-                    if let Some(ref tx) = on_delta {
-                        let _ = tx
-                            .send(format!("\u{274c} {}: {}\n", tool_name, denied))
-                            .await;
+                    if decision == ApprovalResponse::No {
+                        let denied = "Denied by user.".to_string();
+                        runtime_trace::record_event(
+                            "tool_call_result",
+                            Some(channel_name),
+                            Some(provider_name),
+                            Some(model),
+                            Some(&turn_id),
+                            Some(false),
+                            Some(&denied),
+                            serde_json::json!({
+                                "iteration": iteration + 1,
+                                "tool": tool_name.clone(),
+                                "arguments": scrub_credentials(&tool_args.to_string()),
+                            }),
+                        );
+                        if let Some(ref tx) = on_delta {
+                            let _ = tx
+                                .send(format!("\u{274c} {}: {}\n", tool_name, denied))
+                                .await;
+                        }
+                        ordered_results[idx] = Some((
+                            tool_name.clone(),
+                            call.tool_call_id.clone(),
+                            ToolExecutionOutcome {
+                                output: denied.clone(),
+                                success: false,
+                                error_reason: Some(denied),
+                                duration: Duration::ZERO,
+                            },
+                        ));
+                        continue;
                     }
-                    ordered_results[idx] = Some((
-                        tool_name.clone(),
-                        call.tool_call_id.clone(),
-                        ToolExecutionOutcome {
-                            output: denied.clone(),
-                            success: false,
-                            error_reason: Some(denied),
-                            duration: Duration::ZERO,
-                        },
-                    ));
-                    continue;
                 }
             }
 
@@ -3136,7 +3285,7 @@ pub async fn run(
         &config.workspace_dir,
         config.api_key.as_deref(),
     )?);
-    tracing::debug!(backend = mem.name(), "Memory initialized");
+    tracing::info!(backend = mem.name(), "Memory initialized");
 
     // ── Peripherals (merge peripheral tools into registry) ─
     if !peripheral_overrides.is_empty() {
@@ -3356,6 +3505,15 @@ pub async fn run(
             "Delete a memory entry. Use when: memory is incorrect/stale or explicitly requested for removal. Don't use when: impact is uncertain.",
         ),
     ];
+    if matches!(
+        config.skills.prompt_injection_mode,
+        crate::config::SkillsPromptInjectionMode::Compact
+    ) {
+        tool_descs.push((
+            "read_skill",
+            "Load the full source for an available skill by name. Use when: compact mode only shows a summary and you need the complete skill instructions.",
+        ));
+    }
     tool_descs.push((
         "cron_add",
         "Create a cron job. Supports schedule kinds: cron, at, every; and job types: shell or agent.",
@@ -3419,7 +3577,7 @@ pub async fn run(
         ));
         tool_descs.push((
             "arduino_upload",
-            "Upload agent-generated Arduino sketch. Use when: user asks for 'make a heart', 'blink pattern', or custom LED behavior on Arduino. You write the full .ino code; DX-Agent compiles and uploads it. Pin 13 = built-in LED on Uno.",
+            "Upload agent-generated Arduino sketch. Use when: user asks for 'make a heart', 'blink pattern', or custom LED behavior on Arduino. You write the full .ino code; ZeroClaw compiles and uploads it. Pin 13 = built-in LED on Uno.",
         ));
         tool_descs.push((
             "hardware_memory_map",
@@ -3444,13 +3602,14 @@ pub async fn run(
         None
     };
     let native_tools = provider.supports_native_tools();
-    let mut system_prompt = crate::channels::build_system_prompt_with_mode(
+    let mut system_prompt = crate::channels::build_system_prompt_with_mode_and_autonomy(
         &config.workspace_dir,
         &model_name,
         &tool_descs,
         &skills,
         Some(&config.identity),
         bootstrap_max_chars,
+        Some(&config.autonomy),
         native_tools,
         config.skills.prompt_injection_mode,
     );
@@ -3543,6 +3702,7 @@ pub async fn run(
                 false,
                 approval_manager.as_ref(),
                 channel_name,
+                None,
                 &config.multimodal,
                 config.agent.max_tool_iterations,
                 None,
@@ -3620,8 +3780,9 @@ pub async fn run(
         println!("{response}");
         observer.record_event(&ObserverEvent::TurnComplete);
     } else {
-        println!("◆ Agent");
-        println!("\x1b[90mType /help for commands\x1b[0m\n");
+        println!("🦀 ZeroClaw Interactive Mode");
+        println!("Type /help for commands.\n");
+        let cli = crate::channels::CliChannel::new();
 
         // Persistent conversation history across turns
         let mut history = if let Some(path) = session_state_file.as_deref() {
@@ -3631,7 +3792,7 @@ pub async fn run(
         };
 
         loop {
-            print!("\x1b[90m>\x1b[0m ");
+            print!("> ");
             let _ = std::io::stdout().flush();
 
             // Read raw bytes to avoid UTF-8 validation errors when PTY
@@ -3639,29 +3800,21 @@ pub async fn run(
             // (e.g. CJK input with spaces over kubectl exec / SSH).
             let mut raw = Vec::new();
             match std::io::BufRead::read_until(&mut std::io::stdin().lock(), b'\n', &mut raw) {
-                Ok(0) => {
-                    crate::util::show_exit_train();
-                    break;
-                }
+                Ok(0) => break,
                 Ok(_) => {}
                 Err(e) => {
                     eprintln!("\nError reading input: {e}\n");
-                    crate::util::show_exit_train();
                     break;
                 }
             }
             let input = String::from_utf8_lossy(&raw).into_owned();
 
             let user_input = input.trim().to_string();
-
             if user_input.is_empty() {
                 continue;
             }
             match user_input.as_str() {
-                "/quit" | "/exit" => {
-                    crate::util::show_exit_train();
-                    break;
-                }
+                "/quit" | "/exit" => break,
                 "/help" => {
                     println!("Available commands:");
                     println!("  /help        Show this help message");
@@ -3674,7 +3827,7 @@ pub async fn run(
                         "This will clear the current conversation and delete all session memory."
                     );
                     println!("Core memories (long-term facts/preferences) will be preserved.");
-                    print!("\nContinue? [y/N] ");
+                    print!("Continue? [y/N] ");
                     let _ = std::io::stdout().flush();
 
                     let mut confirm_raw = Vec::new();
@@ -3689,7 +3842,7 @@ pub async fn run(
                     }
                     let confirm = String::from_utf8_lossy(&confirm_raw);
                     if !matches!(confirm.trim().to_lowercase().as_str(), "y" | "yes") {
-                        println!("Cancelled\n");
+                        println!("Cancelled.\n");
                         continue;
                     }
 
@@ -3706,9 +3859,9 @@ pub async fn run(
                         }
                     }
                     if cleared > 0 {
-                        println!("Conversation cleared ({cleared} memory entries removed)\n");
+                        println!("Conversation cleared ({cleared} memory entries removed).\n");
                     } else {
-                        println!("Conversation cleared\n");
+                        println!("Conversation cleared.\n");
                     }
                     if let Some(path) = session_state_file.as_deref() {
                         save_interactive_session_history(path, &history)?;
@@ -3776,6 +3929,7 @@ pub async fn run(
                     false,
                     approval_manager.as_ref(),
                     channel_name,
+                    None,
                     &config.multimodal,
                     config.agent.max_tool_iterations,
                     None,
@@ -3827,7 +3981,14 @@ pub async fn run(
                 }
             };
             final_output = response.clone();
-            println!("\n{response}\n");
+            if let Err(e) = crate::channels::Channel::send(
+                &cli,
+                &crate::channels::traits::SendMessage::new(format!("\n{response}\n"), "user"),
+            )
+            .await
+            {
+                eprintln!("\nError sending CLI response: {e}\n");
+            }
             observer.record_event(&ObserverEvent::TurnComplete);
 
             // Auto-compaction before hard trimming to preserve long-context signal.
@@ -3839,9 +4000,10 @@ pub async fn run(
                 config.agent.max_context_tokens,
             )
             .await
-                && compacted
             {
-                println!("\x1b[90mAuto-compaction complete\x1b[0m\n");
+                if compacted {
+                    println!("🧹 Auto-compaction complete");
+                }
             }
 
             // Hard cap as a safety net.
@@ -3880,6 +4042,7 @@ pub async fn process_message(
         &config.autonomy,
         &config.workspace_dir,
     ));
+    let approval_manager = ApprovalManager::for_non_interactive(&config.autonomy);
     let mem: Arc<dyn Memory> = Arc::from(memory::create_memory_with_storage_and_routes(
         &config.memory,
         &config.embedding_routes,
@@ -4038,6 +4201,15 @@ pub async fn process_message(
         ("screenshot", "Capture a screenshot."),
         ("image_info", "Read image metadata."),
     ];
+    if matches!(
+        config.skills.prompt_injection_mode,
+        crate::config::SkillsPromptInjectionMode::Compact
+    ) {
+        tool_descs.push((
+            "read_skill",
+            "Load the full source for an available skill by name.",
+        ));
+    }
     if config.browser.enabled {
         tool_descs.push(("browser_open", "Open approved URLs in browser."));
     }
@@ -4052,7 +4224,7 @@ pub async fn process_message(
         ));
         tool_descs.push((
             "arduino_upload",
-            "Upload Arduino sketch. Use for 'make a heart', custom patterns. You write full .ino code; DX-Agent uploads it.",
+            "Upload Arduino sketch. Use for 'make a heart', custom patterns. You write full .ino code; ZeroClaw uploads it.",
         ));
         tool_descs.push((
             "hardware_memory_map",
@@ -4071,19 +4243,30 @@ pub async fn process_message(
             "Query connected hardware for reported GPIO pins and LED pin. Use when user asks what pins are available.",
         ));
     }
+
+    // Filter out tools excluded for non-CLI channels (gateway counts as non-CLI).
+    // Skip when autonomy is `Full` — full-autonomy agents keep all tools.
+    if config.autonomy.level != AutonomyLevel::Full {
+        let excluded = &config.autonomy.non_cli_excluded_tools;
+        if !excluded.is_empty() {
+            tool_descs.retain(|(name, _)| !excluded.iter().any(|ex| ex == name));
+        }
+    }
+
     let bootstrap_max_chars = if config.agent.compact_context {
         Some(6000)
     } else {
         None
     };
     let native_tools = provider.supports_native_tools();
-    let mut system_prompt = crate::channels::build_system_prompt_with_mode(
+    let mut system_prompt = crate::channels::build_system_prompt_with_mode_and_autonomy(
         &config.workspace_dir,
         &model_name,
         &tool_descs,
         &skills,
         Some(&config.identity),
         bootstrap_max_chars,
+        Some(&config.autonomy),
         native_tools,
         config.skills.prompt_injection_mode,
     );
@@ -4119,8 +4302,11 @@ pub async fn process_message(
         ChatMessage::system(&system_prompt),
         ChatMessage::user(&enriched),
     ];
-    let excluded_tools =
+    let mut excluded_tools =
         compute_excluded_mcp_tools(&tools_registry, &config.agent.tool_filter_groups, message);
+    if config.autonomy.level != AutonomyLevel::Full {
+        excluded_tools.extend(config.autonomy.non_cli_excluded_tools.iter().cloned());
+    }
 
     agent_turn(
         provider.as_ref(),
@@ -4132,8 +4318,10 @@ pub async fn process_message(
         config.default_temperature,
         true,
         "daemon",
+        None,
         &config.multimodal,
         config.agent.max_tool_iterations,
+        Some(&approval_manager),
         &excluded_tools,
         &config.agent.tool_call_dedup_exempt,
         activated_handle_pm.as_ref(),
@@ -4145,8 +4333,8 @@ pub async fn process_message(
 #[cfg(test)]
 mod tests {
     use super::{
-        InteractiveSessionState, apply_compaction_summary, build_compaction_transcript,
-        load_interactive_session_history, save_interactive_session_history,
+        apply_compaction_summary, build_compaction_transcript, load_interactive_session_history,
+        save_interactive_session_history, InteractiveSessionState,
     };
     use crate::providers::ChatMessage;
     use tempfile::tempdir;
@@ -4190,7 +4378,7 @@ mod tests {
 
     use super::*;
     use async_trait::async_trait;
-    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
     use std::collections::VecDeque;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
@@ -4267,8 +4455,8 @@ mod tests {
 
     use crate::memory::{Memory, MemoryCategory, SqliteMemory};
     use crate::observability::NoopObserver;
-    use crate::providers::ChatResponse;
     use crate::providers::traits::ProviderCapabilities;
+    use crate::providers::ChatResponse;
     use tempfile::TempDir;
 
     struct NonVisionProvider {
@@ -4449,6 +4637,57 @@ mod tests {
         }
     }
 
+    struct RecordingArgsTool {
+        name: String,
+        recorded_args: Arc<Mutex<Vec<serde_json::Value>>>,
+    }
+
+    impl RecordingArgsTool {
+        fn new(name: &str, recorded_args: Arc<Mutex<Vec<serde_json::Value>>>) -> Self {
+            Self {
+                name: name.to_string(),
+                recorded_args,
+            }
+        }
+    }
+
+    #[async_trait]
+    impl Tool for RecordingArgsTool {
+        fn name(&self) -> &str {
+            &self.name
+        }
+
+        fn description(&self) -> &str {
+            "Records tool arguments for regression tests"
+        }
+
+        fn parameters_schema(&self) -> serde_json::Value {
+            serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "prompt": { "type": "string" },
+                    "schedule": { "type": "object" },
+                    "delivery": { "type": "object" }
+                }
+            })
+        }
+
+        async fn execute(
+            &self,
+            args: serde_json::Value,
+        ) -> anyhow::Result<crate::tools::ToolResult> {
+            self.recorded_args
+                .lock()
+                .expect("recorded args lock should be valid")
+                .push(args.clone());
+            Ok(crate::tools::ToolResult {
+                success: true,
+                output: args.to_string(),
+                error: None,
+            })
+        }
+    }
+
     struct DelayTool {
         name: String,
         delay_ms: u64,
@@ -4587,6 +4826,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             3,
             None,
@@ -4636,6 +4876,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &multimodal,
             3,
             None,
@@ -4649,10 +4890,9 @@ mod tests {
         .await
         .expect_err("oversized payload must fail");
 
-        assert!(
-            err.to_string()
-                .contains("multimodal image size limit exceeded")
-        );
+        assert!(err
+            .to_string()
+            .contains("multimodal image size limit exceeded"));
         assert_eq!(calls.load(Ordering::SeqCst), 0);
     }
 
@@ -4680,6 +4920,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             3,
             None,
@@ -4809,6 +5050,7 @@ mod tests {
             true,
             Some(&approval_mgr),
             "telegram",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -4847,6 +5089,122 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn run_tool_call_loop_injects_channel_delivery_defaults_for_cron_add() {
+        let provider = ScriptedProvider::from_text_responses(vec![
+            r#"<tool_call>
+{"name":"cron_add","arguments":{"job_type":"agent","prompt":"remind me later","schedule":{"kind":"every","every_ms":60000}}}
+</tool_call>"#,
+            "done",
+        ]);
+
+        let recorded_args = Arc::new(Mutex::new(Vec::new()));
+        let tools_registry: Vec<Box<dyn Tool>> = vec![Box::new(RecordingArgsTool::new(
+            "cron_add",
+            Arc::clone(&recorded_args),
+        ))];
+
+        let mut history = vec![
+            ChatMessage::system("test-system"),
+            ChatMessage::user("schedule a reminder"),
+        ];
+        let observer = NoopObserver;
+
+        let result = run_tool_call_loop(
+            &provider,
+            &mut history,
+            &tools_registry,
+            &observer,
+            "mock-provider",
+            "mock-model",
+            0.0,
+            true,
+            None,
+            "telegram",
+            Some("chat-42"),
+            &crate::config::MultimodalConfig::default(),
+            4,
+            None,
+            None,
+            None,
+            &[],
+            &[],
+            None,
+            None,
+        )
+        .await
+        .expect("cron_add delivery defaults should be injected");
+
+        assert_eq!(result, "done");
+
+        let recorded = recorded_args
+            .lock()
+            .expect("recorded args lock should be valid");
+        let delivery = recorded[0]["delivery"].clone();
+        assert_eq!(
+            delivery,
+            serde_json::json!({
+                "mode": "announce",
+                "channel": "telegram",
+                "to": "chat-42",
+            })
+        );
+    }
+
+    #[tokio::test]
+    async fn run_tool_call_loop_preserves_explicit_cron_delivery_none() {
+        let provider = ScriptedProvider::from_text_responses(vec![
+            r#"<tool_call>
+{"name":"cron_add","arguments":{"job_type":"agent","prompt":"run silently","schedule":{"kind":"every","every_ms":60000},"delivery":{"mode":"none"}}}
+</tool_call>"#,
+            "done",
+        ]);
+
+        let recorded_args = Arc::new(Mutex::new(Vec::new()));
+        let tools_registry: Vec<Box<dyn Tool>> = vec![Box::new(RecordingArgsTool::new(
+            "cron_add",
+            Arc::clone(&recorded_args),
+        ))];
+
+        let mut history = vec![
+            ChatMessage::system("test-system"),
+            ChatMessage::user("schedule a quiet cron job"),
+        ];
+        let observer = NoopObserver;
+
+        let result = run_tool_call_loop(
+            &provider,
+            &mut history,
+            &tools_registry,
+            &observer,
+            "mock-provider",
+            "mock-model",
+            0.0,
+            true,
+            None,
+            "telegram",
+            Some("chat-42"),
+            &crate::config::MultimodalConfig::default(),
+            4,
+            None,
+            None,
+            None,
+            &[],
+            &[],
+            None,
+            None,
+        )
+        .await
+        .expect("explicit delivery mode should be preserved");
+
+        assert_eq!(result, "done");
+
+        let recorded = recorded_args
+            .lock()
+            .expect("recorded args lock should be valid");
+        assert_eq!(recorded[0]["delivery"], serde_json::json!({"mode": "none"}));
+    }
+
+    #[tokio::test]
     async fn run_tool_call_loop_deduplicates_repeated_tool_calls() {
         let provider = ScriptedProvider::from_text_responses(vec![
             r#"<tool_call>
@@ -4881,6 +5239,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -4949,6 +5308,7 @@ mod tests {
             true,
             Some(&approval_mgr),
             "telegram",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -5008,6 +5368,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -5087,6 +5448,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -5143,6 +5505,7 @@ mod tests {
             true,
             None,
             "cli",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
@@ -5170,6 +5533,99 @@ mod tests {
                 .all(|msg| !(msg.role == "user" && msg.content.starts_with("[Tool results]"))),
             "native mode should use role=tool history instead of prompt fallback wrapper"
         );
+    }
+
+    #[tokio::test]
+    async fn run_tool_call_loop_relays_native_tool_call_text_via_on_delta() {
+        let provider = ScriptedProvider {
+            responses: Arc::new(Mutex::new(VecDeque::from(vec![
+                ChatResponse {
+                    text: Some("Task started. Waiting 30 seconds before checking status.".into()),
+                    tool_calls: vec![ToolCall {
+                        id: "call_wait".into(),
+                        name: "count_tool".into(),
+                        arguments: r#"{"value":"A"}"#.into(),
+                    }],
+                    usage: None,
+                    reasoning_content: None,
+                },
+                ChatResponse {
+                    text: Some("Final answer".into()),
+                    tool_calls: Vec::new(),
+                    usage: None,
+                    reasoning_content: None,
+                },
+            ]))),
+            capabilities: ProviderCapabilities {
+                native_tool_calling: true,
+                ..ProviderCapabilities::default()
+            },
+        };
+
+        let invocations = Arc::new(AtomicUsize::new(0));
+        let tools_registry: Vec<Box<dyn Tool>> = vec![Box::new(CountingTool::new(
+            "count_tool",
+            Arc::clone(&invocations),
+        ))];
+
+        let mut history = vec![
+            ChatMessage::system("test-system"),
+            ChatMessage::user("run tool calls"),
+        ];
+        let observer = NoopObserver;
+        let (tx, mut rx) = tokio::sync::mpsc::channel(16);
+
+        let result = run_tool_call_loop(
+            &provider,
+            &mut history,
+            &tools_registry,
+            &observer,
+            "mock-provider",
+            "mock-model",
+            0.0,
+            true,
+            None,
+            "telegram",
+            None,
+            &crate::config::MultimodalConfig::default(),
+            4,
+            None,
+            Some(tx),
+            None,
+            &[],
+            &[],
+            None,
+            None,
+        )
+        .await
+        .expect("native tool-call text should be relayed through on_delta");
+
+        let mut deltas: Vec<String> = Vec::new();
+        while let Some(delta) = rx.recv().await {
+            deltas.push(delta);
+        }
+
+        let explanation_idx = deltas
+            .iter()
+            .position(|delta| delta == "Task started. Waiting 30 seconds before checking status.")
+            .expect("native assistant text should be relayed to on_delta");
+        let clear_idx = deltas
+            .iter()
+            .position(|delta| delta == DRAFT_CLEAR_SENTINEL)
+            .expect("final answer streaming should clear prior draft state");
+
+        assert!(
+            deltas
+                .iter()
+                .any(|delta| delta.starts_with("\u{1f4ac} Got 1 tool call(s)")),
+            "tool-call progress line should still be relayed"
+        );
+        assert!(
+            explanation_idx < clear_idx,
+            "native assistant text should arrive before final-answer draft clearing"
+        );
+        assert_eq!(result, "Final answer");
+        assert_eq!(invocations.load(Ordering::SeqCst), 1);
     }
 
     #[test]
@@ -5215,8 +5671,10 @@ mod tests {
                 0.0,
                 true,
                 "daemon",
+                None,
                 &crate::config::MultimodalConfig::default(),
                 4,
+                None,
                 &[],
                 &[],
                 Some(&activated),
@@ -5236,6 +5694,7 @@ mod tests {
             "<tool_call>{\"name\":\"memory_store\"}</tool_call>",
             "",
             true,
+            false,
         );
         assert!(display.is_empty());
     }
@@ -5246,13 +5705,20 @@ mod tests {
             "<tool_call>{\"name\":\"shell\"}</tool_call>",
             "Let me check that.",
             true,
+            false,
         );
         assert_eq!(display, "Let me check that.");
     }
 
     #[test]
+    fn resolve_display_text_uses_response_text_for_native_tool_turns() {
+        let display = resolve_display_text("Task started.", "", true, true);
+        assert_eq!(display, "Task started.");
+    }
+
+    #[test]
     fn resolve_display_text_uses_response_text_for_final_turns() {
-        let display = resolve_display_text("Final answer", "", false);
+        let display = resolve_display_text("Final answer", "", false, false);
         assert_eq!(display, "Final answer");
     }
 
@@ -5850,7 +6316,7 @@ Tail"#;
         assert_eq!(history[0].content, "system prompt");
         // Trimmed to limit
         assert_eq!(history.len(), DEFAULT_MAX_HISTORY_MESSAGES + 1); // +1 for system
-        // Most recent messages preserved
+                                                                     // Most recent messages preserved
         let last = &history[history.len() - 1];
         assert_eq!(
             last.content,
@@ -6350,12 +6816,10 @@ Final answer."#;
         assert_eq!(calls.len(), 1);
         assert_eq!(calls[0].0, "shell");
         assert!(calls[0].1["command"].as_str().unwrap().contains("curl"));
-        assert!(
-            calls[0].1["command"]
-                .as_str()
-                .unwrap()
-                .contains("example.com")
-        );
+        assert!(calls[0].1["command"]
+            .as_str()
+            .unwrap()
+            .contains("example.com"));
     }
 
     #[test]
@@ -6661,6 +7125,7 @@ Let me check the result."#;
             None, // no bootstrap_max_chars
             true, // native_tools
             crate::config::SkillsPromptInjectionMode::Full,
+            crate::security::AutonomyLevel::default(),
         );
 
         // Must contain zero XML protocol artifacts
@@ -7106,6 +7571,7 @@ Let me check the result."#;
             true,
             None,
             "telegram",
+            None,
             &crate::config::MultimodalConfig::default(),
             4,
             None,
