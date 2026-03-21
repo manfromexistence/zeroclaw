@@ -7,6 +7,10 @@ use crate::ui::{effects::RainbowEffect, splash};
 /// Show train animation on exit - called from anywhere in the application
 pub fn show_exit_train() {
     let rainbow = RainbowEffect::new();
+    
+    // Clear screen and move cursor to top for clean animation display
+    print!("\x1B[2J\x1B[H");
+    
     println!();
     println!("Thanks for using DX-Agent!");
     println!();
