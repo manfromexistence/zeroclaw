@@ -369,6 +369,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     allowed_users,
                     listen_to_bots: false,
                     mention_only: false,
+                    interrupt_on_new_message: false,
                 });
             }
             ChannelMenuChoice::Slack => {
@@ -492,6 +493,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     allowed_users,
                     interrupt_on_new_message: false,
                     mention_only: false,
+                    thread_replies: Some(false),
                 });
             }
             ChannelMenuChoice::IMessage => {
@@ -653,6 +655,7 @@ pub fn setup_channels() -> Result<ChannelsConfig> {
                     device_id: detected_device_id,
                     room_id,
                     allowed_users,
+                    interrupt_on_new_message: false,
                 });
             }
             ChannelMenuChoice::Signal => {

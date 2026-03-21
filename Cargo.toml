@@ -151,6 +151,9 @@ terminal_size = "0.4.3"
 textwrap = "0.16"
 zeroize = { version = "1.8", features = ["derive"] }
 
+# ZIP archive handling for skills
+zip = "2.2"
+
 # Hardware discovery (device path globbing)
 glob = "0.3"
 
@@ -245,6 +248,7 @@ channel-matrix = ["dep:matrix-sdk"]
 channel-lark = ["dep:prost"]
 channel-feishu = ["channel-lark"]  # Alias for Feishu users (Lark and Feishu are the same platform)
 memory-postgres = ["dep:postgres"]
+memory-mem0 = []  # mem0 (OpenMemory) backend integration
 observability-prometheus = ["dep:prometheus"]
 observability-otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp"]
 peripheral-rpi = ["rppal"]

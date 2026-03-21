@@ -159,6 +159,7 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         identity: crate::config::IdentityConfig::default(),
         cost: crate::config::CostConfig::default(),
         peripherals: crate::config::PeripheralsConfig::default(),
+        delegate: crate::config::DelegateToolConfig::default(),
         agents: std::collections::HashMap::new(),
         swarms: std::collections::HashMap::new(),
         hooks: crate::config::HooksConfig::default(),
@@ -170,11 +171,14 @@ pub async fn run_wizard(force: bool) -> Result<Config> {
         nodes: crate::config::NodesConfig::default(),
         workspace: crate::config::WorkspaceConfig::default(),
         notion: crate::config::NotionConfig::default(),
+        jira: crate::config::JiraConfig::default(),
         node_transport: crate::config::NodeTransportConfig::default(),
         knowledge: crate::config::KnowledgeConfig::default(),
         linkedin: crate::config::LinkedInConfig::default(),
         plugins: crate::config::PluginsConfig::default(),
         locale: None,
+        text_browser: crate::config::TextBrowserConfig::default(),
+        verifiable_intent: crate::config::VerifiableIntentConfig::default(),
     };
 
     prompts::log::success(format!("Security: {} | workspace-scoped", "Supervised"))?;
@@ -374,6 +378,7 @@ fn memory_config_defaults_for_backend(backend: &str) -> MemoryConfig {
         response_cache_enabled: false,
         response_cache_ttl_minutes: 60,
         response_cache_max_entries: 5_000,
+        mem0: crate::config::schema::Mem0Config::default(),
         response_cache_hot_entries: 256,
         snapshot_enabled: false,
         snapshot_on_hygiene: false,
@@ -524,6 +529,7 @@ async fn run_quick_setup_with_home(
         identity: crate::config::IdentityConfig::default(),
         cost: crate::config::CostConfig::default(),
         peripherals: crate::config::PeripheralsConfig::default(),
+        delegate: crate::config::DelegateToolConfig::default(),
         agents: std::collections::HashMap::new(),
         swarms: std::collections::HashMap::new(),
         hooks: crate::config::HooksConfig::default(),
@@ -535,11 +541,14 @@ async fn run_quick_setup_with_home(
         nodes: crate::config::NodesConfig::default(),
         workspace: crate::config::WorkspaceConfig::default(),
         notion: crate::config::NotionConfig::default(),
+        jira: crate::config::JiraConfig::default(),
         node_transport: crate::config::NodeTransportConfig::default(),
         knowledge: crate::config::KnowledgeConfig::default(),
         linkedin: crate::config::LinkedInConfig::default(),
         plugins: crate::config::PluginsConfig::default(),
         locale: None,
+        text_browser: crate::config::TextBrowserConfig::default(),
+        verifiable_intent: crate::config::VerifiableIntentConfig::default(),
     };
 
     config.save().await?;
@@ -1955,7 +1964,7 @@ fn setup_tunnel() -> Result<crate::config::TunnelConfig> {
 async fn scaffold_workspace(
     workspace_dir: &Path,
     ctx: &ProjectContext,
-    memory_backend: &str,
+    _memory_backend: &str,
 ) -> Result<()> {
     let agent = if ctx.agent_name.is_empty() {
         "Agent"

@@ -253,6 +253,10 @@ pub struct Config {
     #[serde(default)]
     pub http_request: HttpRequestConfig,
 
+    /// OpenAPI integration system configuration (`[openapi]`).
+    #[serde(default)]
+    pub openapi: OpenApiConfig,
+
     /// Multimodal (image) handling configuration (`[multimodal]`).
     #[serde(default)]
     pub multimodal: MultimodalConfig,
@@ -2073,6 +2077,48 @@ fn default_http_timeout_secs() -> u64 {
     30
 }
 
+// ── OpenAPI integration ──────────────────────────────────────────
+
+/// OpenAPI integration system configuration (`[openapi]` section).
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct OpenApiConfig {
+    /// Enable OpenAPI tool loading and CLI operations.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Base directory containing harvested specs and the generated registry file.
+    #[serde(default = "default_openapi_specs_dir")]
+    pub specs_dir: String,
+    /// Load previously harvested specs automatically at startup.
+    #[serde(default)]
+    pub auto_load: bool,
+    /// Default quality tier assigned to newly discovered specs.
+    #[serde(default = "default_openapi_spec_tier")]
+    pub default_tier: crate::tools::openapi::SpecTier,
+    /// Auth presets keyed by provider/service ID.
+    #[serde(default)]
+    pub auth: std::collections::HashMap<String, crate::tools::openapi::AuthConfig>,
+}
+
+impl Default for OpenApiConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            specs_dir: default_openapi_specs_dir(),
+            auto_load: false,
+            default_tier: default_openapi_spec_tier(),
+            auth: std::collections::HashMap::new(),
+        }
+    }
+}
+
+fn default_openapi_specs_dir() -> String {
+    "~/.zeroclaw/openapi-specs".into()
+}
+
+fn default_openapi_spec_tier() -> crate::tools::openapi::SpecTier {
+    crate::tools::openapi::SpecTier::Community
+}
+
 // ── Web fetch ────────────────────────────────────────────────────
 
 /// Web fetch tool configuration (`[web_fetch]` section).
@@ -3246,17 +3292,23 @@ fn validate_proxy_url(field: &str, url: &str) -> Result<()> {
 fn set_proxy_env_pair(key: &str, value: Option<&str>) {
     let lowercase_key = key.to_ascii_lowercase();
     if let Some(value) = value.and_then(|candidate| normalize_proxy_url_option(Some(candidate))) {
-        std::env::set_var(key, &value);
-        std::env::set_var(lowercase_key, value);
+        unsafe {
+            std::env::set_var(key, &value);
+            std::env::set_var(lowercase_key, value);
+        }
     } else {
-        std::env::remove_var(key);
-        std::env::remove_var(lowercase_key);
+        unsafe {
+            std::env::remove_var(key);
+            std::env::remove_var(lowercase_key);
+        }
     }
 }
 
 fn clear_proxy_env_pair(key: &str) {
-    std::env::remove_var(key);
-    std::env::remove_var(key.to_ascii_lowercase());
+    unsafe {
+        std::env::remove_var(key);
+        std::env::remove_var(key.to_ascii_lowercase());
+    }
 }
 
 fn runtime_proxy_state() -> &'static RwLock<ProxyConfig> {
@@ -6427,6 +6479,7 @@ impl Default for Config {
             browser: BrowserConfig::default(),
             browser_delegate: crate::tools::browser_delegate::BrowserDelegateConfig::default(),
             http_request: HttpRequestConfig::default(),
+            openapi: OpenApiConfig::default(),
             multimodal: MultimodalConfig::default(),
             web_fetch: WebFetchConfig::default(),
             text_browser: TextBrowserConfig::default(),
